@@ -1,4 +1,0 @@
-[submodule "packages/gui"]
-	path = packages/gui
-	url = git@github.com:polaristech-io/flomesh-gui.git
-	branch = aws
