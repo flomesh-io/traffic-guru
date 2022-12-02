@@ -2,6 +2,9 @@
   "name": "traffic-guru",
   "version": "1.0.0",
   "scripts": {
+		"setup": "yarn install && cd ./packages/gui && yarn install && cd ../../packages/server && yarn install",
+    "serve:gui": "cd ./packages/gui && npm run serve",
+    "serve:server": "cd ./packages/server && npm run develop",
     "lint:gui": "cd ./packages/gui && npm run lint",
     "lint:server": "cd ./packages/server && npm run lint"
   },

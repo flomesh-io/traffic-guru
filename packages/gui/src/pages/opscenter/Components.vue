@@ -431,7 +431,10 @@
                       </a-select-option>
                     </a-select>
                   </div>
-                  <div class="mt-10" v-if="payload.type.toLowerCase() == 'pipy4lb'">
+                  <div
+                    class="mt-10"
+                    v-if="payload.type.toLowerCase() == 'pipy4lb'"
+                  >
                     <label>{{ $t("Global Max Connections") }} : </label>
                     <a-input
                       :placeholder="$t('unset')"
@@ -439,7 +442,10 @@
                       class="width-120"
                     />
                   </div>
-                  <div class="mt-10" v-if="payload.type.toLowerCase() == 'pipy4lb'">
+                  <div
+                    class="mt-10"
+                    v-if="payload.type.toLowerCase() == 'pipy4lb'"
+                  >
                     <label>{{ $t("Default Read Timeout") }} : </label>
                     <a-input
                       :placeholder="$t('unset')"
@@ -447,7 +453,10 @@
                       class="width-120"
                     />
                   </div>
-                  <div class="mt-10" v-if="payload.type.toLowerCase() == 'pipy4lb'">
+                  <div
+                    class="mt-10"
+                    v-if="payload.type.toLowerCase() == 'pipy4lb'"
+                  >
                     <label>{{ $t("Default IDLE Timeout") }} : </label>
                     <a-input
                       :placeholder="$t('unset')"
@@ -484,7 +493,10 @@
                       </a-select-option>
                     </a-select>
                   </div>
-                  <div class="mt-10" v-if="payload.type.toLowerCase() == 'pipy4lb'">
+                  <div
+                    class="mt-10"
+                    v-if="payload.type.toLowerCase() == 'pipy4lb'"
+                  >
                     <label>{{ $t("Default Max Connections") }} : </label>
                     <a-input
                       :placeholder="$t('unset')"
@@ -492,7 +504,10 @@
                       class="width-120"
                     />
                   </div>
-                  <div class="mt-10" v-if="payload.type.toLowerCase() == 'pipy4lb'">
+                  <div
+                    class="mt-10"
+                    v-if="payload.type.toLowerCase() == 'pipy4lb'"
+                  >
                     <label>{{ $t("Default Write Timeout") }} : </label>
                     <a-input
                       :placeholder="$t('unset')"
