@@ -1,0 +1,90 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Release.Name }}-preinstall
+  namespace: {{ include "osm.namespace" . }}
+  labels:
+    {{- include "osm.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Release.Name }}-preinstall
+  namespace: {{ include "osm.namespace" . }}
+  labels:
+    {{- include "osm.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Release.Name }}-preinstall
+    namespace: {{ include "osm.namespace" . }}
+roleRef:
+  kind: ClusterRole
+  name: {{ .Release.Name }}-preinstall
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Release.Name }}-preinstall
+  namespace: {{ include "osm.namespace" . }}
+  labels:
+    {{- include "osm.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-preinstall
+  namespace: {{ include "osm.namespace" . }}
+  labels:
+    {{- include "osm.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      name: {{ .Release.Name }}-preinstall
+      labels:
+        {{- include "osm.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ .Release.Name }}-preinstall
+      restartPolicy: Never
+      containers:
+        - name: preinstall
+          image: "{{ include "osmPreinstall.image" . }}"
+          imagePullPolicy: {{ .Values.osm.image.pullPolicy }}
+          command: ['/osm-preinstall']
+          args:
+            - --verbosity={{ .Values.osm.controllerLogLevel }}
+            - --enforce-single-mesh={{ .Values.osm.enforceSingleMesh }}
+            - --namespace={{ include "osm.namespace" . }}
+{{- if .Values.osm.imagePullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.osm.imagePullSecrets | indent 8 }}
+{{- end }}
+      {{- if .Values.osm.preinstall.affinity }}
+      affinity:
+      {{- toYaml .Values.osm.preinstall.affinity | nindent 8 }}
+      {{- end }}
+      {{- if .Values.osm.preinstall.nodeSelector }}
+      nodeSelector:
+      {{- toYaml .Values.osm.preinstall.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.osm.preinstall.tolerations }}
+      tolerations:
+      {{- toYaml .Values.osm.preinstall.tolerations | nindent 8 }}
+      {{- end }}

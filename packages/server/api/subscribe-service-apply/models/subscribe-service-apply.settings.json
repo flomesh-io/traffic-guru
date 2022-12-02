@@ -1,0 +1,36 @@
+{
+  "kind": "collectionType",
+  "collectionName": "subscribe_service_applies",
+  "info": {
+    "name": "subscribeServiceApply"
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "service": {
+      "via": "subscribeServiceApplies",
+      "model": "service"
+    },
+    "applyOrganization": {
+      "model": "organization"
+    },
+    "applyUser": {
+      "plugin": "users-permissions",
+      "model": "user"
+    },
+    "approveOrganization": {
+      "model": "organization"
+    },
+    "status": {
+      "type": "integer",
+      "default": 0
+    },
+    "msg": {
+      "type": "text"
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/kubernetes",
+      "handler": "kubernetes.namespaces",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/kube-dashboard",
+      "handler": "kubernetes.kubeProxy",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}

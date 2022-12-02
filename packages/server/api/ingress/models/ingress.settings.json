@@ -1,0 +1,31 @@
+{
+  "kind": "collectionType",
+  "collectionName": "ingresses",
+  "info": {
+    "name": "Ingress",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "content": {
+      "type": "json",
+      "required": true
+    },
+    "uid": {
+      "type": "string"
+    },
+    "namespace": {
+      "model": "namespace",
+      "via": "ingresses"
+    }
+  }
+}

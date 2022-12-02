@@ -1,0 +1,30 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/prometheus",
+      "handler": "prometheus.proxy",
+      "config": {
+        "policies": []
+      }
+    },
+
+    {
+      "method": "GET",
+      "path": "/prometheus/mesh/:id",
+      "handler": "prometheus.proxymesh",
+      "config": {
+        "policies": []
+      }
+    },
+
+    {
+      "method": "GET",
+      "path": "/prometheus/namespace/:id",
+      "handler": "prometheus.proxynamespace",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}

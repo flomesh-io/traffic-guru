@@ -1,0 +1,52 @@
+{
+  "kind": "collectionType",
+  "collectionName": "registries",
+  "info": {
+    "name": "Registry",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "type": {
+      "type": "string",
+      "required": true
+    },
+    "address": {
+      "type": "string",
+      "required": true
+    },
+    "services": {
+      "via": "registry",
+      "collection": "service"
+    },
+    "content": {
+      "type": "json"
+    },
+    "organization": {
+      "via": "registries",
+      "model": "organization"
+    },
+    "namespaces": {
+      "via": "registry",
+      "collection": "namespace"
+    },
+    "kubeconfig": {
+      "model": "file",
+      "via": "related",
+      "allowedTypes": ["images", "files", "videos"],
+      "plugin": "upload",
+      "required": false,
+      "pluginOptions": {}
+    }
+  }
+}

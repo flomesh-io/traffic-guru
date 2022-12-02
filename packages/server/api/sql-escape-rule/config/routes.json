@@ -1,0 +1,52 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/sql-escape-rules",
+      "handler": "sql-escape-rule.find",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/sql-escape-rules/count",
+      "handler": "sql-escape-rule.count",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/sql-escape-rules/:id",
+      "handler": "sql-escape-rule.findOne",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/sql-escape-rules",
+      "handler": "sql-escape-rule.create",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/sql-escape-rules/:id",
+      "handler": "sql-escape-rule.update",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/sql-escape-rules/:id",
+      "handler": "sql-escape-rule.delete",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}

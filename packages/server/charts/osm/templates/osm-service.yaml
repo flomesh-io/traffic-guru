@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: osm-controller
+  namespace: {{ include "osm.namespace" . }}
+  labels:
+    {{- include "osm.labels" . | nindent 4 }}
+    app: osm-controller
+spec:
+  ports:
+    {{- range .Values.osm.sidecarDrivers }}
+    {{- if eq .sidecarName $.Values.osm.sidecarClass }}
+    {{- if eq .sidecarName "pipy" }}
+    - name: pipy-admin-port
+      port: {{ .proxyServerPort }}
+      targetPort: {{ .proxyServerPort }}
+    {{- end }}
+    {{- if eq .sidecarName "envoy" }}
+    - name: ads-port
+      port: {{ .proxyServerPort }}
+      targetPort: {{ .proxyServerPort }}
+    {{- end }}
+    {{- end }}
+    {{- end }}
+    - name: debug-port
+      port: 9092
+      targetPort: 9092
+    - name: healthz
+      port: 9091
+      targetPort: 9091
+  selector:
+    app: osm-controller

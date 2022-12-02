@@ -1,0 +1,50 @@
+{
+  "kind": "collectionType",
+  "collectionName": "templates",
+  "info": {
+    "name": "template",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "unique": false,
+      "required": true
+    },
+    "path": {
+      "type": "string"
+    },
+    "content": {
+      "type": "richtext"
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": [
+        "ingress",
+        "sidecars",
+        "checkpoint",
+        "pipy",
+        "pipy4lb",
+        "pipy4lbbgp"
+      ]
+    },
+    "templatefiles": {
+      "via": "template",
+      "collection": "templatefile"
+    },
+    "version": {
+      "type": "integer",
+      "default": 1
+    },
+    "fleets": {
+      "via": "template",
+      "collection": "fleet"
+    }
+  }
+}

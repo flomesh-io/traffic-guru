@@ -1,0 +1,38 @@
+{
+  "kind": "collectionType",
+  "collectionName": "projects",
+  "info": {
+    "name": "project",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "users": {
+      "via": "userProjects",
+      "plugin": "users-permissions",
+      "collection": "user",
+      "dominant": true
+    },
+    "content": {
+      "type": "json"
+    },
+    "organization": {
+      "via": "projects",
+      "model": "organization"
+    },
+    "userOrganizationRoles": {
+      "via": "project",
+      "collection": "user-organization-role"
+    }
+  }
+}

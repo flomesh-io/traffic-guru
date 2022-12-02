@@ -1,0 +1,52 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/namespaces",
+      "handler": "namespace.find",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/namespaces/count",
+      "handler": "namespace.count",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/namespaces/:id",
+      "handler": "namespace.findOne",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/namespaces",
+      "handler": "namespace.create",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/namespaces/:id",
+      "handler": "namespace.update",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/namespaces/:id",
+      "handler": "namespace.delete",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}

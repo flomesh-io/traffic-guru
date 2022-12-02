@@ -1,0 +1,73 @@
+{
+  "name": "flomesh-load-balancer",
+  "version": "1.0.0",
+  "homepage": "https://flomesh.io/traffic-guru",
+  "private": false,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
+    "format:fix": "prettier --config ./.prettierrc --write \"src/**/**/*{.vue,.ts,.js,.json,.css,.scss,.sass,.less}\""
+  },
+  "dependencies": {
+    "@ant-design/icons-vue": "^6.0.1",
+    "animate.css": "^4.1.0",
+    "ant-design-vue": "^3.2.14",
+    "axios": "^0.21.1",
+    "clipboard": "^2.0.6",
+    "core-js": "^3.6.5",
+    "date-fns": "^2.14.0",
+    "default-passive-events": "^2.0.0",
+    "echarts": "5.0.2",
+    "enquire.js": "^2.1.6",
+    "highlight.js": "^10.2.1",
+    "js-cookie": "^2.2.1",
+    "js-yaml": "^4.1.0",
+    "json2yaml": "^1.1.0",
+    "jsonlint": "1.6.3",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.1",
+    "monaco-editor": "0.27.0",
+    "nprogress": "^0.2.0",
+    "swagger-ui": "^3.51.2",
+    "vue": "^3.2.21",
+    "vue-i18n": "^9.1.6",
+    "vue-router": "^4.0.12",
+    "vuedraggable": "^4.0.3",
+    "vuex": "^4.0.2"
+  },
+  "devDependencies": {
+    "@ant-design/colors": "^4.0.1",
+    "@babel/core": "^7.12.16",
+    "@babel/eslint-parser": "^7.12.16",
+    "@vue/cli-plugin-babel": "^5.0.0-rc.0",
+    "@vue/cli-plugin-eslint": "^5.0.0-rc.0",
+    "@vue/cli-service": "^5.0.0-rc.0",
+    "@vue/compiler-sfc": "^3.2.21",
+    "babel-plugin-transform-remove-console": "^6.9.4",
+    "babel-polyfill": "^6.26.0",
+    "compression-webpack-plugin": "^8.0.0",
+    "deepmerge": "^4.2.2",
+    "eslint": "^7.20.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-vue": "^7.6.0",
+    "fast-deep-equal": "^3.1.3",
+    "gh-pages": "^3.1.0",
+    "less-loader": "^6.1.1",
+    "pre-commit": "^1.2.2",
+    "prettier": "2.5.1",
+    "script-loader": "0.7.2",
+    "style-resources-loader": "^1.3.2",
+    "vue-cli-plugin-style-resources-loader": "~0.1.5",
+    "vue-template-compiler": "^2.6.11",
+    "whatwg-fetch": "^3.0.0"
+  },
+  "pre-commit": [
+    "lint"
+  ],
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 10"
+  ]
+}

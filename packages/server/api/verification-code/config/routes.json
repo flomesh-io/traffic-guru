@@ -1,0 +1,52 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/verification-codes",
+      "handler": "verification-code.find",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/verification-codes/count",
+      "handler": "verification-code.count",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/verification-codes/:id",
+      "handler": "verification-code.findOne",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/verification-codes",
+      "handler": "verification-code.create",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/verification-codes/:id",
+      "handler": "verification-code.update",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/verification-codes/:id",
+      "handler": "verification-code.delete",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}

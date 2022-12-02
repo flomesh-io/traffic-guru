@@ -1,0 +1,65 @@
+.shadow {
+  box-shadow: 2px 0 6px rgba(0, 21, 41, 0.35);
+}
+.side-menu.append:before {
+  content: "";
+  height: 64px;
+  width: 10px;
+  background-color: #fff;
+  position: absolute;
+  top: 0;
+  right: -10px;
+  z-index: 10;
+  border-left: 1px solid #ececec;
+  transition: top 0.2s;
+}
+.fixed-tabs.side-menu.append:before {
+  top: -64px;
+}
+.side-menu {
+  min-height: 100vh;
+  z-index: 10;
+
+  .logo {
+    text-align: center;
+    position: relative;
+    padding: 9px 0 0 0;
+    overflow: hidden;
+    background-color: @layout-trigger-background;
+    &.light {
+      background-color: #fff;
+      h1 {
+        color: @primary-color;
+      }
+    }
+    h1 {
+      color: @menu-dark-highlight-color;
+      font-size: 20px;
+      margin: 0 0 0 10px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    img {
+      width: 85%;
+      vertical-align: middle;
+    }
+  }
+}
+.ant-layout-sider-collapsed.side-menu {
+  .logo {
+    padding: 9px 0 0 0;
+    img {
+      width: 70%;
+    }
+  }
+}
+.menu {
+  padding: 5px 0;
+}
+.menu.menu-collapsed {
+  padding-top: 12px;
+}
+
+.logo.logo-collapsed {
+  padding-top: 12px !important;
+}

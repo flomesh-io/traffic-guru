@@ -1,0 +1,15 @@
+{
+  "name": "traffic-guru",
+  "version": "1.0.0",
+  "scripts": {
+    "lint:gui": "cd ./packages/gui && npm run lint",
+    "lint:server": "cd ./packages/server && npm run lint"
+  },
+  "devDependencies": {
+    "pre-commit": "^1.2.2"
+  },
+  "pre-commit": [
+    "lint:gui",
+    "lint:server"
+  ]
+}

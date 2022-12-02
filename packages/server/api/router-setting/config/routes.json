@@ -1,0 +1,52 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/router-settings",
+      "handler": "router-setting.find",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/router-settings/count",
+      "handler": "router-setting.count",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/router-settings/:id",
+      "handler": "router-setting.findOne",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/router-settings",
+      "handler": "router-setting.create",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/router-settings/:id",
+      "handler": "router-setting.update",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/router-settings/:id",
+      "handler": "router-setting.delete",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}

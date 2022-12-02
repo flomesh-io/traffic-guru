@@ -1,0 +1,25 @@
+{
+  "kind": "collectionType",
+  "collectionName": "resource_permissions",
+  "info": {
+    "name": "resourcePermission",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "content": {
+      "type": "json"
+    },
+    "type": {
+      "type": "string"
+    }
+  }
+}

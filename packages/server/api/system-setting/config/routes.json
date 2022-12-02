@@ -1,0 +1,52 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/system-settings",
+      "handler": "system-setting.find",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/system-settings/count",
+      "handler": "system-setting.count",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/system-settings/:id",
+      "handler": "system-setting.findOne",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/system-settings",
+      "handler": "system-setting.create",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/system-settings/:id",
+      "handler": "system-setting.update",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/system-settings/:id",
+      "handler": "system-setting.delete",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}

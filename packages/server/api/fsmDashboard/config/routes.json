@@ -1,0 +1,12 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/getFsmDashboardPageInfo",
+      "handler": "fsmDashboard.getFsmDashboardPageInfo",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}

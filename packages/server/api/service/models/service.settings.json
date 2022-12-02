@@ -1,0 +1,109 @@
+{
+  "kind": "collectionType",
+  "collectionName": "services",
+  "info": {
+    "name": "Service",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "fleet": {
+      "via": "services",
+      "model": "fleet"
+    },
+    "namespace": {
+      "type": "string"
+    },
+    "registry": {
+      "via": "services",
+      "model": "registry"
+    },
+    "content": {
+      "type": "json",
+      "required": true
+    },
+    "deleted": {
+      "type": "boolean",
+      "default": false
+    },
+    "uid": {
+      "type": "string"
+    },
+    "certificates": {
+      "via": "services",
+      "collection": "certificates"
+    },
+    "extend": {
+      "type": "json"
+    },
+    "autoCreateUpstream": {
+      "type": "boolean",
+      "default": true
+    },
+    "autoCreateApp": {
+      "type": "boolean",
+      "default": true
+    },
+    "organization": {
+      "via": "services",
+      "model": "organization"
+    },
+    "scope": {
+      "type": "integer",
+      "default": 1
+    },
+    "subscribeServiceApplies": {
+      "via": "service",
+      "collection": "subscribe-service-apply"
+    },
+    "subscribeOrgs": {
+      "via": "subscribeServices",
+      "collection": "organization",
+      "dominant": true
+    },
+    "ns": {
+      "via": "services",
+      "model": "namespace"
+    },
+    "whitelistServices": {
+      "collection": "service",
+      "via": "whitelistServicesBack",
+      "dominant": true
+    },
+    "whitelistServicesBack": {
+      "collection": "service",
+      "via": "whitelistServices"
+    },
+    "blacklistServices": {
+      "collection": "service",
+      "via": "blacklistServicesback",
+      "dominant": true
+    },
+    "blacklistServicesback": {
+      "collection": "service",
+      "via": "blacklistServices"
+    },
+    "sidecar": {
+      "via": "servicesSidecar",
+      "model": "fleet"
+    },
+    "version": {
+      "type": "biginteger"
+    },
+    "isGateway": {
+      "type": "boolean"
+    },
+    "gatewayPath": {
+      "type": "string"
+    }
+  }
+}

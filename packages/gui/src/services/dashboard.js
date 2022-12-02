@@ -1,0 +1,234 @@
+import { query, mutation } from "@/services/graphql";
+
+export const DEFAULT_WORKPLACE =
+  process.env.VUE_APP_VERSION == "pro"
+    ? "system.common.ORGANIZATION_TOTAL,system.common.PROJECT_TOTAL,system.common.Space,system.common.Space,workload.dashboard.DEPLOYMENT,workload.dashboard.STATEFULSET,workload.dashboard.JOB,workload.dashboard.POD"
+    : "fsm.dashboard.REGISTRY_TOTAL,fsm.dashboard.NAMESPACE_TOTAL,fsm.dashboard.SERVICE_TOTAL,system.common.Space,workload.dashboard.DEPLOYMENT,workload.dashboard.STATEFULSET,workload.dashboard.JOB,workload.dashboard.POD";
+
+export const DEFAULT_FLB =
+  "flb.dashboard.TOTAL,flb.dashboard.TPS,flb.dashboard.ERRORRATE,flb.dashboard.ADDRESSPOOL,flb.dashboard.SANKEY,flb.dashboard.RANKING";
+
+export const DEFAULT_FSM =
+  "fsm.dashboard.REGISTRY_TOTAL,fsm.dashboard.NAMESPACE_TOTAL,fsm.dashboard.SERVICE_TOTAL,system.common.Space,system.common.Space,fsm.dashboard.SERVICE_HEALTHCHECK,fsm.dashboard.SERVICE_STATUS,fsm.dashboard.INGRESS_STATUS";
+
+export const DEFAULT_MESH_DETAIL =
+  "fsm.dashboard.NAMESPACE_MESH_TOTAL,fsm.dashboard.SERVICE_MESH_TOTAL,system.common.Space,system.common.Space,system.common.TPS_MESH,system.common.ERROR_RATE_MESH,system.common.LATENCY_MESH,workload.dashboard.POD,fsm.dashboard.TOPOLOGY";
+
+export const DEFAULT_SERVICE_DETAIL =
+  "fsm.dashboard.TPS_ERROR,fsm.dashboard.BPS,fsm.dashboard.LATENCY,fsm.dashboard.LOAD_STATUS,fsm.dashboard.TOPOLOGY,fsm.dashboard.QOS";
+
+export const DEFAULT_WORKLOAD =
+  "workload.dashboard.CRONJOB,workload.dashboard.DAEMONSET,workload.dashboard.DEPLOYMENT,workload.dashboard.JOB,workload.dashboard.POD,workload.dashboard.REPLICASET,workload.dashboard.REPLICATIONCONTROLLER,workload.dashboard.STATEFULSET";
+
+export const DEFAULT_API =
+  "openapi.dashboard.API_TOTAL,openapi.dashboard.APP_TOTAL,system.common.ORGANIZATION_TOTAL,system.common.PROJECT_TOTAL,system.common.LATENCY,system.common.USER_AGENT,system.common.QPS,system.common.ERROR_RATE,openapi.dashboard.API_STATUS,openapi.dashboard.API_METRIC_WEEK,openapi.dashboard.API_METRIC_MONTH,system.common.Space,system.common.RANKING";
+
+export const DEFAULT_PROJECT =
+  "openapi.dashboard.API_TOTAL,openapi.dashboard.APP_TOTAL,system.common.Space,system.common.Space,fsm.dashboard.QOS,fsm.dashboard.LATENCY,fsm.dashboard.LOAD_STATUS,fsm.dashboard.TPS_ERROR,fsm.dashboard.BPS,openapi.dashboard.API_STATUS,openapi.dashboard.API_METRIC_WEEK,openapi.dashboard.API_METRIC_MONTH";
+
+export const DEFAULT_API_DETAIL =
+  "fsm.dashboard.QOS,fsm.dashboard.LATENCY,fsm.dashboard.LOAD_STATUS,fsm.dashboard.TPS_ERROR,fsm.dashboard.BPS,openapi.dashboard.API_METRIC_WEEK,openapi.dashboard.API_METRIC_MONTH";
+
+export async function getDashboardById(id) {
+  return query(`dashboard(id:${id}){id,name,content,apply}`);
+}
+
+export async function getDashboardByApply(apply) {
+  return query(`dashboards(where:{apply:"${apply}"}){id,name,content,apply}`);
+}
+
+export async function setDashboard(id, data) {
+  let _p = {},
+    widget = "";
+  if (data.subscribes) {
+    widget = data.subscribes.join(",");
+    _p.content = { widget };
+  }
+  if (data.name && data.name.length > 0) {
+    _p.name = data.name;
+  }
+  if (data.apply != null) {
+    _p.apply = data.apply;
+  }
+  return mutation(
+    `updateDashboard(input: $input){dashboard{id}}`,
+    {
+      input: {
+        where: { id },
+        data: _p,
+      },
+    },
+    { input: "updateDashboardInput" },
+  );
+}
+
+export async function addDashboard(data) {
+  let _p = {};
+  if (data.widget != null) {
+    _p.content = { widget: data.widget };
+  }
+  if (data.name && data.name.length > 0) {
+    _p.name = data.name;
+  }
+  if (data.apply != null) {
+    _p.apply = data.apply;
+  }
+  return mutation(
+    `createDashboard(input: $input){dashboard{id}}`,
+    {
+      input: { data: _p },
+    },
+    { input: "createDashboardInput" },
+  );
+}
+
+export async function addUserWidget(content) {
+  const data = {
+    content: content,
+    name: content.id,
+    shared: 0,
+  };
+  return mutation(
+    `createWidget(input: $input){widget{id}}`,
+    {
+      input: { data },
+    },
+    { input: "createWidgetInput" },
+  );
+}
+
+export async function editUserWidget(id, content) {
+  delete content.uid;
+  const p = { content: content, name: content.id };
+  return mutation(
+    `updateWidget(input: $input){widget{id}}`,
+    {
+      input: {
+        where: { id },
+        data: p,
+      },
+    },
+    { input: "updateWidgetInput" },
+  );
+}
+
+export async function deleteUserWidget(id) {
+  return mutation(`deleteWidget(input:{where:{id:${id}}}){widget{id}}`);
+}
+
+export async function getUserWidgets() {
+  return query(`widgets{id,name,shared,user_id,content}`);
+}
+
+export const SAMPLE_WIDGET = {
+  id: "TEST-CUSTOM",
+  title: "A Sample",
+  tag: { name: "Gauge" },
+  service: {
+    type: "rest",
+    path: "hk.flomesh.cn:8090/kube-dashboard/?url=%2Fapi%2Fv1%2Fjob%2Fdefault%3FitemsPerPage%3D0%26page%3D1%26sortBy%3Dd%2CcreationTimestamp",
+    method: "GET",
+    payload: "{}",
+    clickhouseSQL: "",
+    prometheusSQL: "",
+  },
+  col: 6,
+  data: `res => {
+	let _data = res.data;
+	function getPercentage(current,status){
+		let per = (status.running+status.succeeded+status.failed);
+		return per ==0 ?0 :Math.round(current*100/per);
+	}
+	return {
+		id:'WP-CUSTOM',
+		vals:[
+			getPercentage(_data.status.running,_data.status),
+			getPercentage(_data.status.succeeded,_data.status),
+			getPercentage(_data.status.failed,_data.status)
+		]
+	}
+}`,
+};
+
+export const CLICKHOUSE_SAMPLE_WIDGET = {
+  id: "CLICKHOUSE-TEST-CUSTOM",
+  title: "A Clickhouse Datasource Sample",
+  tag: { name: "MiniSector" },
+  service: {
+    type: "clickhouse",
+    path: "",
+    method: "GET",
+    payload: "{}",
+    clickhouseSQL:
+      "select count() as count,res.status from log where res.status>'0' group by res.status order by res.status",
+    prometheusSQL: "",
+  },
+  col: 6,
+  data: `res => {
+	let dv = [];
+	res.map((item) => {
+			dv.push({type:item[1],value:item[0],name:item[1]});
+	});
+	return {
+		colors:['#8bd4a1','#fac858','#fb9690'],
+		dv:dv
+	}
+}`,
+};
+
+export const PROMETHEUS_SAMPLE_WIDGET = {
+  id: "PROMETHEUS-TEST-CUSTOM",
+  title: "A Prometheus Datasource Sample",
+  tag: { name: "MiniArea" },
+  service: {
+    type: "prometheus",
+    path: "",
+    method: "GET",
+    payload: "{}",
+    clickhouseSQL: "",
+    prometheusSQL: "sum(rate(http_requests_count[5m]))",
+  },
+  col: 6,
+  data: `res => {
+	let dv = [];
+	if(!res || !res.data || !res.data.result){
+		return null
+	}
+	res.data.result.forEach((item,index) => {
+		dv.push({
+			type:'item'+index,
+			value:(item.value[1]*1).toFixed(2),
+			date:new Date(item.value[0]*1000).toISOString().split('.')[0].replace('T',' ')
+		})
+	})
+	return {
+		id: 'Test-Prometheus-MiniArea',
+		colors: ['#8bd4a1', '#fb9690'],
+		height: 240,
+		axis: false,
+		unit: 'MB',
+		showy: false,
+		dv:dv
+	}
+}`,
+};
+
+export default {
+  getDashboardById,
+  getDashboardByApply,
+  setDashboard,
+  addDashboard,
+  addUserWidget,
+  editUserWidget,
+  deleteUserWidget,
+  getUserWidgets,
+  SAMPLE_WIDGET,
+  DEFAULT_WORKPLACE,
+  DEFAULT_FLB,
+  DEFAULT_FSM,
+  DEFAULT_WORKLOAD,
+  DEFAULT_API,
+  DEFAULT_API_DETAIL,
+  DEFAULT_SERVICE_DETAIL,
+  DEFAULT_PROJECT,
+};

@@ -1,0 +1,24 @@
+{
+  "kind": "collectionType",
+  "collectionName": "system_settings",
+  "info": {
+    "name": "systemSetting"
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "type": {
+      "type": "string"
+    },
+    "mode": {
+      "type": "string"
+    },
+    "content": {
+      "type": "json"
+    }
+  }
+}

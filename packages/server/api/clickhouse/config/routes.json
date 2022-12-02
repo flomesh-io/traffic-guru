@@ -1,0 +1,12 @@
+{
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/clickhouse",
+      "handler": "clickhouse.proxy",
+      "config": {
+        "policies": []
+      }
+    }
+  ]
+}

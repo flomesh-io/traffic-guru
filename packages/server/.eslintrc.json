@@ -1,0 +1,55 @@
+{
+  "env": {
+    "browser": true,
+    "commonjs": true,
+    "es2021": true
+  },
+  "globals": {
+    "__dirname": true,
+    "Buffer": true,
+    "strapi": true,
+    "process": true
+  },
+  "extends": "eslint:recommended",
+  "overrides": [],
+  "parserOptions": {
+    "ecmaVersion": "latest"
+  },
+  "plugins": ["prettier"],
+  "rules": {
+    "no-unused-vars": "error",
+    "no-var": "error",
+    "no-undef": "error",
+    "prefer-const": "error",
+    "no-const-assign": "off",
+    "no-new-object": "error",
+    "object-shorthand": "off",
+    "no-prototype-builtins": "off",
+    "no-array-constructor": "error",
+    "prefer-destructuring": "off",
+    "no-eval": "error",
+    "no-useless-escape": "off",
+    "func-style": "off",
+    "no-loop-func": "off",
+    "default-param-last": "error",
+    "prefer-arrow-callback": "off",
+    "arrow-spacing": "error",
+    "arrow-parens": "error",
+    "arrow-body-style": "off",
+    "dot-notation": "off",
+    "one-var": "off",
+    "no-multi-assign": "error",
+    "no-plusplus": "off",
+    "eqeqeq": "off",
+    "no-case-declarations": "off",
+    "spaced-comment": "off",
+    "id-length": "off",
+    "camelcase": "off",
+    "new-cap": "off",
+    "no-underscore-dangle": "off",
+    "no-restricted-globals": "error",
+    "no-unsafe-optional-chaining": "off",
+    "no-empty": "off",
+    "no-dupe-keys": "off"
+  }
+}
