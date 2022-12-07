@@ -1,7 +1,12 @@
 <img src="./packages/gui/src/assets/img/logo2.png" width="200" alt="Traffic Guru Logo"/><br/>
 ## Traffic Guru
 
-Traffic Guru provides a unified graphical interface for [PIPY](https://github.com/flomesh-io/pipy)'s microservice governance capabilities, allowing administrators to import Kubernetes clusters while assigning different cluster, namespace, and service management capabilities, including logging, tracing capabilities, etc. to users within the system through permission control. It allows developers to manage applications running in Kubernetes clusters and view their operational status, facilitating developers to better manage Kubernetes clusters.
+TrafficGuru is one stop GUI for cloud native traffic management of Service Mesh, Ingress, GatewayAPI, ELB, MCS, API management.
+
+TrafficGuru from Flomesh is an open source one stop graphical console application for cloud native traffic management. It provides a multi-tenant, visual management console for management of Service Mesh, Software Load Balancing, API Management, Ingress/Egress, ELB, MCS (Multi-Cluster Services).
+TrafficGuru with the basis of micro-service registry provides traffic management capabilities and unified service governance, identity management, access control and other capabilities for multiple micro service technology stacks. It supports Kubernetes based services, services running on virtual machine, physical machine, or running on third party micro service runtime environments.
+TrafficGuru web console provides both administrator-oriented and normal user-oriented operation views; provides multi-level organization management, project management, access management, and provides multi-tenant application traffic management capabilities for medium to large organizations.
+TrafficGuru is built on top of Strapi, and comes integrated with various other tools like prometheus, jaeger, etc. TrafficGuru is designed to be  flexible with scalability at its core, so that users can quickly (or even zero code) extend and customize the management logic to meet their own needs.
 
 ## Functions
 
