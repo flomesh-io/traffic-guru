@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flomesh-console
+  labels:
+    {{- include "flomesh-console.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "flomesh-console.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "flomesh-console.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}/{{ .Values.console.imageName | default "flomesh-console"}}:{{ .Values.console.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: HOST
+            value: '::'
+          - name: PIPY_REPO_HOST
+            value: localhost
+          - name: PIPY_REPO_PORT
+            value: "6060"
+          - name: PORT
+            value: "8080"
+          {{- range $k, $v := .Values.console.env }}
+          - name: {{$k}}
+            value: {{$v}}
+          {{- end }}
+          envFrom:
+          - secretRef:
+              name: flomesh-console-db-cred
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 5
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 10
+            failureThreshold: 18
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+        - name: pipy-repo
+          image: "{{ .Values.image.repository }}/{{ .Values.pipyRepo.imageName | default "pipy-repo" }}:{{ .Values.pipyRepo.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+          - pipy
+          ports:
+            - name: http
+              containerPort: 6060
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /api/v1/repo
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /api/v1/repo
+              port: http
+          resources:
+            {{- toYaml .Values.pipyRepo.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
