@@ -16,7 +16,7 @@ and create a database named `flomesh`, otherwide you need to set the database na
 1. Add helm repo:
 
    ```
-   helm repo add flomesh-console https://ethinx.github.io/flomesh-console-charts
+   helm repo add flomesh https://flomesh-io.github.io/helm-charts
    ```
 
 2. Install the repo
@@ -26,10 +26,9 @@ and create a database named `flomesh`, otherwide you need to set the database na
    ```
    helm install \
    	--create-namespace \
-   	--namespace flomesh-console \
-   	flomesh-console \
-   	flomesh-console/flomesh-console \
-   	--set console.tag=1.0-16 \
+   	--namespace traffic-guru \
+   	traffic-guru \
+   	flomesh/traffic-guru \
    	--set database.host=<db addr> \
    	--set database.user=<db user> \
    	--set database.password=<db password> \
@@ -41,10 +40,9 @@ and create a database named `flomesh`, otherwide you need to set the database na
    ```
    helm install \
    	--create-namespace \
-   	--namespace flomesh-console \
-   	flomesh-console \
-   	flomesh-console/flomesh-console \
-   	--set console.tag=1.0-16 \
+   	--namespace traffic-guru \
+   	traffic-guru \
+   	flomesh/traffic-guru \
    	--set database.type=postgres \
    	--set database.host=<db addr> \
    	--set database.port=5432 \
@@ -57,10 +55,9 @@ and create a database named `flomesh`, otherwide you need to set the database na
    ```
    helm install \
    	--create-namespace \
-   	--namespace flomesh-console \
-   	flomesh-console \
-   	flomesh-console/flomesh-console \
-   	--set console.tag=1.0-16 \
+   	--namespace traffic-guru \
+   	traffic-guru \
+   	flomesh/traffic-guru \
    	--set database.host=<db addr> \
    	--set database.user=<db user> \
    	--set database.password=<db password> \
