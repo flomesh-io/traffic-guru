@@ -30,3 +30,43 @@ Selector labels
 {{- define "flomesh-console.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "flomesh-console.name" . }}
 {{- end }}
+
+{{- define "flomesh-console.repository" -}}
+{{- if contains "ubi" .Chart.AppVersion -}}
+quay.io/{{ .Values.image.repository }}
+{{- else -}}
+{{ .Values.image.repository }}
+{{- end -}}
+{{- end }}
+
+{{- define "flomesh-console.imageName" -}}
+{{- if contains "ubi" .Chart.AppVersion -}}
+{{ include "flomesh-console.repository" .}}/{{.Values.gui.imageName}}-ubi8
+{{- else -}}
+{{ include "flomesh-console.repository" .}}/{{.Values.gui.imageName}}
+{{- end -}}
+{{- end }}
+
+{{- define "flomesh-console.tag" -}}
+{{- if .Values.gui.tag  -}}
+{{ .Values.gui.tag }}
+{{- else -}}
+{{ .Chart.AppVersion }}
+{{- end -}}
+{{- end }}
+
+{{- define "pipyRepo.imageName" -}}
+{{- if contains "ubi" .Chart.AppVersion -}}
+{{ include "flomesh-console.repository" .}}/{{.Values.pipyRepo.imageName}}-ubi8
+{{- else -}}
+{{ include "flomesh-console.repository" .}}/{{.Values.pipyRepo.imageName}}
+{{- end -}}
+{{- end }}
+
+{{- define "curl.imageName" -}}
+{{- if contains "ubi" .Chart.AppVersion -}}
+{{ include "flomesh-console.repository" .}}/curl-ubi8
+{{- else -}}
+{{ include "flomesh-console.repository" .}}/curl
+{{- end -}}
+{{- end }}
