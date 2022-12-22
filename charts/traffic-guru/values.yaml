@@ -1,4 +1,4 @@
-# Default values for flomesh-console.
+# Default values for traffic-guru.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -7,12 +7,12 @@ image:
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
-nameOverride: "flomesh-console"
-fullnameOverride: "flomesh-console"
+nameOverride: "traffic-guru"
+fullnameOverride: "traffic-guru"
 
 gui:
-  imageName: flomesh-console
-  tag: "0.70.0-30"
+  imageName: traffic-guru
+  tag: ""
   resources: {}
   env: {}
 
@@ -28,7 +28,7 @@ pipyRepo:
     #  memory: 1Gi
 
 database:
-  host: mysql.flomesh-console.svc
+  host: mysql.traffic-guru.svc
   port: 3306
   db: "flomesh"
   username: "flomesh"
@@ -43,7 +43,7 @@ serviceAccount:
   annotations: {}
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
-  name: "flomesh-console"
+  name: "traffic-guru"
 
 podAnnotations: {}
 
@@ -69,7 +69,7 @@ ingress:
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
-  host: flomesh-console.local
+  host: traffic-guru.local
   paths:
     - path: /
       pathType: ImplementationSpecific

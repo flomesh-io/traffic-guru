@@ -4,14 +4,14 @@
 
 ## Prerequisite
 
-Before installing the flomesh console, you need to setup a database beforehand:
+Before installing Flomesh OpenShift, you need to setup a database beforehand:
 
 * MySQL >= 5.7
 * PostgreSQL >= v12
 
 and create a database named `flomesh`, otherwide you need to set the database name.
 
-## Install the console
+## Install the Flomesh OpenShift
 
 1. Add helm repo:
 
@@ -26,9 +26,9 @@ and create a database named `flomesh`, otherwide you need to set the database na
    ```
    helm install \
    	--create-namespace \
-   	--namespace traffic-guru \
-   	traffic-guru \
-   	flomesh/traffic-guru \
+   	--namespace flomesh-console \
+   	flomesh-console \
+   	flomesh/flomesh-console \
    	--set database.host=<db addr> \
    	--set database.user=<db user> \
    	--set database.password=<db password> \
@@ -40,9 +40,9 @@ and create a database named `flomesh`, otherwide you need to set the database na
    ```
    helm install \
    	--create-namespace \
-   	--namespace traffic-guru \
-   	traffic-guru \
-   	flomesh/traffic-guru \
+   	--namespace flomesh-console \
+   	flomesh-console \
+   	flomesh/flomesh-console \
    	--set database.type=postgres \
    	--set database.host=<db addr> \
    	--set database.port=5432 \
@@ -55,9 +55,9 @@ and create a database named `flomesh`, otherwide you need to set the database na
    ```
    helm install \
    	--create-namespace \
-   	--namespace traffic-guru \
-   	traffic-guru \
-   	flomesh/traffic-guru \
+   	--namespace flomesh-console \
+   	flomesh-console \
+   	flomesh/flomesh-console \
    	--set database.host=<db addr> \
    	--set database.user=<db user> \
    	--set database.password=<db password> \

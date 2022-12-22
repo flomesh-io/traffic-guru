@@ -1,0 +1,7 @@
+apiVersion: v2
+name: traffic-guru
+description: A Helm chart to install traffic-guru on Kubernetes
+type: application
+kubeVersion: ">= 1.19"
+version: 0.70.0
+appVersion: "0.70.0"

@@ -1,0 +1,584 @@
+{
+    "$schema": "https://json-schema.org/draft/2019-09/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "default": {},
+    "title": "Root Schema",
+    "required": [
+        "image",
+        "imagePullSecrets",
+        "nameOverride",
+        "fullnameOverride",
+        "gui",
+        "pipyRepo",
+        "database",
+        "serviceAccount",
+        "podAnnotations",
+        "podSecurityContext",
+        "securityContext",
+        "service",
+        "ingress",
+        "nodeSelector",
+        "tolerations",
+        "affinity"
+    ],
+    "properties": {
+        "image": {
+            "type": "object",
+            "default": {},
+            "title": "The image Schema",
+            "required": [
+                "repository",
+                "pullPolicy"
+            ],
+            "properties": {
+                "repository": {
+                    "type": "string",
+                    "default": "",
+                    "title": "The repository Schema",
+                    "examples": [
+                        "quay.io/flomesh"
+                    ]
+                },
+                "pullPolicy": {
+                    "type": "string",
+                    "default": "",
+                    "title": "The pullPolicy Schema",
+                    "examples": [
+                        "IfNotPresent"
+                    ]
+                }
+            },
+            "examples": [
+                {
+                    "repository": "quay.io/flomesh",
+                    "pullPolicy": "IfNotPresent"
+                }
+            ]
+        },
+        "imagePullSecrets": {
+            "type": "array",
+            "default": [],
+            "title": "The imagePullSecrets Schema",
+            "items": {},
+            "examples": [
+                []
+            ]
+        },
+        "nameOverride": {
+            "type": "string",
+            "default": "",
+            "title": "The nameOverride Schema",
+            "examples": [
+                "flomesh-console"
+            ]
+        },
+        "fullnameOverride": {
+            "type": "string",
+            "default": "",
+            "title": "The fullnameOverride Schema",
+            "examples": [
+                "flomesh-console"
+            ]
+        },
+        "gui": {
+            "type": "object",
+            "default": {},
+            "title": "The console Schema",
+            "required": [
+                "imageName",
+                "resources",
+                "env"
+            ],
+            "properties": {
+                "imageName": {
+                    "type": "string",
+                    "default": "",
+                    "title": "The imageName Schema",
+                    "examples": [
+                        "flomesh-console-ubi8"
+                    ]
+                },
+                "tag": {
+                    "type": "string",
+                    "default": "",
+                    "title": "The tag Schema",
+                    "examples": [
+                        "0.70.0-25"
+                    ]
+                },
+                "resources": {
+                    "type": "object",
+                    "default": {},
+                    "title": "The resources Schema",
+                    "required": [],
+                    "properties": {},
+                    "examples": [
+                        {}
+                    ]
+                },
+                "env": {
+                    "type": "object",
+                    "default": {},
+                    "title": "The env Schema",
+                    "required": [],
+                    "properties": {},
+                    "examples": [
+                        {}
+                    ]
+                }
+            },
+            "examples": [
+                {
+                    "imageName": "flomesh-console-ubi8",
+                    "tag": "0.70.0-25",
+                    "resources": {},
+                    "env": {}
+                }
+            ]
+        },
+        "pipyRepo": {
+            "type": "object",
+            "default": {},
+            "title": "The pipyRepo Schema",
+            "required": [
+                "imageName",
+                "tag",
+                "resources"
+            ],
+            "properties": {
+                "imageName": {
+                    "type": "string",
+                    "default": "",
+                    "title": "The imageName Schema",
+                    "examples": [
+                        "pipy-repo-ubi8"
+                    ]
+                },
+                "tag": {
+                    "type": "string",
+                    "default": "",
+                    "title": "The tag Schema",
+                    "examples": [
+                        "0.70.0-46"
+                    ]
+                },
+                "resources": {
+                    "type": "object",
+                    "default": {},
+                    "title": "The resources Schema",
+                    "required": [],
+                    "properties": {},
+                    "examples": [
+                        {}
+                    ]
+                }
+            },
+            "examples": [
+                {
+                    "imageName": "pipy-repo-ubi8",
+                    "tag": "0.70.0-46",
+                    "resources": {}
+                }
+            ]
+        },
+        "database": {
+            "type": "object",
+            "default": {},
+            "title": "The database Schema",
+            "required": [
+                "host",
+                "port",
+                "db",
+                "username",
+                "password",
+                "type"
+            ],
+            "properties": {
+                "host": {
+                    "type": "string",
+                    "default": "",
+                    "title": "The host Schema",
+                    "examples": [
+                        "mysql.flomesh-console.svc"
+                    ]
+                },
+                "port": {
+                    "type": "integer",
+                    "default": 0,
+                    "title": "The port Schema",
+                    "examples": [
+                        3306
+                    ]
+                },
+                "db": {
+                    "type": "string",
+                    "default": "",
+                    "title": "The db Schema",
+                    "examples": [
+                        "flomesh"
+                    ]
+                },
+                "username": {
+                    "type": "string",
+                    "default": "",
+                    "title": "The username Schema",
+                    "examples": [
+                        "flomesh"
+                    ]
+                },
+                "password": {
+                    "type": "string",
+                    "default": "",
+                    "title": "The password Schema",
+                    "examples": [
+                        ""
+                    ]
+                },
+                "type": {
+                    "type": "string",
+                    "default": "",
+                    "title": "The type Schema",
+                    "examples": [
+                        "default"
+                    ]
+                }
+            },
+            "examples": [
+                {
+                    "host": "mysql.flomesh-console.svc",
+                    "port": 3306,
+                    "db": "flomesh",
+                    "username": "flomesh",
+                    "password": "",
+                    "type": "default"
+                }
+            ]
+        },
+        "serviceAccount": {
+            "type": "object",
+            "default": {},
+            "title": "The serviceAccount Schema",
+            "required": [
+                "create",
+                "annotations",
+                "name"
+            ],
+            "properties": {
+                "create": {
+                    "type": "boolean",
+                    "default": false,
+                    "title": "The create Schema",
+                    "examples": [
+                        true
+                    ]
+                },
+                "annotations": {
+                    "type": "object",
+                    "default": {},
+                    "title": "The annotations Schema",
+                    "required": [],
+                    "properties": {},
+                    "examples": [
+                        {}
+                    ]
+                },
+                "name": {
+                    "type": "string",
+                    "default": "",
+                    "title": "The name Schema",
+                    "examples": [
+                        "flomesh-console"
+                    ]
+                }
+            },
+            "examples": [
+                {
+                    "create": true,
+                    "annotations": {},
+                    "name": "flomesh-console"
+                }
+            ]
+        },
+        "podAnnotations": {
+            "type": "object",
+            "default": {},
+            "title": "The podAnnotations Schema",
+            "required": [],
+            "properties": {},
+            "examples": [
+                {}
+            ]
+        },
+        "podSecurityContext": {
+            "type": "object",
+            "default": {},
+            "title": "The podSecurityContext Schema",
+            "required": [],
+            "properties": {},
+            "examples": [
+                {}
+            ]
+        },
+        "securityContext": {
+            "type": "object",
+            "default": {},
+            "title": "The securityContext Schema",
+            "required": [],
+            "properties": {},
+            "examples": [
+                {}
+            ]
+        },
+        "service": {
+            "type": "object",
+            "default": {},
+            "title": "The service Schema",
+            "required": [
+                "type",
+                "port",
+                "nodePort"
+            ],
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "default": "",
+                    "title": "The type Schema",
+                    "examples": [
+                        "ClusterIP"
+                    ]
+                },
+                "port": {
+                    "type": "integer",
+                    "default": 0,
+                    "title": "The port Schema",
+                    "examples": [
+                        8080
+                    ]
+                },
+                "nodePort": {
+                    "type": "integer",
+                    "default": 0,
+                    "title": "The nodePort Schema",
+                    "examples": [
+                        30000
+                    ]
+                }
+            },
+            "examples": [
+                {
+                    "type": "ClusterIP",
+                    "port": 8080,
+                    "nodePort": 30000
+                }
+            ]
+        },
+        "ingress": {
+            "type": "object",
+            "default": {},
+            "title": "The ingress Schema",
+            "required": [
+                "enabled",
+                "className",
+                "annotations",
+                "host",
+                "paths",
+                "tls"
+            ],
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "default": false,
+                    "title": "The enabled Schema",
+                    "examples": [
+                        false
+                    ]
+                },
+                "className": {
+                    "type": "string",
+                    "default": "",
+                    "title": "The className Schema",
+                    "examples": [
+                        ""
+                    ]
+                },
+                "annotations": {
+                    "type": "object",
+                    "default": {},
+                    "title": "The annotations Schema",
+                    "required": [],
+                    "properties": {},
+                    "examples": [
+                        {}
+                    ]
+                },
+                "host": {
+                    "type": "string",
+                    "default": "",
+                    "title": "The host Schema",
+                    "examples": [
+                        "flomesh-console.local"
+                    ]
+                },
+                "paths": {
+                    "type": "array",
+                    "default": [],
+                    "title": "The paths Schema",
+                    "items": {
+                        "type": "object",
+                        "default": {},
+                        "title": "A Schema",
+                        "required": [
+                            "path",
+                            "pathType"
+                        ],
+                        "properties": {
+                            "path": {
+                                "type": "string",
+                                "default": "",
+                                "title": "The path Schema",
+                                "examples": [
+                                    "/"
+                                ]
+                            },
+                            "pathType": {
+                                "type": "string",
+                                "default": "",
+                                "title": "The pathType Schema",
+                                "examples": [
+                                    "ImplementationSpecific"
+                                ]
+                            }
+                        },
+                        "examples": [
+                            {
+                                "path": "/",
+                                "pathType": "ImplementationSpecific"
+                            }
+                        ]
+                    },
+                    "examples": [
+                        [
+                            {
+                                "path": "/",
+                                "pathType": "ImplementationSpecific"
+                            }
+                        ]
+                    ]
+                },
+                "tls": {
+                    "type": "array",
+                    "default": [],
+                    "title": "The tls Schema",
+                    "items": {},
+                    "examples": [
+                        []
+                    ]
+                }
+            },
+            "examples": [
+                {
+                    "enabled": false,
+                    "className": "",
+                    "annotations": {},
+                    "host": "flomesh-console.local",
+                    "paths": [
+                        {
+                            "path": "/",
+                            "pathType": "ImplementationSpecific"
+                        }
+                    ],
+                    "tls": []
+                }
+            ]
+        },
+        "nodeSelector": {
+            "type": "object",
+            "default": {},
+            "title": "The nodeSelector Schema",
+            "required": [],
+            "properties": {},
+            "examples": [
+                {}
+            ]
+        },
+        "tolerations": {
+            "type": "array",
+            "default": [],
+            "title": "The tolerations Schema",
+            "items": {},
+            "examples": [
+                []
+            ]
+        },
+        "affinity": {
+            "type": "object",
+            "default": {},
+            "title": "The affinity Schema",
+            "required": [],
+            "properties": {},
+            "examples": [
+                {}
+            ]
+        }
+    },
+    "examples": [
+        {
+            "image": {
+                "repository": "quay.io/flomesh",
+                "pullPolicy": "IfNotPresent"
+            },
+            "imagePullSecrets": [],
+            "nameOverride": "flomesh-console",
+            "fullnameOverride": "flomesh-console",
+            "console": {
+                "imageName": "flomesh-console-ubi8",
+                "tag": "0.70.0-25",
+                "resources": {},
+                "env": {}
+            },
+            "pipyRepo": {
+                "imageName": "pipy-repo-ubi8",
+                "tag": "0.70.0-46",
+                "resources": {}
+            },
+            "database": {
+                "host": "mysql.flomesh-console.svc",
+                "port": 3306,
+                "db": "flomesh",
+                "username": "flomesh",
+                "password": "",
+                "type": "default"
+            },
+            "serviceAccount": {
+                "create": true,
+                "annotations": {},
+                "name": "flomesh-console"
+            },
+            "podAnnotations": {},
+            "podSecurityContext": {},
+            "securityContext": {},
+            "service": {
+                "type": "ClusterIP",
+                "port": 8080,
+                "nodePort": 30000
+            },
+            "ingress": {
+                "enabled": false,
+                "className": "",
+                "annotations": {},
+                "host": "flomesh-console.local",
+                "paths": [
+                    {
+                        "path": "/",
+                        "pathType": "ImplementationSpecific"
+                    }
+                ],
+                "tls": []
+            },
+            "nodeSelector": {},
+            "tolerations": [],
+            "affinity": {}
+        }
+    ]
+}
