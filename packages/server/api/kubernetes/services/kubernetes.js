@@ -137,7 +137,6 @@ module.exports = {
 
       ctx.response.body = response.data;
     } catch (error) {
-      strapi.log.error(error);
     }
   },
 
