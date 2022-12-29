@@ -362,6 +362,7 @@ import {
 import DetailList from "@/components/tool/DetailList";
 import DetailListItem from "@/components/tool/DetailListItem";
 import FormItem from "@/components/tool/FormItem";
+import { mapState } from "vuex";
 const port_columns = [
   {
     key: "as",
@@ -427,29 +428,11 @@ export default {
     return {
       port_columns,
       ep_columns,
-      rules: {
-        name: [
-          {
-            required: true,
-            message: "Name is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-
-        numberRequired: [
-          {
-            required: true,
-            message: "This is required",
-            trigger: "blur",
-            type: "number",
-          },
-        ],
-      },
     };
   },
 
   computed: {
+    ...mapState("rules", ["rules"]),
     epDataColumns() {
       return this.ep_columns.map((column) => {
         column.title = this.$t(column.key);

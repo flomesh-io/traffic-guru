@@ -141,34 +141,34 @@ export default {
     },
 
     URL() {
-      let append = this.$REST.KUBE.append(
+      let append = this.$REST.K8S.append(
         this.params.pageSize,
         this.params.pageNo,
         "d,creationTimestamp",
       );
-      return this.$REST.KUBE.encode(this.$REST.KUBE.SECRET, append);
+      return this.$REST.K8S.encode(this.$REST.K8S.SECRET, append);
     },
 
     search() {
       this.loading = true;
       this.$request(this.URL(), this.$METHOD.GET).then((res) => {
-        let _data = res.data; //this.getDummyData();
-        this.list = this.reset(_data.secrets); //res.data.data?res.data.data:[];
-        this.params.total = _data.listMeta.totalItems;
+        let _data = res.data; 
+        this.list = this.reset(_data.items); 
+        this.params.total = _data.count;
         this.loading = false;
       });
     },
 
     reset(list) {
       for (let i = 0; i < list.length; i++) {
-        list[i].uid = list[i].objectMeta.uid;
-        list[i].name = list[i].objectMeta.name;
-        list[i].namespace = list[i].objectMeta.namespace;
-        list[i].labels = list[i].objectMeta.labels
-          ? list[i].objectMeta.labels
+        list[i].uid = list[i].metadata.uid;
+        list[i].name = list[i].metadata.name;
+        list[i].namespace = list[i].metadata.namespace;
+        list[i].labels = list[i].metadata.labels
+          ? list[i].metadata.labels
           : [];
         list[i].creationTimestamp = new Date(
-          list[i].objectMeta.creationTimestamp,
+          list[i].metadata.creationTimestamp,
         ).toLocaleString();
         list[i].type = list[i].type;
       }

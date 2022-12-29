@@ -84,7 +84,6 @@ const columns = [
   {
     key: "Creation Timestamp",
     dataIndex: "creationTimestamp",
-    sorter: true,
   },
   {
     key: "Action",
@@ -95,7 +94,7 @@ const columns = [
 export default {
   name: "ServiceList",
   components: { MoreOutlined },
-  props: ["url", "namespace"],
+  props: ["embed","d","url", "namespace"],
   i18n: require("@/i18n"),
   data() {
     return {
@@ -121,7 +120,13 @@ export default {
   },
 
   created() {
-    this.search();
+    if(this.embed){
+      this.list = this.reset(this.d);
+      this.params.total = this.d.length;
+      this.loading = false;
+    }else{
+      this.search();
+    }
   },
 
   methods: {
@@ -132,12 +137,12 @@ export default {
     },
 
     MakeUrl() {
-      let append = this.$REST.KUBE.append(
+      let append = this.$REST.K8S.append(
         this.params.pageSize,
         this.params.pageNo,
         "d,creationTimestamp",
       );
-      return this.$REST.KUBE.encode(this.url, append, this.namespace);
+      return this.$REST.K8S.encode(this.url, append, this.namespace);
     },
 
     search(pageNo, pageSize) {
@@ -148,24 +153,24 @@ export default {
       this.loading = true;
 
       this.$request(this.MakeUrl(), this.$METHOD.GET).then((res) => {
-        let _data = res.data;
-        this.list = this.reset(_data.horizontalpodautoscalers);
-        this.params.total = _data.listMeta.totalItems;
+        let _data = res.data; 
+        this.list = this.reset(_data.items); 
+        this.params.total = _data.count;
         this.loading = false;
       });
     },
 
     reset(list) {
       for (let i = 0; i < list.length; i++) {
-        list[i].uid = list[i].objectMeta.uid;
-        list[i].name = list[i].objectMeta.name;
-        list[i].namespace = list[i].objectMeta.namespace;
-        list[i].minReplicas = list[i].minReplicas;
-        list[i].maxReplicas = list[i].maxReplicas;
-        list[i].ref =
-          list[i].scaleTargetRef.kind + "/" + list[i].scaleTargetRef.name;
+        list[i].uid = list[i].metadata.uid;
+        list[i].name = list[i].metadata.name;
+        list[i].namespace = list[i].metadata.namespace;
+        list[i].minReplicas = list[i].spec.minReplicas;
+        list[i].maxReplicas = list[i].spec.maxReplicas;
+        list[i].ref = list[i].spec.scaleTargetRef?
+          (list[i].spec.scaleTargetRef.kind + "/" + list[i].spec.scaleTargetRef.name):'-';
         list[i].creationTimestamp = new Date(
-          list[i].objectMeta.creationTimestamp,
+          list[i].metadata.creationTimestamp,
         ).toLocaleString();
       }
       return list;

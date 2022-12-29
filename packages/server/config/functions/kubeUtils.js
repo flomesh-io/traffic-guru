@@ -1,5 +1,8 @@
 'use strict';
 
+const https = require("https");
+const axios = require("axios");
+
 module.exports = {
   async getKubeEntitys(ctx, type) {
     const k8s_cluster_id = ctx.headers.schema_id || '';
@@ -83,6 +86,8 @@ module.exports = {
           id
         ) {
           dbData.content = item;
+          dbData.selector = item.spec?.selector?.app
+          delete dbData.serviceExport
           await strapi.query(type).update({ id: dbData.id }, dbData);
         }
       } else {
@@ -92,6 +97,7 @@ module.exports = {
           uid: item.metadata.uid,
           content: item,
           registry: k8s_cluster_id,
+          selector: item.spec?.selector?.app
         };
 
         if (type == 'ingress') {
@@ -107,4 +113,18 @@ module.exports = {
     }
     return true;
   },
+
+  getK8sAxios(reg) {
+    if (!reg?.address?.length) {
+      throw new Error("The cluster is not registered.");
+    }
+    return axios.create({
+      httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+      baseURL: reg.address,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + reg.content.credit,
+      },
+    });
+  }
 };

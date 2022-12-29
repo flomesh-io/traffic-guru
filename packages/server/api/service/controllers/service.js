@@ -1,6 +1,7 @@
 'use strict';
 
 const url = require('url');
+const k8s = require('@kubernetes/client-node');
 
 module.exports = {
   async getServices(ctx) {
@@ -31,7 +32,21 @@ module.exports = {
         strapi.log.error(error);
       }
     }
-    return await strapi.services.service.findOne(ctx.query);
+    const service = await strapi.services.service.findOne(ctx.query);
+
+    if (service.content?.spec?.selector?.app) {
+      const kc = await strapi.services.kubernetes.getKubeConfig(
+        service.registry.id,
+        "k8s"
+      );
+      const k8sCoreApi = kc.makeApiClient(k8s.CoreV1Api);
+      const items = await k8sCoreApi.listNamespacedPod(
+        service.content.metadata.namespace, null, null, null, null, "app=" + service.content.spec.selector.app
+      );
+      service.pods = items.body.items
+    }
+
+    return service;
   },
 
   async fetchServices(ctx) {

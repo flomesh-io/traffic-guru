@@ -16,9 +16,10 @@
         show-icon
         class="mb-24"
       />
-      <a-form-item
-        name="mobile"
-        v-if="!userName"
+      <FormItem
+        class="mb-20"
+        name="name"
+        :rules="rules.name"
       >
         <MdInput
           icon="user"
@@ -29,8 +30,12 @@
         >
           {{ $t("User") }}
         </MdInput>
-      </a-form-item>
-      <a-form-item name="email">
+      </FormItem>
+      <FormItem
+        class="mb-20"
+        name="name"
+        :rules="rules.email"
+      >
         <MdInput
           icon="email"
           size="large"
@@ -40,8 +45,12 @@
         >
           {{ $t("Email") }}
         </MdInput>
-      </a-form-item>
-      <a-form-item name="password">
+      </FormItem>
+      <FormItem
+        class="mb-20"
+        name="password"
+        :rules="rules.password"
+      >
         <MdInput
           type="password"
           icon="password"
@@ -55,7 +64,7 @@
         >
           {{ $t("Password") }}
         </MdInput>
-      </a-form-item>
+      </FormItem>
       <div
         v-if="!nofoot"
         class="font-right"
@@ -88,17 +97,20 @@ import {
 } from "@ant-design/icons-vue";
 import { notification } from "ant-design-vue";
 import { h } from "vue";
+import { mapState } from "vuex";
+import FormItem from "@/components/tool/FormItem";
 
 export default {
   name: "RegForm",
   components: {
     MdInput,
     ArrowRightOutlined,
+    FormItem,
   },
 
   i18n: require("./i18n"),
   inject: ["next"],
-  props: ["nofoot", "userName"],
+  props: ["nofoot"],
   data() {
     return {
       snsloading: false,
@@ -116,54 +128,13 @@ export default {
         password: "",
         automatic: true,
       },
-
-      rules: {
-        name: [
-          {
-            required: true,
-            message: "Please input user name",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-
-        email: [
-          {
-            required: true,
-            message: "Please input email",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-
-        password: [
-          {
-            min: 8,
-            pattern: /[A-Z].{7,}/,
-            required: true,
-            message: "Password least 8 characters and initial capital",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-      },
     };
   },
 
   computed: {
+    ...mapState("rules", ["rules"]),
     systemName() {
       return this.$store.state.setting.systemName;
-    },
-
-    getRules() {
-      Object.keys(this.rules).map((key) => {
-        this.rules[key].map((rule) => {
-          rule.message = this.$t(rule.message);
-          return rule;
-        });
-        return key;
-      });
-      return this.rules;
     },
   },
 

@@ -184,7 +184,7 @@
           >
             <FormItem
               name="name"
-              :rules="rules.name"
+              :rules="rules.uniqueName('certificates',{id:payload.id,namespace:payload.namespace?.id})"
             >
               <a-input
                 :placeholder="$t('unset')"
@@ -309,7 +309,7 @@ import HeadInfo from "@/components/tool/HeadInfo";
 import CardList from "@/components/card/CardList";
 import EnvSelector from "@/components/menu/EnvSelector";
 import FormItem from "@/components/tool/FormItem";
-
+import { mapState } from "vuex";
 import { Empty } from "ant-design-vue";
 export default {
   name: "Certificates",
@@ -332,17 +332,6 @@ export default {
         { value: "k8s", label: "K8S Secret" },
         { value: "api", label: "API Secret" },
       ],
-
-      rules: {
-        name: [
-          {
-            required: true,
-            message: "Name is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-      },
 
       FileProtectOutlined,
       isEdit: false,
@@ -378,6 +367,7 @@ export default {
   },
 
   computed: {
+    ...mapState("rules", ["rules"]),
     calcCertificates() {
       if (!this.isBind) {
         return this.certificates;

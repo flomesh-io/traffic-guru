@@ -57,9 +57,9 @@ const openapi = {
         return {
           id: "API-Status",
           colors: ["#00adef", "#fb9690"],
-          labels: ["Running", "ERROR"],
+          labels: ["Running", "Error"],
           total: res.api_status.run * 1 + res.api_status.error * 1,
-          unit: "个",
+          unit: "unitge",
           vals: [res.api_status.run * 1, res.api_status.error * 1],
         };
       },

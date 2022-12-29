@@ -17,7 +17,7 @@
             :height="240"
             :padding="[0, 0, 0, 0]"
             :axis="false"
-            unit="%"
+            unit="cores"
             :showy="false"
             :id="'cpu-area' + Math.ceil(Math.random() * 1000)"
             :dv="cpu"
@@ -35,7 +35,7 @@
             :colors="['rgba(195,158,253,1)', 'rgba(195,158,253,0.4)']"
             :height="240"
             :padding="[0, 0, 0, 0]"
-            unit="MB"
+            :unit="memortUnit"
             :axis="false"
             :showy="false"
             :id="'memory-area' + Math.ceil(Math.random() * 1000)"
@@ -65,7 +65,7 @@
             :height="230"
             :padding="[55, 5, 5, 15]"
             :axis="true"
-            unit="%"
+            unit="cores"
             :id="'cpu-area' + Math.ceil(Math.random() * 1000)"
             :dv="cpu"
           />
@@ -90,7 +90,7 @@
             :height="230"
             :padding="[55, 5, 5, 15]"
             :axis="true"
-            unit="MB"
+            :unit="memortUnit"
             :id="'memory-area' + Math.ceil(Math.random() * 1000)"
             :dv="memory"
           />
@@ -114,6 +114,7 @@ export default {
     return {
       cpu: [],
       memory: [],
+      memortUnit: "Ki",
       loadingCPU: false,
       loadingMemory: false,
     };
@@ -138,64 +139,40 @@ export default {
 
   methods: {
     renderData(val) {
-      for (let i = 0; i < val.length; i++) {
-        if (val[i].metricName == "cpu/usage_rate") {
-          this.cpu = val[i].dataPoints;
-          for (let j = 0; j < this.cpu.length; j++) {
-            this.cpu[j].type = "CPU";
-            this.cpu[j].date = format(
-              new Date(this.cpu[j].x * 1000),
-              "HH:mm",
-            );
-            this.cpu[j].value = this.cpu[j].y / 1000;
-          }
-        }
-        if (val[i].metricName == "memory/usage") {
-          this.memory = val[i].dataPoints;
-          for (let j = 0; j < this.memory.length; j++) {
-            this.memory[j].type = "Memory";
-            this.memory[j].date = format(
-              new Date(this.memory[j].x * 1000),
-              "HH:mm",
-            );
-            this.memory[j].value = this.memory[j].y / 1000000;
-          }
-        }
-      }
-    },
-
-    requestCPU() {
-      this.loadingCPU = true;
       this.cpu = [];
-      const beginDay = new Date().getTime();
-      for (let i = 0; i < 10; i++) {
-        let _template = {};
-        _template.type = "CPU";
-        _template.value = (i + 5) / 2;
-        (_template.date = format(
-          new Date(beginDay + 1000 * 60 * 60 * 24 * i),
-          "HH:mm",
-        )),
-        this.cpu.push(_template);
-      }
-      this.loadingCPU = false;
-    },
-
-    requestMemory() {
-      this.loadingMemory = true;
       this.memory = [];
-      const beginDay = new Date().getTime();
-      for (let i = 0; i < 10; i++) {
-        let _template = {};
-        _template.type = "Memory";
-        _template.value = (i + 5) / 2;
-        (_template.date = format(
-          new Date(beginDay + 1000 * 60 * 60 * 24 * i),
-          "yyyy-MM-dd HH:mm",
-        )),
-        this.memory.push(_template);
+      let maxMemory = 0;
+      for (let i = 0; i < val.length; i++) {
+        if(val[i].memory>maxMemory){
+          maxMemory = val[i].memory;
+        }
       }
-      this.loadingMemory = false;
+      if(maxMemory>1000000){
+        this.memortUnit = "Gi";
+      }else if(maxMemory>1000){
+        this.memortUnit = "Mi";
+      }else{
+        this.memortUnit = "Ki";
+      }
+      let setMemory = { "Ki":1,"Mi":1000,"Gi":1000000 }
+      for (let i = 0; i < val.length; i++) {
+        this.cpu.push({
+          type: "CPU",
+          value: val[i].cpu / 1000000000,
+          date: format(
+            new Date(val[i].time * 1000),
+            "HH:mm",
+          )
+        });
+        this.memory.push({
+          type: "Memory",
+          value: val[i].memory / setMemory[this.memortUnit],
+          date: format(
+            new Date(val[i].time * 1000),
+            "HH:mm",
+          )
+        });
+      }
     },
   },
 };

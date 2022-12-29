@@ -31,7 +31,7 @@
             </a-menu-item>
             <a-menu-item
               v-if="item.type == 'k8s'"
-              @click.stop="addNamespace(item.value)"
+              @click.stop="addNamespace(item.id)"
             >
               <div>
                 <PlusCircleTwoTone
@@ -48,24 +48,37 @@
   <a-modal
     v-model:visible="visible"
     :title="schemaName"
-    @ok="saveNamespace"
+    @ok="validNamespace"
   >
-    <a-input
-      v-model:value="newNamespace"
-      :maxlength="30"
-      :placeholder="$t('New namespace')"
-    />
+    <a-form
+      :model="payload"
+      ref="nsForm"
+    >
+      <FormItem
+        :name="['newNamespace']"
+        :rules="rules.uniqueName('namespaces',{registry:regModId})"
+      >
+        <a-input
+          v-model:value="payload.newNamespace"
+          :maxlength="30"
+          :placeholder="$t('New namespace')"
+        />
+      </FormItem>
+    </a-form>
   </a-modal>
 </template>
 
 <script>
 import { DownOutlined, PlusCircleTwoTone } from "@ant-design/icons-vue";
 import { getRegistries, getK8sNamespaces } from "@/services/common";
+import FormItem from "@/components/tool/FormItem";
+import { mapState } from "vuex";
 export default {
   name: "EnvSelector",
   components: {
     DownOutlined,
     PlusCircleTwoTone,
+    FormItem
   },
 
   props: ["isFilter", "noAll", "namespace"],
@@ -73,14 +86,19 @@ export default {
   data() {
     return {
       visible: false,
-      newNamespace: "",
+      payload:{
+        newNamespace: "",
+      },
+
       isEditing: false,
+      regModId:null,
       k8svalue: [],
       k8soptions: [],
     };
   },
 
   computed: {
+    ...mapState("rules", ["rules"]),
     schemaName() {
       let name = "Select register";
       this.k8soptions.forEach((option) => {
@@ -110,14 +128,24 @@ export default {
   },
 
   methods: {
-    addNamespace() {
+    addNamespace(id) {
+      this.regModId = id;
       this.visible = true;
+    },
+
+    validNamespace() {
+      this.$refs.nsForm
+        .validateFields()
+        .then(() => {
+          this.saveNamespace();
+        })
+        .catch(() => {});
     },
 
     saveNamespace() {
       let savedata = {
-        registry: this.k8svalue[0].split(",")[0] * 1,
-        name: this.newNamespace,
+        registry: this.regModId,
+        name: this.payload.newNamespace,
       };
       this.$gql
         .mutation(
@@ -130,7 +158,7 @@ export default {
           },
         )
         .then(() => {
-          this.newNamespace = "";
+          this.payload.newNamespace = "";
           this.visible = false;
           this.$message.success(this.$t("Created successfully"), 3);
           let findOps = null;
@@ -269,198 +297,3 @@ export default {
   },
 };
 </script>
-
-<style lang="less" scoped>
-  @import "index";
-  .windowDrawerBody {
-    display: flex;
-    background-color: #f5f5f5;
-    height: 100%;
-  }
-  .left-bar {
-    position: relative;
-    width: 50px;
-  }
-  .left-bar .bottom {
-    width: 50px;
-    position: absolute;
-    bottom: 0;
-  }
-  .menu-bar {
-    flex: 2;
-    background-color: #ffffff;
-  }
-  .menu-bar h6 {
-    display: block;
-    width: 100%;
-    color: #999;
-    padding: 10px;
-    background-color: #fcfcfc;
-  }
-
-  .back-menu {
-    display: none;
-    height: 90px;
-  }
-
-  .menu-content {
-    flex: 3;
-  }
-  @media (max-width: 768px) {
-    .menu-content {
-      display: none;
-    }
-    .back-menu {
-      display: block;
-    }
-    .menu-select {
-      .menu-bar {
-        display: none;
-      }
-      .menu-content {
-        display: block;
-      }
-    }
-  }
-  .icon-menu {
-    display: block;
-    font-size: 20px;
-    height: 50px;
-    line-height: 50px;
-    cursor: pointer;
-    transition: color 0.3s;
-    color: #232323;
-  }
-  .icon-menu:hover {
-    color: #00adef;
-  }
-  .app-icon {
-    vertical-align: middle;
-    border-radius: 4px;
-    font-size: 30px;
-    color: #fff;
-    background-color: #409de0;
-    height: 50px;
-    padding-top: 4px;
-    line-height: 46px;
-    width: 50px;
-    text-align: center;
-  }
-
-  .wrapper {
-    perspective: 1000px;
-  }
-  .cube {
-    cursor: pointer;
-    height: 50px;
-    width: 50px;
-    position: relative;
-    margin: auto;
-    transform-style: preserve-3d;
-    animation: rotate 15s infinite;
-  }
-  @keyframes rotate {
-    from {
-      transform: rotateY(0deg) rotateX(0deg);
-    }
-    to {
-      transform: rotateY(360deg) rotateX(360deg);
-    }
-  }
-  .cube > div {
-    height: 100%;
-    width: 100%;
-    opacity: 0.9;
-    position: absolute;
-    text-align: center;
-    background: rgba(246, 246, 246, 0.5);
-    color: #fff;
-    box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.05);
-    line-height: 200px;
-    font-size: 25px;
-  }
-  .plane-front {
-    position: relative;
-    transform: translateZ(25px);
-    transition: all 0.3s;
-  }
-  .plane-back {
-    position: relative;
-    transform: rotateY(180deg) translateZ(25px);
-    transition: all 0.3s;
-  }
-  .plane-left {
-    position: relative;
-    transform: rotateY(270deg) translateZ(25px);
-    transition: all 0.3s;
-  }
-  .plane-right {
-    position: relative;
-    transform: rotateY(90deg) translateZ(25px);
-    transition: all 0.3s;
-  }
-  .plane-top {
-    position: relative;
-    transform: rotateX(90deg) translateZ(25px);
-    transition: all 0.3s;
-  }
-  .plane-bottom {
-    position: relative;
-    transform: rotateX(270deg) translateZ(25px);
-    transition: all 0.3s;
-  }
-  .cube:hover .plane-front {
-    transform: translateZ(40px);
-    background: rgba(255, 255, 255, 0.9);
-  }
-  .cube:hover .plane-back {
-    transform: rotateY(180deg) translateZ(40px);
-    background: rgba(255, 255, 255, 0.9);
-  }
-  .cube:hover .plane-left {
-    transform: rotateY(270deg) translateZ(40px);
-    background: rgba(255, 255, 255, 0.9);
-  }
-  .cube:hover .plane-right {
-    transform: rotateY(90deg) translateZ(40px);
-    background: rgba(255, 255, 255, 0.9);
-  }
-  .cube:hover .plane-top {
-    transform: rotateX(90deg) translateZ(40px);
-    background: rgba(255, 255, 255, 0.9);
-  }
-  .cube:hover .plane-bottom {
-    transform: rotateX(270deg) translateZ(40px);
-    background: rgba(255, 255, 255, 0.9);
-  }
-  .cube-icon {
-    color: #999;
-    position: absolute;
-    opacity: 0.7;
-    font-size: 30px;
-    left: 10px;
-    top: 10px;
-  }
-  .cube-icon-img {
-    height: 30px;
-    width: 30px;
-    opacity: 0.7;
-  }
-  .windowWrapper {
-    position: fixed;
-    bottom: 30px;
-    left: 30px;
-    z-index: 10;
-  }
-  .windowDrawerBody .avatar {
-    border-radius: 50%;
-    position: relative;
-    top: 10px;
-    margin-left: 10px;
-  }
-  .LeftOutlined {
-    color: #ccc;
-    position: relative;
-    top: 10px;
-  }
-</style>

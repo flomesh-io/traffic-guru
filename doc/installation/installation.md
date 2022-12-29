@@ -60,7 +60,7 @@ $ yarn serve:gui
 |  password   |        ClickHouse password       |
 
 
-### K8s & DashBoard
+### K8s
 - Install K8s [(点击下载)](https://kubernetes.io/docs/home/)
 - 在注册中心添加K8s
 

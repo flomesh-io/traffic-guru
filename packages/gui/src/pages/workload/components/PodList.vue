@@ -3,7 +3,7 @@
     <CPUMemory
       v-if="metric"
       :loading="loading"
-      :metrics="cumulativeMetrics"
+      :metrics="metrics"
     />
     <a-card
       class="card nopd"
@@ -49,25 +49,7 @@
               </div>
             </template>
             <template v-else-if="column.dataIndex === 't'">
-              <div>
-                <a-tooltip
-                  placement="topLeft"
-                  :title="record.t"
-                >
-                  <a href="javascript:void(0)">
-                    <svg
-                      class="icon svg"
-                      aria-hidden="true"
-                    >
-                      <use
-                        :xlink:href="
-                          $REST.KUBE.iconStatus[record.t]
-                        "
-                      />
-                    </svg>
-                  </a>
-                </a-tooltip>
-              </div>
+              <Status :d="{status:record.phase}" />
             </template>
             <template v-else-if="column.dataIndex === 'labels'">
               <div>
@@ -79,6 +61,22 @@
                   {{ key }}:{{ record.labels[key] }}
                 </a-tag>
               </div>
+            </template>
+            <template v-else-if="column.dataIndex === 'restartCount'">
+              <a-badge
+                :count="record.restartCount"
+                :show-zero="false"
+              />
+            </template>
+            <template v-else-if="column.dataIndex === 'cpuUsage'">
+              <a-tag v-if="record.cpuUsage">
+                {{ record.cpuUsage }}
+              </a-tag><span v-else>-</span>
+            </template>
+            <template v-else-if="column.dataIndex === 'memoryUsage'">
+              <a-tag v-if="record.memoryUsage">
+                {{ record.memoryUsage }}
+              </a-tag><span v-else>-</span>
             </template>
             <template v-else-if="column.dataIndex === 'action'">
               <div>
@@ -120,6 +118,7 @@
 <script>
 import { MoreOutlined } from "@ant-design/icons-vue";
 import CPUMemory from "@/components/chart/CPUMemory.vue";
+import Status from "@/components/tag/Status";
 const columns = [
   {
     key: " ", 
@@ -144,7 +143,7 @@ const columns = [
   },
   {
     key: "Status",
-    dataIndex: "status",
+    dataIndex: "phase",
   },
   {
     key: "Restart",
@@ -160,8 +159,7 @@ const columns = [
   },
   {
     key: "Creation Timestamp",
-    dataIndex: "creationTimestamp",
-    sorter: true,
+    dataIndex: "creationTimestamp"
   },
   {
     key: "Action",
@@ -171,20 +169,11 @@ const columns = [
 ];
 export default {
   name: "PodList",
-  components: { CPUMemory, MoreOutlined },
-  props: ["url", "metric", "hasSearch", "namespace"],
+  components: { CPUMemory, MoreOutlined,Status },
+  props: ["embed","d", "url", "metric", "hasSearch", "namespace"],
   i18n: require("@/i18n"),
   data() {
     return {
-      iconStatus: {
-        Completed: "#icon-success",
-        Running: "#icon-success",
-        Warning: "#icon-warning",
-        ImagePullBackOff: "#icon-error",
-        ErrImagePull: "#icon-error",
-        "Init: CrashLoopBackOff": "#icon-error",
-      },
-
       params: {
         pageNo: 1,
         pageSize: 10,
@@ -193,7 +182,7 @@ export default {
       },
 
       columns,
-      cumulativeMetrics: [],
+      metrics: [],
       loading: false,
       list: [],
     };
@@ -209,7 +198,14 @@ export default {
   },
 
   created() {
-    this.search();
+    if(this.embed){
+      this.list = this.reset(this.d);
+      this.params.total = this.d.length;
+      this.metrics = null;
+      this.loading = false;
+    }else{
+      this.search();
+    }
   },
 
   methods: {
@@ -220,13 +216,13 @@ export default {
     },
 
     MakeUrl() {
-      let append = this.$REST.KUBE.append(
+      let append = this.$REST.K8S.append(
         this.params.pageSize,
         this.params.pageNo,
         "d,creationTimestamp",
         this.params.key,
       );
-      return this.$REST.KUBE.encode(this.url, append, this.namespace);
+      return this.$REST.K8S.encode(this.url, append, this.namespace);
     },
 
     search(pageNo, pageSize) {
@@ -237,32 +233,41 @@ export default {
       this.loading = true;
       this.$request(this.MakeUrl(), this.$METHOD.GET).then((res) => {
         let _data = res.data;
-        this.list = this.reset(_data.pods);
-        this.params.total = _data.listMeta.totalItems;
-        this.cumulativeMetrics = _data.cumulativeMetrics;
+        this.list = this.reset(_data.items);
+        this.params.total = _data.count;
+        this.metrics = _data.metrics;
         this.loading = false;
       });
     },
 
     reset(list) {
+      let setMemory = { "Ki":1,"Mi":1000,"Gi":1000000 }
       for (let i = 0; i < list.length; i++) {
-        list[i].uid = list[i].objectMeta.uid;
-        list[i].name = list[i].objectMeta.name;
-        list[i].namespace = list[i].objectMeta.namespace;
-        list[i].labels = list[i].objectMeta.labels;
-        list[i].node = list[i].nodeName;
-        list[i].status = list[i].status;
-        list[i].restartCount = list[i].restartCount;
-        list[i].cpuUsage = list[i].metrics
-          ? list[i].metrics.cpuUsage.toFixed(2) + "m"
-          : -"";
-        list[i].memoryUsage = list[i].metrics
-          ? (list[i].metrics.memoryUsage / 100000).toFixed(2) + "Mi"
-          : "-";
+        list[i].uid = list[i].metadata.uid;
+        list[i].name = list[i].metadata.name;
+        list[i].namespace = list[i].metadata.namespace;
+        list[i].labels = list[i].metadata.labels;
+        list[i].node = list[i].spec.nodeName;
+        list[i].restartCount = list[i].status.containerStatuses?list[i].status.containerStatuses[0].restartCount : 0;
+        list[i].cpuUsage = list[i].metrics && list[i].metrics.length>0
+          ? (list[i].metrics[list[i].metrics.length-1].cpu/1000000000).toFixed(2) + "cores"
+          : null;
+        let memory = list[i].metrics && list[i].metrics.length>0
+          ? list[i].metrics[list[i].metrics.length-1].memory
+          : null;
+        let memortUnit = "Ki";
+        if(memory>1000000){
+          memortUnit = "Gi";
+        }else if(memory>1000){
+          memortUnit = "Mi";
+        }else{
+          memortUnit = "Ki";
+        }
+        list[i].memoryUsage = memory?(''+(memory / setMemory[memortUnit]).toFixed(2) + memortUnit):null
         list[i].creationTimestamp = new Date(
-          list[i].objectMeta.creationTimestamp,
+          list[i].metadata.creationTimestamp,
         ).toLocaleString();
-        list[i].t = list[i].status;
+        list[i].phase = list[i].status.phase;
       }
       return list;
     },

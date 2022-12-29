@@ -168,7 +168,7 @@
           >
             <FormItem
               name="name"
-              :rules="rules.name"
+              :rules="rules.uniqueName('getRoles',{id:payload.id,type:payload.type})"
             >
               <a-input
                 :maxlength="10"
@@ -230,6 +230,7 @@ import HeadInfo from "@/components/tool/HeadInfo";
 import CardList from "@/components/card/CardList";
 import FormItem from "@/components/tool/FormItem";
 import _ from "lodash";
+import { mapState } from "vuex";
 export default {
   name: "Roles",
   components: {
@@ -248,17 +249,6 @@ export default {
   i18n: require("@/i18n"),
   data() {
     return {
-      rules: {
-        name: [
-          {
-            required: true,
-            message: "Name is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-      },
-
       activeKey: "system",
       tabs: [
         { type: "system", title: "System Role" },
@@ -294,6 +284,10 @@ export default {
     };
   },
 
+  computed: {
+    ...mapState("rules", ["rules"]),
+  },
+	
   created() {
     if (!this.$isPro) {
       this.tabs = [

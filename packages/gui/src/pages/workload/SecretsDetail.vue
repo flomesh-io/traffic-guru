@@ -1,96 +1,7 @@
 <template>
   <PageLayout :title="$t('Secrets')">
     <template #headerContent>
-      <DetailList
-        size="small"
-        :col="1"
-      >
-        <DetailListItem
-          :term="$t('as')"
-        >
-          <a-input
-            read-only
-            :placeholder="$t('unset')"
-            v-model:value="detail.objectMeta.name"
-            class="bold width-300"
-          />
-        </DetailListItem>
-        <DetailListItem
-          :term="$t('Namespace')"
-        >
-          <a-input
-            read-only
-            :placeholder="$t('unset')"
-            v-model:value="detail.objectMeta.namespace"
-            class="width-200"
-          />
-        </DetailListItem>
-        <DetailListItem :term="$t('Creation Timestamp')">
-          {{
-            new Date(detail.objectMeta.creationTimestamp).toLocaleString()
-          }}
-        </DetailListItem>
-      </DetailList>
-      <DetailList
-        size="small"
-        :col="1"
-      >
-        <DetailListItem :term="$t('Labels')">
-          <a-tag
-            :key="index"
-            v-for="(key, index) in Object.keys(detail.objectMeta.labels || [])"
-            :closable="false"
-          >
-            {{ key }}:{{ detail.objectMeta.labels[key] }}
-          </a-tag>
-        </DetailListItem>
-        <DetailListItem :term="$t('Annotations')">
-          <a-tag
-            :key="index"
-            v-for="(key, index) in Object.keys(
-              detail.objectMeta.annotations || [],
-            )"
-            :closable="false"
-            class="mb-5"
-          >
-            <span v-if="key == 'objectset.rio.cattle.io/applied'">
-              <a-tooltip
-                placement="topLeft"
-                :title="detail.objectMeta.annotations[key]"
-              >
-                <a
-                  class="font-primary"
-                  href="javascript:void(0)"
-                >{{ key }}</a>
-              </a-tooltip>
-            </span>
-            <span
-              v-else-if="
-                key == 'kubectl.kubernetes.io/last-applied-configuration'
-              "
-            >
-              <a-popover
-                trigger="click"
-                :title="key"
-              >
-                <template #content>
-                  <JsonEditor
-                    :is-j-s-o-n="true"
-                    :value="detail.objectMeta.annotations[key]"
-                  />
-                </template>
-                <a
-                  class="font-primary"
-                  href="javascript:void(0)"
-                >{{ key }}</a>
-              </a-popover>
-            </span>
-            <span
-              v-else
-            >{{ key }}:{{ detail.objectMeta.annotations[key] }}</span>
-          </a-tag>
-        </DetailListItem>
-      </DetailList>
+      <DetailHeader :d="detail" />
     </template>
     <template
       v-if="pid != ''"
@@ -98,7 +9,7 @@
     >
       <HeadInfo
         :title="$t('UID')"
-        :content="detail.objectMeta.uid"
+        :content="detail.metadata.uid"
       />
     </template>
     <template #action />
@@ -146,28 +57,28 @@
 </template>
 
 <script>
-import JsonEditor from "@/components/editor/JsonEditor";
 import PageLayout from "@/layouts/PageLayout";
 import DetailList from "@/components/tool/DetailList";
 import { mapState } from "vuex";
 import HeadInfo from "@/components/tool/HeadInfo";
 import DetailListItem from "@/components/tool/DetailListItem";
+import DetailHeader from "./components/DetailHeader";
 export default {
   name: "SecretsDetail",
   i18n: require("@/i18n"),
   components: {
     HeadInfo,
-    JsonEditor,
     DetailListItem,
     DetailList,
     PageLayout,
+    DetailHeader,
   },
 
   data() {
     return {
       detail: {
         data: {},
-        objectMeta: { labels: {}, annotations: {} },
+        metadata: { labels: {}, annotations: {} },
         typeMeta: {},
         podInfo: {},
         containerImages: [],
@@ -181,7 +92,7 @@ export default {
       pid: "",
       namespace: "",
       isMounted: false,
-      cumulativeMetrics: [],
+      metrics: [],
     };
   },
 
@@ -203,7 +114,7 @@ export default {
     } else {
       this.detail = {
         data: "",
-        objectMeta: { labels: {}, annotations: {} },
+        metadata: { labels: {}, annotations: {} },
         typeMeta: {},
         podInfo: {},
         containerImages: [],
@@ -234,8 +145,8 @@ export default {
 
     URL() {
       let append = "/" + this.pid;
-      return this.$REST.KUBE.encode(
-        this.$REST.KUBE.SECRET,
+      return this.$REST.K8S.encode(
+        this.$REST.K8S.SECRET,
         append,
         this.namespace,
       );

@@ -16,9 +16,12 @@
         show-icon
         class="mb-24"
       />
-      <a-form-item
-        name="email"
+			
+      <FormItem
+        class="mb-20"
+        name="name"
         v-if="!userName"
+        :rules="rules.name"
       >
         <MdInput
           icon="email"
@@ -30,8 +33,11 @@
         >
           {{ $t("Email") }}
         </MdInput>
-      </a-form-item>
-      <a-form-item name="snscode">
+      </FormItem>
+      <a-form-item
+        class="mb-20"
+        name="snscode"
+      >
         <SnsCode
           ref="snscode"
           v-model:value="formState.snscode"
@@ -39,7 +45,11 @@
           :username="formState.name"
         />
       </a-form-item>
-      <a-form-item name="password">
+      <FormItem
+        class="mb-20"
+        name="password"
+        :rules="rules.password"
+      >
         <MdInput
           type="password"
           icon="password"
@@ -53,7 +63,7 @@
         >
           {{ $t("New Password") }}
         </MdInput>
-      </a-form-item>
+      </FormItem>
       <div v-if="!nofoot">
         <a @click="fire"><ArrowLeftOutlined /> {{ $t("Back Login") }}</a>
       </div>
@@ -79,10 +89,12 @@ import { mapMutations } from "vuex";
 import MdInput from "@/components/MDinput/MDinput";
 import { ArrowLeftOutlined } from "@ant-design/icons-vue";
 import SnsCode from "./SnsCode";
+import { mapState } from "vuex";
+import FormItem from "@/components/tool/FormItem";
 
 export default {
   name: "ForgetForm",
-  components: { SnsCode, MdInput, ArrowLeftOutlined },
+  components: { SnsCode, MdInput, ArrowLeftOutlined, FormItem },
   i18n: require("./i18n"),
   inject: ["last"],
   props: ["nofoot", "userName"],
@@ -103,44 +115,13 @@ export default {
         password: "",
         automatic: true,
       },
-
-      rules: {
-        name: [
-          {
-            required: true,
-            message: "Please input a user",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-
-        password: [
-          {
-            required: true,
-            message: "Must be at least 6 characters long",
-            whitespace: true,
-            min: 6,
-            trigger: "blur",
-          },
-        ],
-      },
     };
   },
 
   computed: {
+    ...mapState("rules", ["rules"]),
     systemName() {
       return this.$store.state.setting.systemName;
-    },
-
-    getRules() {
-      Object.keys(this.rules).map((key) => {
-        this.rules[key].map((rule) => {
-          rule.message = this.$t(rule.message);
-          return rule;
-        });
-        return key;
-      });
-      return this.rules;
     },
   },
 

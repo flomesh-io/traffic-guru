@@ -5,9 +5,9 @@ module.exports = {
     beforeCreate: async (data) => {
       if (process.env.APP_VERSION && process.env.APP_VERSION == 'free') {
         const registry = await strapi.query('registry').find();
-        if (registry.length > 1) {
+        if (registry.length > 2) {
           throw new Error(
-            `The current free version can only add two registries, please upgrade to pro version`
+            `The current free version can only add three registries, please upgrade to pro version`
           );
         }
       }
@@ -30,8 +30,22 @@ module.exports = {
       if (result.type == 'k8s') {
         strapi.log.info('fetch k8s namespace');
         strapi.services.registry.fetchK8sNamespace(result.id);
+        try {
+          await strapi.services.registry.initK8sMetrics(result.id);
+        } catch (error) {
+          strapi.log.error(error)
+        }
       } else {
         strapi.log.info('fetch xxx namespace');
+      }
+    },
+    afterUpdate: async (result) => {
+      if (result.type == 'k8s') {
+        try {
+          await strapi.services.registry.initK8sMetrics(result.id);
+        } catch (error) {
+          strapi.log.error(error)
+        }
       }
     },
     beforeUpdate: async (params) => {

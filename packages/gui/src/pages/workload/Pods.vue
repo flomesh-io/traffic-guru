@@ -1,7 +1,7 @@
 <template>
   <div>
     <PodList
-      :url="$REST.KUBE.POD"
+      :url="$REST.K8S.POD"
       :metric="true"
       :has-search="true"
     />

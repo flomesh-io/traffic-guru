@@ -19,7 +19,7 @@
           >
             <DetailListItem
               :term="$t('as')"
-              :rules="rules.name"
+              :rules="rules.uniqueName('registries',{id:pid})"
               name="name"
             >
               <a-input
@@ -31,7 +31,7 @@
             <DetailListItem
               v-if="pid == ''"
               :term="$t('Type')"
-              :rules="rules.type"
+              :rules="rules.required"
               name="type"
             >
               <a-select
@@ -69,17 +69,6 @@
                 :placeholder="$t('unset')"
                 v-model:value="detail.content.domain"
                 class="width-300"
-              />
-            </DetailListItem>
-            <DetailListItem
-              v-if="detail.type == 'k8s'"
-              :term="$t('Dashboard Port')"
-            >
-              <a-input-number
-                :placeholder="$t('unset')"
-                :min="0"
-                v-model:value="detail.content.dashboardPort"
-                class="width-100"
               />
             </DetailListItem>
             <DetailListItem
@@ -220,6 +209,7 @@ import { Empty } from "ant-design-vue";
 import PageLayout from "@/layouts/PageLayout";
 import DetailList from "@/components/tool/DetailList";
 import DetailListItem from "@/components/tool/DetailListItem";
+import { mapState } from "vuex";
 export default {
   name: "RegistryBaseDetail",
   i18n: require("@/i18n"),
@@ -234,35 +224,6 @@ export default {
     return {
       connectLoading: false,
       namespaces: [],
-      rules: {
-        name: [
-          {
-            required: true,
-            message: "Name is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-
-        type: [
-          {
-            required: true,
-            message: "Type is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-
-        required: [
-          {
-            required: true,
-            message: "This is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-      },
-
       simpleImage: Empty.PRESENTED_IMAGE_SIMPLE,
       service: `{
 		}`,
@@ -290,6 +251,10 @@ export default {
     };
   },
 
+  computed: {
+    ...mapState("rules", ["rules"]),
+  },
+	
   created() {
     if (this.pid != "") {
       this.loaddata(true);
@@ -305,8 +270,7 @@ export default {
           autoApplication: false,
           isGateway: true,
           gatewayPath: "",
-          gatewayPort: 0,
-          dashboardPort: ""
+          gatewayPort: 0
         },
 
         address: "",

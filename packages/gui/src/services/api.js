@@ -7,8 +7,7 @@ const DEFAULT_BASE_URL =
     : API_PROXY_PREFIX;
 const BASE_URL = DEFAULT_BASE_URL;
 const FLB_BASE = `${BASE_URL}/flb`;
-const KUBE_BASE = `${BASE_URL}/kube-dashboard/?url=`;
-const K8S_BASE = `${BASE_URL}/kube-proxy/?url=`;
+const K8S_BASE = `${BASE_URL}/k8s`;
 const CLICKHOUSE_BASE = `${BASE_URL}/clickhouse`;
 const PROMETHEUS_BASE = `${BASE_URL}/prometheus`;
 
@@ -74,46 +73,6 @@ module.exports = {
     },
   },
   K8S: {
-    append: (size, page, sort) => {
-      return (
-        "?itemsPerPage=" +
-        size +
-        "&page=" +
-        page +
-        (sort ? "&sortBy=" + sort : "")
-      );
-    },
-    encode: (url, append, ns) => {
-      let namespace = ns || localStorage.getItem("NAMESPACE");
-      return (
-        `${K8S_BASE}` +
-        encodeURIComponent(
-          url.replace(
-            "{namespace}",
-            namespace == "_all" ? "" : namespace || "default",
-          ) +
-            "" +
-            (append ? append : ""),
-        )
-      );
-    },
-    PROXYPROFILES: `/proxyprofiles`,
-  },
-  KUBE: {
-    iconStatus: {
-      Normal: "#icon-success",
-      Success: "#icon-success",
-      Completed: "#icon-success",
-      Complete: "#icon-success",
-      Running: "#icon-success",
-      Warning: "#icon-warning",
-      ImagePullBackOff: "#icon-error",
-      ErrImagePull: "#icon-error",
-      "Init: CrashLoopBackOff": "#icon-error",
-      "Init:Error": "#icon-error",
-      "Error: ErrImagePull": "#icon-error",
-      "Back-off restarting failed container": "#icon-error",
-    },
     append: (size, page, sort, filter) => {
       return (
         "?itemsPerPage=" +
@@ -121,39 +80,35 @@ module.exports = {
         "&page=" +
         page +
         (sort ? "&sortBy=" + sort : "") +
-        (filter && filter.trim() != "" ? "&filterBy=name," + filter : "")
+        (filter ? "&filterBy=name," + filter : "")
       );
     },
     encode: (url, append, ns) => {
-      let namespace = ns || localStorage.getItem("NAMESPACE") || "default";
+      let namespace = ns || localStorage.getItem("NAMESPACE");
       return (
-        `${KUBE_BASE}` +
-        encodeURIComponent(
-          url.replace("{namespace}", namespace == "_all" ? "" : namespace) +
+        `${K8S_BASE}` +
+          url.replace(
+            "/{namespace}",
+            namespace == "_all" ? "" : ("/" + namespace || "default"),
+          ) +
             "" +
-            (append ? append : ""),
-        )
+            (append ? append : "")
       );
     },
-    NAMESPACE: () => {
-      return `${KUBE_BASE}` + encodeURIComponent("/api/v1/namespace");
-    },
-    DAEMONSET: "/api/v1/daemonset/{namespace}",
-    CRONJOB: "/api/v1/cronjob/{namespace}",
-    JOB: "/api/v1/job/{namespace}",
-    DEPLOYMENT: "/api/v1/deployment/{namespace}",
-    POD: "/api/v1/pod/{namespace}",
-    SERVICE: "/api/v1/service/{namespace}",
-    REPLICASET: "/api/v1/replicaset/{namespace}",
-    STATEFULSET: "/api/v1/statefulset/{namespace}",
-    REPLICATIONCONTROLLER: "/api/v1/replicationcontroller/{namespace}",
-    SECRET: "/api/v1/secret/{namespace}",
-    INGRESS: "/api/v1/ingress/{namespace}",
-    SIDECAR: "/api/v1/crd/{namespace}/proxyprofiles.flomesh.io",
-    SIDECAR_DETAIL: "/api/v1/_raw/proxyprofiles.flomesh.io",
+    DAEMONSET: "/daemonset/{namespace}",
+    CRONJOB: "/cronjob/{namespace}",
+    JOB: "/job/{namespace}",
+    DEPLOYMENT: "/deployment/{namespace}",
+    POD: "/pod/{namespace}",
+    SERVICE: "/service/{namespace}",
+    REPLICASET: "/replicaset/{namespace}",
+    STATEFULSET: "/statefulset/{namespace}",
+    REPLICATIONCONTROLLER: "/replicationcontroller/{namespace}",
+    SECRET: "/secret/{namespace}",
+    INGRESS: "/ingress/{namespace}",
+    SIDECAR: "/crd/{namespace}/proxyprofiles.flomesh.io",
+    SIDECAR_DETAIL: "/_raw/proxyprofiles.flomesh.io",
     SIDECAR_POST: "/apis/flomesh.io/v1alpha1/proxyprofiles",
-    MESH_CONFIG: "/api/v1/meshconfig/{namespace}",
-    OSM_INSTALL: "/api/v1/osm/cmd/cli/install",
-    OSM_UNINSTALL: "/api/v1/osm/cmd/cli/uninstall",
+    PROXYPROFILES: `/proxyprofiles`,
   },
 };

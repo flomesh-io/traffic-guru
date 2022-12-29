@@ -61,6 +61,7 @@ module.exports = {
           list: { name: "服务" },
           detail: { name: "服务详情" },
           create: { name: "新建服务" },
+          imports: { name: "服务导入" },
         },
         ingress: {
           list: { name: "进栈" },
@@ -276,6 +277,7 @@ module.exports = {
           list: { name: "Services" },
           detail: { name: "Service Detail" },
           create: { name: "New Services" },
+          imports: { name: "Svc Imports" },
         },
         vCluster: {
           list: { name: "Virtual Service Clusters" },
@@ -478,6 +480,7 @@ module.exports = {
           list: { name: "サービス" },
           detail: { name: "サービス詳細" },
           create: { name: "新規サービス" },
+          imports: { name: "サービスインレット" },
         },
         ingress: {
           list: { name: "入倉リッド" },

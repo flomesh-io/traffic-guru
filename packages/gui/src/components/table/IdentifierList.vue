@@ -173,6 +173,7 @@ import { PlusCircleTwoTone } from "@ant-design/icons-vue";
 import CardList from "@/components/card/CardList";
 import AutoForm from "@/components/form/AutoForm";
 import FormItem from "@/components/tool/FormItem";
+import { mapState } from "vuex";
 export default {
   name: "IdentifierList",
   i18n: require("@/i18n"),
@@ -187,35 +188,6 @@ export default {
 
   data() {
     return {
-      rules: {
-        name: [
-          {
-            required: true,
-            message: "This is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-
-        required: [
-          {
-            required: true,
-            message: "This is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-
-        arrayRequired: [
-          {
-            required: true,
-            type: "array",
-            message: "This is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-      },
 
       visible: false,
       identifiersVals: {},
@@ -232,7 +204,9 @@ export default {
     };
   },
 
-  computed: {},
+  computed: {
+    ...mapState("rules", ["rules"]),
+  },
 
   watch: {
     identifiersVals: {

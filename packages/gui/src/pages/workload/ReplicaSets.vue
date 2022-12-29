@@ -1,7 +1,7 @@
 <template>
   <div>
     <ReplicaSetList
-      :url="$REST.KUBE.REPLICASET"
+      :url="$REST.K8S.REPLICASET"
       :title="$t('Replica Sets')"
       :metric="true"
       :has-search="true"

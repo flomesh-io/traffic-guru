@@ -106,7 +106,7 @@ export default {
           {
             type: "category",
             boundaryGap: false,
-            data: this.bpsData.xaxis,
+            // data: this.bpsData.xaxis,
             nameGap: 30,
             axisLabel: {
               backgroundColor: "rgba(240,240,240,0.7)",
@@ -233,15 +233,16 @@ export default {
               let dateAry = new Date(node[1]);
               let _ts = dateAry.getTime();
               this.maxCnt = node[0]*1 > this.maxCnt ? node[0]*1 : this.maxCnt;
-              this.bpsData.success.push(node[0]*1);
-              this.bpsData.xaxis.push(getTimeLabel(_ts, this.date));
+              let xaxiVal = getTimeLabel(_ts, this.date);
+              this.bpsData.success.push([xaxiVal,node[0]*1]);
+              this.bpsData.xaxis.push(xaxiVal);
               if (index == 1) {
-                this.bpsData.day = getTimeLabel(_ts, this.date);
+                this.bpsData.day = xaxiVal;
               } else if (
                 index + 1 == nodes.length &&
-                this.bpsData.day != getTimeLabel(_ts, this.date)
+                this.bpsData.day != xaxiVal
               ) {
-                this.bpsData.day += " ~ " + getTimeLabel(_ts, this.date);
+                this.bpsData.day += " ~ " + xaxiVal;
               }
             }
             return nodeStr;

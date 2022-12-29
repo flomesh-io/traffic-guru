@@ -318,17 +318,6 @@ export default {
 
   data() {
     return {
-      rules: {
-        name: [
-          {
-            required: true,
-            message: "Name is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-      },
-
       labelVisible: false,
       labelValue: "",
       annotationVisible: false,
@@ -354,12 +343,15 @@ export default {
       whiteAddress: [],
       blackAddress: [],
       isMounted: false,
-      cumulativeMetrics: [],
+      metrics: [],
     };
   },
 
   computed: {
-    ...mapState("setting", ["isMobile"]),
+    ...mapState({
+      rules: state => state.rules.rules,
+      isMobile: state => state.setting.isMobile,
+    }),
   },
 
   created() {

@@ -80,46 +80,16 @@
             </div>
           </template>
           <template v-else-if="column.dataIndex === 'status.bootstrap'">
-            <LoadingOutlined
-              v-if="record.status.bootstrap == 'pending'"
-              class="font-18 font-primary"
-            />
-            <StopOutlined
-              v-else-if="record.status.bootstrap == 'stop'"
-              class="danger font-18"
-            />
-            <CheckCircleFilled
-              v-else
-              class="font-18 success"
-            />
+            <Status :d="{status:record.status.bootstrap}" />
           </template>
           <template v-else-if="column.dataIndex === 'status.controller'">
-            <LoadingOutlined
-              v-if="record.status.controller == 'pending'"
-              class="font-18 font-primary"
-            />
-            <StopOutlined
-              v-else-if="record.status.controller == 'stop'"
-              class="danger font-18"
-            />
-            <CheckCircleFilled
-              v-else
-              class="font-18 success"
-            />
+            <Status :d="{status:record.status.controller}" />
           </template>
           <template v-else-if="column.dataIndex === 'status.injector'">
-            <LoadingOutlined
-              v-if="record.status.injector == 'pending'"
-              class="font-18 font-primary"
-            />
-            <StopOutlined
-              v-else-if="record.status.injector == 'stop'"
-              class="danger font-18"
-            />
-            <CheckCircleFilled
-              v-else
-              class="font-18 success"
-            />
+            <Status :d="{status:record.status.injector}" />
+          </template>
+          <template v-else-if="column.dataIndex === 'status.mcs'">
+            <Status :d="{status:record.status.mcs}" />
           </template>
           <template v-else-if="column.dataIndex === 'virtualServices'">
             <div v-if="record.virtualServices">
@@ -233,8 +203,15 @@
             >
               <EnvSelector
                 :is-filter="true"
+                :no-all="true"
                 @envChange="envChange"
               />
+              <a-checkbox
+                @change="mcsEnableChange"
+                v-model:checked="payload.mcsEnable"
+              >
+                {{ $t("Enable MCS") }}
+              </a-checkbox>
             </a-descriptions-item>
             <a-descriptions-item :span="1">
               <template #label>
@@ -465,7 +442,10 @@
                 </a-tooltip>
               </template>
               <FormItem>
-                <a-switch v-model:checked="payload.enforceSingleMesh" />
+                <a-switch
+                  :disabled="payload.mcsEnable"
+                  v-model:checked="payload.enforceSingleMesh"
+                />
               </FormItem>
             </a-descriptions-item>
             <a-descriptions-item :span="1">
@@ -509,15 +489,14 @@
 import _ from "lodash";
 import {
   MoreOutlined,
-  StopOutlined,
-  LoadingOutlined,
   PlusCircleTwoTone,
-  CheckCircleFilled,
   ExclamationCircleOutlined,
 } from "@ant-design/icons-vue";
 import Json2YamlCard from "@/components/card/Json2YamlCard";
 import FormItem from "@/components/tool/FormItem";
 import EnvSelector from "@/components/menu/EnvSelector";
+import Status from "@/components/tag/Status";
+import { mapState } from "vuex";
 
 const columns = [
   {
@@ -545,6 +524,10 @@ const columns = [
     dataIndex: "status.injector",
   },
   {
+    key: "MCS",
+    dataIndex: "status.mcs",
+  },
+  {
     key: "updTime",
     dataIndex: "creationTimestamp",
   },
@@ -559,13 +542,11 @@ export default {
   components: {
     ExclamationCircleOutlined,
     Json2YamlCard,
-    CheckCircleFilled,
-    LoadingOutlined,
     EnvSelector,
     FormItem,
     MoreOutlined,
-    StopOutlined,
     PlusCircleTwoTone,
+    Status,
   },
 
   i18n: require("@/i18n"),
@@ -589,26 +570,17 @@ export default {
       payload: {
         name: "osm",
         timeout: 300,
+        mcsEnable:true,
         namespace: null,
         atomic: true,
         enforceSingleMesh: true,
         options: null,
       },
-
-      rules: {
-        name: [
-          {
-            required: true,
-            message: "Name is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-      },
     };
   },
 
   computed: {
+    ...mapState("rules", ["rules"]),
     dataColumns() {
       return this.columns.map((column) => {
         column.title = this.$t(column.key);
@@ -628,6 +600,12 @@ export default {
   },
 
   methods: {
+    mcsEnableChange() {
+      if(this.payload.mcsEnable){
+        this.payload.enforceSingleMesh = true;
+      }
+    },
+		
     envChange(data) {
       this.env = data;
       this.payload.namespace = data.namespaceId;
@@ -656,6 +634,7 @@ export default {
         name: "osm",
         timeout: 300,
         namespace: "",
+        mcsEnable:true,
         atomic: true,
         enforceSingleMesh: true,
         options: this.payload.options,
@@ -695,6 +674,7 @@ export default {
                 name: savedata.name,
                 namespace: savedata.namespace,
                 atomic: savedata.atomic,
+                mcsEnable: savedata.mcsEnable,
                 enforceSingleMesh: savedata.enforceSingleMesh,
                 options,
               },
@@ -724,20 +704,6 @@ export default {
       this.$router.push({
         path: `/fsm/mesh/detail/${id}`,
       });
-    },
-
-    MakeUrl() {
-      let append = this.$REST.KUBE.append(
-        this.pageSize,
-        this.pageNo,
-        "d,creationTimestamp",
-        this.key,
-      );
-      return this.$REST.KUBE.encode(
-        this.$REST.KUBE.MESH_CONFIG,
-        append,
-        this.namespace,
-      );
     },
 
     search(pageNo, pageSize) {

@@ -395,6 +395,7 @@ import ColSpace from "@/components/tool/ColSpace";
 import _ from "lodash";
 import { isPro } from "@/utils/util";
 import subscribe from "@/subscribe/index";
+import { mapState } from "vuex";
 import {
   CLICKHOUSE_SAMPLE_WIDGET,
   PROMETHEUS_SAMPLE_WIDGET,
@@ -424,17 +425,6 @@ export default {
   i18n: require("@/i18n"),
   data() {
     return {
-      rules: {
-        required: [
-          {
-            required: true,
-            message: "This is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-      },
-
       isEdit: false,
       custom: {
         id: "",
@@ -478,6 +468,7 @@ export default {
   },
 
   computed: {
+    ...mapState("rules", ["rules"]),
     filterBaseComponents() {
       return Object.keys(this.baseComponents || {}).filter(
         (key) => this.baseComponents[key].isOpen,

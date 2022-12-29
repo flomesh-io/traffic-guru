@@ -415,7 +415,7 @@ blockquote {
   background-color: #ff7274;
 }
 .ant-input {
-  border-color: #d9d9d9 !important;
+  border-color: #d9d9d9;
 }
 .ant-input-affix-wrapper:hover,
 .ant-input-affix-wrapper:focus {
@@ -533,9 +533,6 @@ blockquote {
 }
 .ant-row .detail-content {
   padding-right: 20px;
-}
-.ant-col.ant-form-item-control .ant-form-item-control-input {
-  top: 5px;
 }
 .project-selection {
   padding: 5px;
@@ -813,8 +810,11 @@ blockquote {
 .mt-100 {
   margin-top: 100px;
 }
+.mb-30 {
+  margin-bottom: 30px !important;
+}
 .mb-20 {
-  margin-bottom: 20px;
+  margin-bottom: 20px !important;;
 }
 .mb-10 {
   margin-bottom: 10px;
@@ -1147,4 +1147,8 @@ blockquote {
 }
 .move {
   cursor: move;
+}
+.ant-tag .ant-badge-count{
+	position: relative;
+	top:-1.5px;
 }

@@ -3,6 +3,15 @@
 const k8s = require('@kubernetes/client-node');
 
 module.exports = {
+  async getK8sItems(ctx) {
+    await strapi.services.kubernetes.getK8sItems(ctx)
+  },
+  async getK8sItem(ctx) {
+    await strapi.services.kubernetes.getK8sItem(ctx)
+  },
+  async getK8sEvent(ctx) {
+    await strapi.services.kubernetes.getK8sEvent(ctx)
+  },
   async namespaces(ctx) {
     const clusterId = ctx.query.id;
     const k8s_schema_type = ctx.headers.schema_type || '';

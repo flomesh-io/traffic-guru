@@ -31,4 +31,10 @@ module.exports = {
       .count({ count: 'id' });
     return { aggregate: { totalCount: count[0].count }, values: result };
   },
+  async getRoles(ctx) {
+    strapi.log.info(ctx.query);
+    const roles = await strapi.query("role", "users-permissions").find(ctx.query)
+
+    return roles;
+  },
 };

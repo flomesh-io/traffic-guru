@@ -11,7 +11,7 @@
         <DetailListItem
           :term="$t('as')"
           v-if="!embed"
-          :rules="rules.name"
+          :rules="rules.uniqueName('projects',{id:pid,organization:detail.organization})"
           name="name"
         >
           <a-input
@@ -22,7 +22,7 @@
         </DetailListItem>
         <DetailListItem
           :term="$t('Organization')"
-          :rules="rules.organization"
+          :rules="rules.required"
           name="organization"
         >
           <a-select
@@ -98,6 +98,7 @@ import DetailListItem from "@/components/tool/DetailListItem";
 import PageLayout from "@/layouts/PageLayout";
 import _ from "lodash";
 import { Empty } from "ant-design-vue";
+import { mapState } from "vuex";
 export default {
   name: "ProjectBaseDetail",
   components: {
@@ -111,26 +112,6 @@ export default {
   props: ["pid"],
   data() {
     return {
-      rules: {
-        name: [
-          {
-            required: true,
-            message: "Name is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-
-        organization: [
-          {
-            required: true,
-            message: "Organization is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-      },
-
       activeKey: "1",
       FolderTwoTone,
       orgs: [],
@@ -154,12 +135,16 @@ export default {
     };
   },
 
-  computed: {},
+  computed: {
+    ...mapState("rules", ["rules"]),
+  },
+	
   created() {
-    if (this.pid != "") {
+    if (this.pid) {
       this.isEdit = true;
       this.loaddata();
     } else {
+      this.isEdit = false;
       this.loading = false;
       this.detail = {
         users: [],
@@ -196,7 +181,6 @@ export default {
         delete savedata.organization;
       }
       delete savedata.users;
-
       if (this.isEdit) {
         const whereID = savedata.id;
         delete savedata.id;

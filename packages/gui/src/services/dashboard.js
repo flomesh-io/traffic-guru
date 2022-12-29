@@ -9,7 +9,7 @@ export const DEFAULT_FLB =
   "flb.dashboard.TOTAL,flb.dashboard.TPS,flb.dashboard.ERRORRATE,flb.dashboard.ADDRESSPOOL,flb.dashboard.SANKEY,flb.dashboard.RANKING";
 
 export const DEFAULT_FSM =
-  "fsm.dashboard.REGISTRY_TOTAL,fsm.dashboard.NAMESPACE_TOTAL,fsm.dashboard.SERVICE_TOTAL,system.common.Space,system.common.Space,fsm.dashboard.SERVICE_HEALTHCHECK,fsm.dashboard.SERVICE_STATUS,fsm.dashboard.INGRESS_STATUS";
+  "fsm.dashboard.REGISTRY_TOTAL,fsm.dashboard.NAMESPACE_TOTAL,fsm.dashboard.SERVICE_TOTAL,system.common.Space,fsm.dashboard.SERVICE_HEALTHCHECK,fsm.dashboard.SERVICE_STATUS,fsm.dashboard.INGRESS_STATUS,fsm.dashboard.MCS_TOPOLOGY";
 
 export const DEFAULT_MESH_DETAIL =
   "fsm.dashboard.NAMESPACE_MESH_TOTAL,fsm.dashboard.SERVICE_MESH_TOTAL,system.common.Space,system.common.Space,system.common.TPS_MESH,system.common.ERROR_RATE_MESH,system.common.LATENCY_MESH,workload.dashboard.POD,fsm.dashboard.TOPOLOGY";

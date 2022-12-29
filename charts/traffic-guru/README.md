@@ -30,7 +30,7 @@ and create a database named `flomesh`, otherwide you need to set the database na
    	traffic-guru \
    	flomesh/traffic-guru \
    	--set database.host=<db addr> \
-   	--set database.user=<db user> \
+   	--set database.username=<db user> \
    	--set database.password=<db password> \
    	--set service.type=NodePort
    ```
@@ -46,7 +46,7 @@ and create a database named `flomesh`, otherwide you need to set the database na
    	--set database.type=postgres \
    	--set database.host=<db addr> \
    	--set database.port=5432 \
-   	--set database.user=<db user> \
+   	--set database.username=<db user> \
    	--set database.password=<db password> \
    	--set service.type=NodePort
    ```
@@ -59,7 +59,7 @@ and create a database named `flomesh`, otherwide you need to set the database na
    	traffic-guru \
    	flomesh/traffic-guru \
    	--set database.host=<db addr> \
-   	--set database.user=<db user> \
+   	--set database.username=<db user> \
    	--set database.password=<db password> \
    	--set ingress.enabled=true \
    	--set ingress.host=<your domain name here>

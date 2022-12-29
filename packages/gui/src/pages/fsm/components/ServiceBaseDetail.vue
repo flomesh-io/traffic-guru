@@ -26,7 +26,7 @@
         <DetailListItem
           v-else
           :term="$t('as')"
-          :rules="rules.name"
+          :rules="rules.uniqueName('services',{ns,id:pid})"
           :name="['metadata', 'name']"
         >
           <a-input
@@ -224,22 +224,25 @@
       <slot name="extra" />
     </template>
     <template #action>
-      <a-button
-        type="primary"
-        @click="validate"
-        v-permission="['service:update']"
-        v-if="pid != ''"
-      >
-        {{ $t("save") }}
-      </a-button>
-      <a-button
-        type="primary"
-        @click="validate"
-        v-permission="['service:create']"
-        v-else
-      >
-        {{ $t("create") }}
-      </a-button>
+      <a-space>
+        <slot name="action" />
+        <a-button
+          type="primary"
+          @click="validate"
+          v-permission="['service:update']"
+          v-if="pid != ''"
+        >
+          {{ $t("save") }}
+        </a-button>
+        <a-button
+          type="primary"
+          @click="validate"
+          v-permission="['service:create']"
+          v-else
+        >
+          {{ $t("create") }}
+        </a-button>
+      </a-space>
     </template>
     <a-row class="row-mg">
       <a-col
@@ -288,6 +291,7 @@ export default {
     "detail",
     "registry",
     "extend",
+    "hasExport",
     "blacklistServices",
     "whitelistServices",
     "subscribeServices",
@@ -297,28 +301,9 @@ export default {
 
   data() {
     return {
-      rules: {
-        name: [
-          {
-            required: true,
-            message: "Name is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-
-        numberRequired: [
-          {
-            required: true,
-            message: "This is required",
-            trigger: "blur",
-            type: "number",
-          },
-        ],
-      },
-
       orgs: [],
       sidecars: [],
+      ns: null,
       visibleAP: false,
       dialTestings: [],
       whiteAddress: [],
@@ -340,7 +325,10 @@ export default {
   },
 
   computed: {
-    ...mapState("setting", ["isMobile"]),
+    ...mapState({
+      rules: state => state.rules.rules,
+      isMobile: state => state.setting.isMobile,
+    }),
   },
 
   created() {},
@@ -390,6 +378,7 @@ export default {
     envChange(d) {
       let detail = this.detail;
       detail.metadata.namespace = d.namespace;
+      this.ns = d.namespaceId;
       this.$emit("update:registry", {
         id: d.registerId,
         name: d.registerName,
@@ -467,7 +456,7 @@ export default {
       this.$emit("update:loading", true);
       this.$gql
         .query(
-          `getService(id: ${this.pid}){id,content,ns{id,name},isGateway,gatewayPath,organization{id,name,whiteOrgs{id,name,services{id,name,content,organization{id,name},registry{id,type,name,content},namespace,blacklistServices{id}}},whiteOrgsBack{id,name,services{id,name,content,organization{id,name},registry{id,type,name,content},namespace,blacklistServices{id}}},services{id,name,content,organization{id,name},registry{id,type,name,content},namespace,blacklistServices{id}},subscribeServices{id,name,content,organization{id,name},registry{id,type,name,content},namespace,blacklistServices{id}}},extend,certificates{id,name,content},uid,name,fleet{id,name},registry{id,type,name,content},created_at, subscribeOrgs{services{id,name,content,organization{id,name},registry{id,type,name,content},namespace}},whitelistServices{id,name,namespace},blacklistServices{id,name,namespace},sidecar{id,name}}`,
+          `getService(id: ${this.pid}){id,serviceExport{id},pods,content,ns{id,name},isGateway,gatewayPath,organization{id,name,whiteOrgs{id,name,services{id,name,content,organization{id,name},registry{id,type,name,content},namespace,blacklistServices{id}}},whiteOrgsBack{id,name,services{id,name,content,organization{id,name},registry{id,type,name,content},namespace,blacklistServices{id}}},services{id,name,content,organization{id,name},registry{id,type,name,content},namespace,blacklistServices{id}},subscribeServices{id,name,content,organization{id,name},registry{id,type,name,content},namespace,blacklistServices{id}}},extend,certificates{id,name,content},uid,name,fleet{id,name},registry{id,type,name,content},created_at, subscribeOrgs{services{id,name,content,organization{id,name},registry{id,type,name,content},namespace}},whitelistServices{id,name,namespace},blacklistServices{id,name,namespace},sidecar{id,name}}`,
         )
         .then((res) => {
           let subscribeServices = [];
@@ -627,13 +616,16 @@ export default {
           this.$emit("update:extend", extend);
           this.$emit("update:registry", registry);
           this.$emit("update:ns", ns);
+          this.$emit("update:pods", res.pods||[]);
           this.$emit("update:whitelistServices", whitelistServices);
           this.$emit("update:blacklistServices", blacklistServices);
           this.$emit("update:subscribeServicesAll", subscribeServicesAll);
           this.$emit("update:subscribeServicesTo", subscribeServicesTo);
           this.$emit("update:subscribeServices", subscribeServices);
           this.$emit("update:loading", false);
+          this.$emit("update:hasExport", !!res.serviceExport);
           console.log(this.loading);
+          console.log(this.hasExport);
           console.log(this.subscribeServices);
           console.log(this.subscribeServicesTo);
           console.log(this.subscribeServicesAll);

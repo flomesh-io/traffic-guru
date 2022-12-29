@@ -104,6 +104,16 @@
     },
     "gatewayPath": {
       "type": "string"
+    },
+    "selector": {
+      "type": "string"
+    },
+    "serviceExport": {
+      "via": "service",
+      "model": "service-export"
+    },
+    "pods": {
+      "type": "json"
     }
   }
 }

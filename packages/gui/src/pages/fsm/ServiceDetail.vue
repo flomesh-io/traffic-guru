@@ -7,7 +7,9 @@
     v-model:detail="detail"
     v-model:registry="registry"
     v-model:ns="ns"
+    v-model:pods="pods"
     v-model:extend="extend"
+    v-model:hasExport="isExportEdit" 
     v-model:blacklistServices="blacklistServices"
     v-model:whitelistServices="whitelistServices"
     v-model:subscribeServices="subscribeServices"
@@ -15,6 +17,17 @@
     v-model:subscribeServicesAll="subscribeServicesAll"
     ref="ServiceBaseDetail"
   >
+    <template #action>
+      <a-button
+        :loading="exportLoading"
+        type="primary"
+        v-if="!isExportEdit"
+        v-permission="['service:update']"
+        @click="exportOpen"
+      >
+        {{ $t("Export") }}
+      </a-button>
+    </template>
     <template #tabs>
       <a-tabs
         type="card"
@@ -41,9 +54,10 @@
             :loading="loading"
           >
             <PodList
+              :embed="true"
               :namespace="namespace"
               :has-search="false"
-              :url="$REST.KUBE.SERVICE + '/' + detail.metadata.name + '/pod'"
+              :d="pods"
             />
           </a-card>
         </a-tab-pane>
@@ -58,6 +72,21 @@
             :is-create="false"
             v-model:jsonVal="contentString"
             @change="setSaveData"
+          />
+        </a-tab-pane>
+        <a-tab-pane
+          key="15"
+          v-if="pid"
+          :tab="$t('MCS')"
+        >
+          <ServiceExportCard 
+            :sid="pid"
+            :ports="detail?.spec?.ports"
+            :loading="loading"
+            v-model:isEdit="isExportEdit" 
+            v-model:modal="modalVisible" 
+            @start="exportStart" 
+            @save="exportSave"
           />
         </a-tab-pane>
         <a-tab-pane
@@ -108,6 +137,7 @@ import Json2YamlCard from "@/components/card/Json2YamlCard";
 import LogViewer from "@/components/table/LogViewer";
 import { DEFAULT_SERVICE_DETAIL } from "@/services/dashboard";
 import EmbedDashboard from "@/components/page/EmbedDashboard";
+import ServiceExportCard from "@/pages/fsm/components/ServiceExportCard";
 
 export default {
   name: "ServicesDetail",
@@ -119,6 +149,7 @@ export default {
     Json2YamlCard,
     EmbedDashboard,
     LogViewer,
+    ServiceExportCard,
   },
 
   data() {
@@ -144,6 +175,7 @@ export default {
 
       registry: { type: "", name: "", content: {} },
       ns: {id:"",name:""},
+      pods:[],
       detail: {
         endpoints: [],
         spec: { type: "", clusterIP: "", sessionAffinity: "", ports: [] },
@@ -165,12 +197,16 @@ export default {
       pid: "",
       namespace: "",
       isMounted: false,
-      cumulativeMetrics: [],
+      metrics: [],
       subscribeServices: [],
       subscribeServicesTo: [],
       subscribeServicesAll: [],
       whitelistServices: [],
       blacklistServices: [],
+      exportData:{content:{portNumber:8080,path:''}},
+      exportLoading: false,
+      modalVisible: false,
+      isExportEdit: true,
     };
   },
 
@@ -183,6 +219,19 @@ export default {
   mounted() {},
 
   methods: {
+    exportOpen() {
+      this.activeKey = "15";
+      this.modalVisible = true;
+    },
+
+    exportStart() {
+      this.exportLoading = true;
+    },
+
+    exportSave() {
+      this.exportLoading = false;
+    },
+
     saveLogLevel(data) {
       this.$refs.ServiceBaseDetail.saveLogLevel(data);
     },

@@ -6,6 +6,7 @@ import {
 	DashboardOutlined,
   LoginOutlined,
   LogoutOutlined,
+	CloudDownloadOutlined,
 } from "@ant-design/icons-vue";
 import OsmSvg from "@/assets/img/osm.svg";
 import ServiceSvg from "@/assets/img/service.png";
@@ -68,6 +69,15 @@ const fsm = {
         authority: "service:find",
       },
       component: () => import("@/pages/fsm/ServiceDetail"),
+    },
+    {
+      path: "service/imports",
+      name: "Service Imports",
+      meta: {
+        icon: CloudDownloadOutlined,
+        authority: "service:find",
+      },
+      component: () => import("@/pages/fsm/ServiceImports"),
     },
     {
       path: "service/create",

@@ -42,8 +42,8 @@
                 @click="selectNS"
               >
                 <a-menu-item
-                  v-for="(item, index) in namespaces"
-                  :key="index"
+                  v-for="item in namespaces"
+                  :key="item.id"
                 >
                   {{ item.name
                   }}<span
@@ -151,6 +151,7 @@ export default {
     },
 
     selectNS(e) {
+      this.selectedNS = {services:[]}
       this.detail.namespaces.forEach((ns) => {
         if (ns.id == e.key) {
           this.selectedNS = ns;

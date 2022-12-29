@@ -20,6 +20,9 @@ async function syncRegistries() {
       strapi.log.error(err.message);
     }
   }
+  
+  const now = new Date();
+  await strapi.query("metrics").delete({created_at_lt: new Date((now.getTime() - (16 * 60 * 1000)))})
 }
 
 async function syncOsm() {
@@ -75,6 +78,6 @@ async function syncOsm() {
 }
 
 module.exports = {
-  '*/50 * * * * *': syncRegistries,
+  '10 * * * * *': syncRegistries,
   '*/40 * * * * *': syncOsm,
 };

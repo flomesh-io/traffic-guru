@@ -43,10 +43,18 @@
     "kubeconfig": {
       "model": "file",
       "via": "related",
-      "allowedTypes": ["images", "files", "videos"],
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos"
+      ],
       "plugin": "upload",
       "required": false,
       "pluginOptions": {}
+    },
+    "serviceImports": {
+      "via": "registry",
+      "collection": "service-imports"
     }
   }
 }

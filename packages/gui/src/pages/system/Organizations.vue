@@ -118,7 +118,7 @@
           >
             <FormItem
               name="name"
-              :rules="rules.name"
+              :rules="rules.uniqueName('organizations',{id:payload.id})"
             >
               <a-input
                 :placeholder="$t('unset')"
@@ -183,6 +183,7 @@ import _ from "lodash";
 import { mapGetters } from "vuex";
 import { Empty } from "ant-design-vue";
 import FormItem from "@/components/tool/FormItem";
+import { mapState } from "vuex";
 export default {
   name: "Organizations",
   components: {
@@ -200,17 +201,6 @@ export default {
   i18n: require("@/i18n"),
   data() {
     return {
-      rules: {
-        name: [
-          {
-            required: true,
-            message: "Name is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-      },
-
       users: [],
       orgs: [],
       orgTree: [],
@@ -241,6 +231,7 @@ export default {
   },
 
   computed: {
+    ...mapState("rules", ["rules"]),
     ...mapGetters("account", ["user"]),
   },
 

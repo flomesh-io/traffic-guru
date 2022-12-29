@@ -100,13 +100,14 @@ export default {
           {
             type: "category",
             boundaryGap: false,
-            data: this.areaData.xaxis,
+            // data: this.areaData.xaxis,
             nameGap: 30,
             minorSplitLine: {
               show: true,
             },
 
             axisLabel: {
+              margin: 0,
               backgroundColor: "rgba(240,240,240,0.7)",
               padding: [2, 3, 2, 3],
               textStyle: {
@@ -114,7 +115,7 @@ export default {
               },
 
               inside: true,
-              borderRadius: 2,
+              borderRadius: [3,3,0,0],
               minInterval: 20,
             },
 
@@ -153,6 +154,7 @@ export default {
             inside: true,
             backgroundColor: "rgba(240,240,240,0.7)",
             padding: [2, 3, 2, 3],
+            borderRadius: [0,3,3,0],
             textStyle: {
               color: "#6a7985",
             },
@@ -245,16 +247,17 @@ export default {
             if (node[3]) {
               let dateAry = new Date(node[3]);
               let _ts = dateAry.getTime();
-              this.areaData.success.push(node[1]);
-              this.areaData.failed.push(node[2]);
-              this.areaData.xaxis.push(getTimeLabel(_ts, this.date));
+              let xaxiVal = getTimeLabel(_ts, this.date);
+              this.areaData.success.push([xaxiVal,node[1]]);
+              this.areaData.failed.push([xaxiVal,node[2]]);
+              this.areaData.xaxis.push(xaxiVal);
               if (index == 1) {
-                this.areaData.day = getTimeLabel(_ts, this.date);
+                this.areaData.day = xaxiVal;
               } else if (
                 index + 1 == nodes.length &&
-                this.areaData.day != getTimeLabel(_ts, this.date)
+                this.areaData.day != xaxiVal
               ) {
-                this.areaData.day += " ~ " + getTimeLabel(_ts, this.date);
+                this.areaData.day += " ~ " + xaxiVal;
               }
             }
             return nodeStr;

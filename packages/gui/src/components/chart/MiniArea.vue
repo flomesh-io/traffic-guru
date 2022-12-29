@@ -38,6 +38,7 @@ export default {
     "isGradient",
   ],
 
+  i18n: require("@/i18n"),
   data() {
     return {
       id2: Math.ceil(Math.random() * 1000),
@@ -144,7 +145,7 @@ export default {
       legend.forEach((n) => {
         let seriesData = [];
         xAxis.forEach((j) => {
-          seriesData.push(_data[j][n] || 0);
+          seriesData.push([j,_data[j][n] || 0]);
         });
         series.push({
           name: n,
@@ -173,6 +174,7 @@ export default {
       if (chartDom) {
         // this.$echarts.dispose(chartDom);
       }
+      let _unit = this.$t(this.unit||"") || "";
       let myChart = this.$echarts.init(chartDom);
       myChart.showLoading();
       let option = {
@@ -223,7 +225,7 @@ export default {
               show: true,
             },
 
-            data: xAxis,
+            // data: xAxis,
             axisLabel: this.axis
               ? {
                 minInterval: 20,
@@ -231,7 +233,7 @@ export default {
               : {
                 showMinLabel: false,
                 showMaxLabel: false,
-                borderRadius: 2,
+                borderRadius: [3,3,0,0],
                 margin: 0,
                 minInterval: 20,
                 inside: true,
@@ -280,21 +282,22 @@ export default {
               lineStyle: { type: "dashed", opacity: 0.4 },
             },
 
-            minInterval: 1,
+            minInterval: 0.1,
             axisLabel: this.axis
               ? {
                 formatter: (value) => {
-                  return "" + value + (this.unit ? this.unit : "");
+                  return "" + value + _unit;
                 },
               }
               : {
                 showMinLabel: false,
                 showMaxLabel: false,
                 formatter: (value) => {
-                  return "" + value + (this.unit ? this.unit : "");
+                  return "" + value + _unit;
                 },
 
                 inside: true,
+                borderRadius: [0,3,3,0],
                 margin: 0,
                 backgroundColor: "rgba(240,240,240,0.7)",
                 padding: [2, 3, 2, 3],

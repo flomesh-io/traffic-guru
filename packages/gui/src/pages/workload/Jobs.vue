@@ -1,7 +1,7 @@
 <template>
   <div>
     <JobList
-      :url="$REST.KUBE.JOB"
+      :url="$REST.K8S.JOB"
       :title="$t('Jobs')"
       :unactive="false"
       :has-search="true"

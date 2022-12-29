@@ -15,6 +15,38 @@
       "config": {
         "policies": []
       }
+    },
+    {
+      "method": "GET",
+      "path": "/k8s/:type",
+      "handler": "kubernetes.getK8sItems",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/k8s/:type/:namespace",
+      "handler": "kubernetes.getK8sItems",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/k8s/:type/:namespace/:name",
+      "handler": "kubernetes.getK8sItem",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/k8s/:type/:namespace/:name/event",
+      "handler": "kubernetes.getK8sEvent",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }

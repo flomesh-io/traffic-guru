@@ -3,7 +3,7 @@
     <CPUMemory
       v-if="metric"
       :loading="loading"
-      :metrics="cumulativeMetrics"
+      :metrics="metrics"
     />
     <a-card
       class="card nopd"
@@ -40,25 +40,7 @@
         >
           <template #bodyCell="{ column, record }">
             <template v-if="column.dataIndex === 't'">
-              <div>
-                <a-tooltip
-                  placement="topLeft"
-                  :title="record.t"
-                >
-                  <a href="javascript:void(0)">
-                    <svg
-                      class="icon svg"
-                      aria-hidden="true"
-                    >
-                      <use
-                        :xlink:href="
-                          $REST.KUBE.iconStatus[record.t]
-                        "
-                      />
-                    </svg>
-                  </a>
-                </a-tooltip>
-              </div>
+              <Status :d="record.podInfo?.warnings" />
             </template>
             <template v-else-if="column.dataIndex === 'name'">
               <div>
@@ -80,15 +62,10 @@
               </div>
             </template>
             <template v-else-if="column.dataIndex === 'containerImages'">
-              <div>
-                <a-tag
-                  :key="index"
-                  v-for="(item, index) in record.containerImages"
-                  :closable="false"
-                >
-                  {{ item }}
-                </a-tag>
-              </div>
+              <ImageTags :d="record" />
+            </template>
+            <template v-else-if="column.dataIndex === 'pods'">
+              <PodStatusTags :d="record.podInfo" />
             </template>
             <template v-else-if="column.dataIndex === 'action'">
               <div>
@@ -115,7 +92,10 @@
 
 <script>
 import { MoreOutlined } from "@ant-design/icons-vue";
+import ImageTags from "./ImageTags";
 import CPUMemory from "@/components/chart/CPUMemory.vue";
+import PodStatusTags from "./PodStatusTags";
+import Status from "@/components/tag/Status";
 const columns = [
   {
     key: " ", 
@@ -139,13 +119,12 @@ const columns = [
     dataIndex: "pods",
   },
   {
-    key: "Creation Timestamp",
-    dataIndex: "creationTimestamp",
-    sorter: true,
-  },
-  {
     key: "Container Images",
     dataIndex: "containerImages",
+  },
+  {
+    key: "Creation Timestamp",
+    dataIndex: "creationTimestamp",
   },
   {
     key: "Action",
@@ -155,8 +134,8 @@ const columns = [
 ];
 export default {
   name: "ReplicaSetList",
-  components: { CPUMemory, MoreOutlined },
-  props: ["title", "url", "metric", "hasSearch", "namespace"],
+  components: { CPUMemory, MoreOutlined, ImageTags, PodStatusTags,Status },
+  props: ["embed","d","title", "url", "metric", "hasSearch", "namespace"],
   i18n: require("@/i18n"),
   data() {
     return {
@@ -168,7 +147,7 @@ export default {
       },
 
       columns,
-      cumulativeMetrics: [],
+      metrics: [],
       loading: false,
       list: [],
     };
@@ -184,7 +163,14 @@ export default {
   },
 
   created() {
-    this.search();
+    if(this.embed){
+      this.list = this.reset(this.d);
+      this.params.total = this.d.length;
+      this.metrics = null;
+      this.loading = false;
+    }else{
+      this.search();
+    }
   },
 
   methods: {
@@ -195,13 +181,13 @@ export default {
     },
 
     URL() {
-      let append = this.$REST.KUBE.append(
+      let append = this.$REST.K8S.append(
         this.params.pageSize,
         this.params.pageNo,
         "d,creationTimestamp",
         this.params.key,
       );
-      return this.$REST.KUBE.encode(this.url, append, this.namespace);
+      return this.$REST.K8S.encode(this.url, append, this.namespace);
     },
 
     search(pageNo, pageSize) {
@@ -212,31 +198,24 @@ export default {
       this.loading = true;
       this.$request(this.URL(), this.$METHOD.GET).then((res) => {
         let _data = res.data; 
-        this.list = this.reset(_data.replicaSets); 
-        this.params.total = _data.listMeta.totalItems;
-        this.cumulativeMetrics = _data.cumulativeMetrics;
+        this.list = this.reset(_data.items); 
+        this.params.total = _data.count;
+        this.metrics = _data.metrics;
         this.loading = false;
       });
     },
 
     reset(list) {
       for (let i = 0; i < list.length; i++) {
-        list[i].uid = list[i].objectMeta.uid;
-        list[i].name = list[i].objectMeta.name;
-        list[i].namespace = list[i].objectMeta.namespace;
-        list[i].labels = list[i].objectMeta.labels
-          ? list[i].objectMeta.labels
+        list[i].uid = list[i].metadata.uid;
+        list[i].name = list[i].metadata.name;
+        list[i].namespace = list[i].metadata.namespace;
+        list[i].labels = list[i].metadata.labels
+          ? list[i].metadata.labels
           : [];
-        list[i].pods =
-          "" + list[i].podInfo.running + "/" + list[i].podInfo.desired;
         list[i].creationTimestamp = new Date(
-          list[i].objectMeta.creationTimestamp,
+          list[i].metadata.creationTimestamp,
         ).toLocaleString();
-        list[i].containerImages = list[i].containerImages;
-        list[i].t =
-          list[i].podInfo.warnings && list[i].podInfo.warnings[0]
-            ? list[i].podInfo.warnings[0].message
-            : "Success";
       }
       return list;
     },
@@ -261,11 +240,6 @@ export default {
     }
   }
   .input-search {
-    width: 30px;
-    height: 30px;
-    margin-top: 10px;
-  }
-  .svg {
     width: 30px;
     height: 30px;
     margin-top: 10px;

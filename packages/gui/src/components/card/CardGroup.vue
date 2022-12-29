@@ -26,21 +26,21 @@
           />
           <a-divider
             type="vertical"
-            v-if="cards.length > 1"
+            v-if="!fixed && cards.length > 1"
           />
           <DeleteOutlined
             @click="remove(index)"
             class="font-20 font-primary icon-menu primary"
-            v-if="cards.length > 1"
+            v-if="!fixed && cards.length > 1"
           />
           <a-divider
             type="vertical"
-            v-if="cards.length - 1 == index"
+            v-if="!fixed && cards.length - 1 == index"
           />
           <PlusCircleTwoTone
             @click="add"
             class="font-20 font-primary icon-menu primary rotate-icon"
-            v-if="cards.length - 1 == index"
+            v-if="!fixed && cards.length - 1 == index"
           />
         </template>
       </a-card>
@@ -57,7 +57,7 @@ import { DeleteOutlined, PlusCircleTwoTone } from "@ant-design/icons-vue";
 export default {
   name: "CardGroup",
   components: { DeleteOutlined, PlusCircleTwoTone },
-  props: ["cards", "col"],
+  props: ["cards", "col", "fixed"],
   emits: ["add", "remove"],
   data() {
     return {};

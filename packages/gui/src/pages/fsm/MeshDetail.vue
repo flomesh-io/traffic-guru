@@ -21,6 +21,12 @@
         <DetailListItem :term="$t('Namespace')">
           {{ detail.namespace? (detail.namespace?.registry?.name +"/"+detail.namespace?.name):'-' }}
         </DetailListItem>
+        <DetailListItem
+          v-if="detail.status?.mcs"
+          :term="$t('MCS')"
+        >
+          <Status :d="{status:detail.status?.mcs}" />
+        </DetailListItem>
         <DetailListItem :term="$t('Creation Timestamp')">
           {{
             new Date(detail.config?.metadata?.creationTimestamp).toLocaleString()
@@ -487,7 +493,7 @@
                   :span="3"
                 >
                   <TagMap
-                    v-model:list="detail.config.spec.sidecar.resources"
+                    v-model:map="detail.config.spec.sidecar.resources"
                     name="resources"
                     placeholder="[key]:[value]"
                   />
@@ -535,6 +541,7 @@ import TagMap from "@/components/tag/TagMap";
 import { mapState } from "vuex";
 import { DEFAULT_MESH_DETAIL } from "@/services/dashboard";
 import LogViewer from "@/components/table/LogViewer";
+import Status from "@/components/tag/Status";
 
 export default {
   name: "MeshDetail",
@@ -549,32 +556,12 @@ export default {
     TagList,
     TagMap,
     EmbedDashboard,
+    Status,
   },
 
   data() {
     return {
       DEFAULT_MESH_DETAIL,
-      rules: {
-        name: [
-          {
-            required: true,
-            message: "Name is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-
-        number: [
-          {
-            type: "number",
-            required: true,
-            message: "This is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-      },
-
       activeKey: "1",
       detail: {
         name: "",
@@ -588,7 +575,10 @@ export default {
   },
 
   computed: {
-    ...mapState("setting", ["isMobile"]),
+    ...mapState({
+      rules: state => state.rules.rules,
+      isMobile: state => state.setting.isMobile,
+    }),
   },
 
   created() {

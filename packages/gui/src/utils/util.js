@@ -496,7 +496,7 @@ export function getTimeLabel(val, date) {
     case "6 hour":
     case "12 hour":
     case "1 day":
-      return _d.format("HH:mm");
+      return _d.format("MM-DD HH:mm");
     case "3 day":
     case "7 day":
     case "15 day":

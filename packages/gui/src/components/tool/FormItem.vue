@@ -58,3 +58,9 @@ export default {
   methods: {},
 };
 </script>
+
+<style scoped="scoped">
+	.ant-form-item{
+		margin-bottom: 0;
+	}
+</style>

@@ -6,7 +6,7 @@ const workload = {
     CRONJOB: {
       title: "Cron Jobs",
       tag: Gauge,
-      provide: "kube",
+      provide: "k8s",
       service: workload_svc.CRONJOB,
       className: "card nopd",
       col: 6,
@@ -30,7 +30,7 @@ const workload = {
     DAEMONSET: {
       title: "Daemon Sets",
       tag: Gauge,
-      provide: "kube",
+      provide: "k8s",
       service: workload_svc.DAEMONSET,
       className: "card nopd",
       col: 6,
@@ -54,7 +54,7 @@ const workload = {
     DEPLOYMENT: {
       title: "Deployments",
       tag: Gauge,
-      provide: "kube",
+      provide: "k8s",
       service: workload_svc.DEPLOYMENT,
       className: "card nopd",
       col: 6,
@@ -78,7 +78,7 @@ const workload = {
     JOB: {
       title: "Jobs",
       tag: Gauge,
-      provide: "kube",
+      provide: "k8s",
       service: workload_svc.JOB,
       className: "card nopd",
       col: 6,
@@ -102,7 +102,7 @@ const workload = {
     POD: {
       title: "Pods",
       tag: Gauge,
-      provide: "kube",
+      provide: "k8s",
       service: workload_svc.POD,
       className: "card nopd",
       col: 6,
@@ -126,7 +126,7 @@ const workload = {
     REPLICASET: {
       title: "Replica Sets",
       tag: Gauge,
-      provide: "kube",
+      provide: "k8s",
       service: workload_svc.REPLICASET,
       className: "card nopd",
       col: 6,
@@ -150,7 +150,7 @@ const workload = {
     REPLICATIONCONTROLLER: {
       title: "Replication Controllers",
       tag: Gauge,
-      provide: "kube",
+      provide: "k8s",
       service: workload_svc.REPLICATIONCONTROLLER,
       className: "card nopd",
       col: 6,
@@ -174,7 +174,7 @@ const workload = {
     STATEFULSET: {
       title: "Stateful Sets",
       tag: Gauge,
-      provide: "kube",
+      provide: "k8s",
       service: workload_svc.STATEFULSET,
       className: "card nopd",
       col: 6,

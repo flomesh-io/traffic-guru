@@ -8,29 +8,7 @@
       <a-table
         :columns="dataColumns"
         :data-source="list"
-      >
-        <template #bodyCell="{ column, record }">
-          <template v-if="column.dataIndex === 't'">
-            <div>
-              <a-tooltip
-                placement="topLeft"
-                :title="record.t"
-              >
-                <a href="javascript:void(0)">
-                  <svg
-                    class="icon tooltip"
-                    aria-hidden="true"
-                  >
-                    <use
-                      :xlink:href="$REST.KUBE.iconStatus[record.t]"
-                    />
-                  </svg>
-                </a>
-              </a-tooltip>
-            </div>
-          </template>
-        </template>
-      </a-table>
+      />
     </div>
   </a-card>
 </template>

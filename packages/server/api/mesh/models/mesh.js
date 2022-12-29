@@ -21,6 +21,7 @@ module.exports = {
             bootstrap: 'stop',
             controller: 'stop',
             injector: 'stop',
+            mcs: 'stop'
           };
           strapi.log.info(error?.body?.message);
         }
@@ -31,8 +32,6 @@ module.exports = {
         await strapi.services.mesh.setMesh(result);
       } catch (error) {
         strapi.log.info(error?.body?.message);
-
-        throw new Error('The OSM installation is not complete or failed');
       }
     },
     async afterDelete(result) {

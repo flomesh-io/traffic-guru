@@ -20,7 +20,7 @@
         </DetailListItem>
         <DetailListItem
           :term="$t('as')"
-          :rules="rules.name"
+          :rules="rules.uniqueName('ingresses',{id:pid,namespace:detail.namespace?.id})"
           name="name"
         >
           <a-input
@@ -691,55 +691,6 @@ export default {
 
   data() {
     return {
-      rules: {
-        name: [
-          {
-            required: true,
-            message: "Name is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-
-        required: [
-          {
-            required: true,
-            message: "This is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-
-        numberRequired: [
-          {
-            required: true,
-            message: "This is required",
-            trigger: "blur",
-            type: "number",
-          },
-        ],
-
-        objectRequired: [
-          {
-            required: true,
-            type: "object",
-            message: "This is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-
-        arrayRequired: [
-          {
-            required: true,
-            type: "array",
-            message: "This is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-      },
-
       certificates: [],
       labelVisible: false,
       labelValue: "",
@@ -765,7 +716,7 @@ export default {
       pjsConfig: "",
       namespace: "",
       isMounted: false,
-      cumulativeMetrics: [],
+      metrics: [],
       columns,
       rulecolumns,
       secretrulecolumns,
@@ -774,7 +725,11 @@ export default {
   },
 
   computed: {
-    ...mapState("setting", ["isMobile"]),
+    ...mapState({
+      rules: state => state.rules.rules,
+      isMobile: state => state.setting.isMobile,
+    }),
+
     dataColumns() {
       return this.columns.map((column) => {
         column.title = this.$t(column.key);

@@ -4,6 +4,7 @@ import TotalChart from "@/components/chart/TotalChart";
 
 //fsm
 import TopologyChart from "@/components/chart/fsm/TopologyChart";
+import McsTopologyChart from "@/components/chart/fsm/McsTopologyChart";
 import AreaChart from "@/components/chart/fsm/AreaChart";
 import BpsChart from "@/components/chart/fsm/BpsChart";
 import DelayChart from "@/components/chart/fsm/DelayChart";
@@ -169,6 +170,15 @@ const fsm = {
       service: clickhouse_svc.getTopoData,
       className: "card nopd",
       data: clickhouse_svc.setTopoData(),
+    },
+    MCS_TOPOLOGY: {
+      title: "MCS Topology",
+      tag: McsTopologyChart,
+      col: 24,
+      timer: 10000,
+      service: fsm_svc.getTopoSvc,
+      className: "card nopd",
+      data: fsm_svc.setTopoSvcData,
     },
     TPS_ERROR: {
       title: "TPS/Error",

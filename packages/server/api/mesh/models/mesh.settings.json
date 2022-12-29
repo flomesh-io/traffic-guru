@@ -44,6 +44,9 @@
     "prometheus": {
       "via": "meshes",
       "model": "fleet"
+    },
+    "mcsEnable": {
+      "type": "boolean"
     }
   }
 }

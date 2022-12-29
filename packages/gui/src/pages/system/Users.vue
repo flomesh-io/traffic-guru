@@ -76,6 +76,7 @@
 
     <a-modal
       v-model:visible="visible"
+      :destroy-on-close="true"
       :title="$t('user')"
       width="50%"
     >
@@ -110,7 +111,7 @@
           >
             <FormItem
               name="username"
-              :rules="rules.username"
+              :rules="rules.uniqueUserName('users',{id:payload.id})"
             >
               <a-input
                 :placeholder="$t('unset')"
@@ -220,7 +221,7 @@ import HeadInfo from "@/components/tool/HeadInfo";
 import UsersResults from "./components/UsersResults";
 import PermissionCard from "@/components/card/PermissionCard";
 import FormItem from "@/components/tool/FormItem";
-
+import { mapState } from "vuex";
 import { DEFAULT_PREFERENCE } from "@/services/user";
 import _ from "lodash";
 
@@ -242,42 +243,6 @@ export default {
   i18n: require("@/i18n"),
   data() {
     return {
-      rules: {
-        username: [
-          {
-            required: true,
-            message: "This is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-
-        password: [
-          {
-            required: true,
-            message: "Must be at least 6 characters long",
-            whitespace: true,
-            min: 6,
-            trigger: "blur",
-          },
-        ],
-
-        email: [
-          {
-            required: true,
-            message: "This is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-          {
-            type: "email",
-            message: "Email is not a valid email",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-      },
-
       TeamOutlined,
       isEdit: false,
       users: [],
@@ -315,6 +280,7 @@ export default {
   },
 
   computed: {
+    ...mapState("rules", ["rules"]),
     start(){
       return (this.pageNo - 1) * this.pageSize;
     }
@@ -389,7 +355,7 @@ export default {
       let firstRole = false;
       this.$gql
         .query(
-          `roles{id,name,type,permissions{id,type,controller,action,enabled}}`,
+          `roles(where:{type:"system"}){id,name,type,permissions{id,type,controller,action,enabled}}`,
         )
         .then((res) => {
           this.roles = res;

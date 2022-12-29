@@ -195,6 +195,7 @@ import Certificates from "@/pages/opscenter/Certificates";
 import CardList from "@/components/card/CardList";
 import AutoForm from "@/components/form/AutoForm";
 import FormItem from "@/components/tool/FormItem";
+import { mapState } from "vuex";
 export default {
   name: "IdentityList",
   i18n: require("@/i18n"),
@@ -217,36 +218,6 @@ export default {
   data() {
     return {
       certificatesVal: [],
-      rules: {
-        name: [
-          {
-            required: true,
-            message: "This is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-
-        required: [
-          {
-            required: true,
-            message: "This is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-
-        arrayRequired: [
-          {
-            required: true,
-            type: "array",
-            message: "This is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-      },
-
       visible: false,
       identitysVals: {},
       identityTypes: [],
@@ -262,7 +233,9 @@ export default {
     };
   },
 
-  computed: {},
+  computed: {
+    ...mapState("rules", ["rules"]),
+  },
 
   watch: {
     certificatesVal: {

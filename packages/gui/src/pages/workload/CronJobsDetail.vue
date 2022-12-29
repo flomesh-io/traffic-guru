@@ -1,104 +1,7 @@
 <template>
   <PageLayout :title="$t('Cron Jobs')">
     <template #headerContent>
-      <DetailList
-        size="small"
-        :col="1"
-      >
-        <DetailListItem
-          v-if="pid != ''"
-          :term="$t('UID')"
-        >
-          {{
-            detail.objectMeta.uid
-          }}
-        </DetailListItem>
-        <DetailListItem
-          :term="$t('as')"
-        >
-          <a-input
-            read-only
-            :placeholder="$t('unset')"
-            v-model:value="detail.objectMeta.name"
-            class="bold width-300"
-          />
-        </DetailListItem>
-        <DetailListItem
-          :term="$t('Namespace')"
-        >
-          <a-input
-            read-only
-            :placeholder="$t('unset')"
-            v-model:value="detail.objectMeta.namespace"
-            class="width-200"
-          />
-        </DetailListItem>
-        <DetailListItem :term="$t('Creation Timestamp')">
-          {{
-            new Date(detail.objectMeta.creationTimestamp).toLocaleString()
-          }}
-        </DetailListItem>
-      </DetailList>
-      <DetailList
-        size="small"
-        :col="1"
-      >
-        <DetailListItem :term="$t('Labels')">
-          <a-tag
-            :key="index"
-            v-for="(key, index) in Object.keys(detail.objectMeta.labels || [])"
-            :closable="false"
-          >
-            {{ key }}:{{ detail.objectMeta.labels[key] }}
-          </a-tag>
-        </DetailListItem>
-        <DetailListItem :term="$t('Annotations')">
-          <a-tag
-            :key="index"
-            v-for="(key, index) in Object.keys(
-              detail.objectMeta.annotations || [],
-            )"
-            :closable="false"
-            class="mb-5"
-          >
-            <span v-if="key == 'objectset.rio.cattle.io/applied'">
-              <a-tooltip
-                placement="topLeft"
-                :title="detail.objectMeta.annotations[key]"
-              >
-                <a
-                  class="font-primary"
-                  href="javascript:void(0)"
-                >{{ key }}</a>
-              </a-tooltip>
-            </span>
-            <span
-              v-else-if="
-                key == 'kubectl.kubernetes.io/last-applied-configuration'
-              "
-            >
-              <a-popover
-                trigger="click"
-                :title="key"
-              >
-                <template #content>
-                  <JsonEditor
-                    :is-j-s-o-n="true"
-                    :value="detail.objectMeta.annotations[key]"
-                  />
-                </template>
-                <a
-                  class="font-primary"
-                  href="javascript:void(0)"
-                >{{ key }}</a>
-              </a-popover>
-            </span>
-            <span
-              v-else
-            >{{ key }}:{{ detail.objectMeta.annotations[key] }}</span>
-          </a-tag>
-        </DetailListItem>
-      </DetailList>
+      <DetailHeader :d="detail" />
     </template>
     <template #action />
 
@@ -116,83 +19,18 @@
             key="1"
             :tab="$t('Overview')"
           >
-            <a-card
-              class="card mb-20"
-              :bordered="false"
+            <ResourceInfoCard
               :loading="loading"
-              :title="$t('Resource Info')"
-            >
-              <DetailList
-                size="small"
-                :col="3"
-              >
-                <DetailListItem
-                  v-if="detail.schedule"
-                  :term="$t('Schedule')"
-                >
-                  {{ detail.schedule }}
-                </DetailListItem>
-                <DetailListItem :term="$t('Active Jobs')">
-                  {{
-                    detail.active
-                  }}
-                </DetailListItem>
-                <DetailListItem :term="$t('Suspend')">
-                  {{
-                    detail.suspend
-                  }}
-                </DetailListItem>
-              </DetailList>
-
-              <DetailList
-                size="small"
-                :col="3"
-              >
-                <DetailListItem
-                  v-if="detail.lastSchedule"
-                  :term="$t('Last Schedule')"
-                >
-                  {{ detail.lastSchedule }}
-                </DetailListItem>
-                <DetailListItem
-                  v-if="detail.concurrencyPolicy"
-                  :term="$t('Concurrency Policy')"
-                >
-                  {{ detail.concurrencyPolicy }}
-                </DetailListItem>
-              </DetailList>
-            </a-card>
-            <a-card
-              v-if="detail.rollingUpdateStrategy"
-              class="card mb-20"
-              :bordered="false"
+              :d="detail"
+            />
+            <RollingUpdateCard
               :loading="loading"
-              :title="$t('Rolling Update Strategy')"
-            >
-              <DetailList
-                size="small"
-                :col="3"
-              >
-                <DetailListItem :term="$t('Max Surge')">
-                  {{
-                    detail.rollingUpdateStrategy.maxSurge
-                  }}
-                </DetailListItem>
-                <DetailListItem :term="$t('Max Unavailable')">
-                  {{
-                    detail.rollingUpdateStrategy.maxUnavailable
-                  }}
-                </DetailListItem>
-              </DetailList>
-            </a-card>
-            <!--
-              <a-card class="card mb-20" :bordered="false" :loading="loading" :title="$t('Pod Status')">
-              <detail-list size="small" :col="3" >
-              <detail-list-item :term="$t('Running')">{{detail.podInfo.running}}</detail-list-item>
-              <detail-list-item :term="$t('Desired')">{{detail.podInfo.desired}}</detail-list-item>
-              </detail-list>
-              </a-card> 
-            -->
+              :d="detail.spec?.updateStrategy"
+            />
+            <PodStatusCard
+              :loading="loading"
+              :d="detail.podInfo"
+            />
           </a-tab-pane>
           <a-tab-pane
             key="2"
@@ -204,11 +42,11 @@
               :loading="loading"
             >
               <JobList
-                :namespace="namespace"
-                :url="$REST.KUBE.CRONJOB + '/' + pid + '/job'"
                 :title="$t('Active Jobs')"
+                :embed="true"
                 :unactive="false"
                 :has-search="false"
+                :d="detail.active"
               />
             </a-card>
             <a-card
@@ -217,11 +55,11 @@
               :loading="loading"
             >
               <JobList
-                :namespace="namespace"
-                :url="$REST.KUBE.CRONJOB + '/' + pid + '/job'"
                 :title="$t('Not Working Jobs')"
+                :embed="true"
                 :unactive="true"
                 :has-search="false"
+                :d="detail.notWorking"
               />
             </a-card>
           </a-tab-pane>
@@ -251,7 +89,7 @@
               <EventList
                 :namespace="namespace"
                 :has-search="false"
-                :url="$REST.KUBE.CRONJOB + '/' + pid + '/event'"
+                :url="$REST.K8S.CRONJOB + '/' + pid + '/event'"
               />
             </a-card>
           </a-tab-pane>
@@ -262,31 +100,34 @@
 </template>
 
 <script>
-import JsonEditor from "@/components/editor/JsonEditor";
 import EventList from "./components/EventList";
 import StatusList from "./components/StatusList";
 import JobList from "./components/JobList";
 import PageLayout from "@/layouts/PageLayout";
 import { mapState } from "vuex";
-import DetailList from "@/components/tool/DetailList";
-import DetailListItem from "@/components/tool/DetailListItem";
+import RollingUpdateCard from "./components/RollingUpdateCard";
+import ResourceInfoCard from "./components/ResourceInfoCard";
+import PodStatusCard from "./components/PodStatusCard";
+import DetailHeader from "./components/DetailHeader";
 export default {
   name: "CronJobsDetail",
   i18n: require("@/i18n"),
   components: {
-    JsonEditor,
-    DetailListItem,
-    DetailList,
     PageLayout,
     EventList,
     StatusList,
     JobList,
+    RollingUpdateCard,
+    PodStatusCard,
+    DetailHeader,
+    ResourceInfoCard,
   },
 
   data() {
     return {
       detail: {
-        objectMeta: { labels: {}, annotations: {} },
+        spec: {updateStrategy:{rollingUpdate:{}},template:{spec:{containers:[]}}},
+        metadata: { labels: {}, annotations: {} },
         typeMeta: {},
         jobStatus: {},
         podInfo: {},
@@ -301,7 +142,7 @@ export default {
       pid: "",
       namespace: "",
       isMounted: false,
-      cumulativeMetrics: [],
+      metrics: [],
       params: {
         key: "",
         pageNo: 1,
@@ -328,7 +169,8 @@ export default {
       this.search();
     } else {
       this.detail = {
-        objectMeta: { labels: {}, annotations: {} },
+        spec: {updateStrategy:{rollingUpdate:{}},template:{spec:{containers:[]}}},
+        metadata: { labels: {}, annotations: {} },
         typeMeta: {},
         jobStatus: {},
         podInfo: {},
@@ -357,8 +199,8 @@ export default {
 
     URL() {
       let append = "/" + this.pid;
-      return this.$REST.KUBE.encode(
-        this.$REST.KUBE.CRONJOB,
+      return this.$REST.K8S.encode(
+        this.$REST.K8S.CRONJOB,
         append,
         this.namespace,
       );

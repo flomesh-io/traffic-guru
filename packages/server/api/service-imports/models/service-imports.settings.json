@@ -1,0 +1,38 @@
+{
+  "kind": "collectionType",
+  "collectionName": "service_imports",
+  "info": {
+    "name": "ServiceImport",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "registry": {
+      "model": "registry",
+      "via": "serviceImports"
+    },
+    "content": {
+      "type": "json"
+    },
+    "serviceExports": {
+      "via": "serviceImports",
+      "collection": "service-export",
+      "dominant": true
+    },
+    "namespace": {
+      "type": "string"
+    },
+    "policySwitch": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}

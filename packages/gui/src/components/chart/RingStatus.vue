@@ -18,6 +18,7 @@ import { mapState } from "vuex";
 export default {
   name: "RingStatus",
   props: ["vals", "id", "height", "unit", "ver", "total", "colors", "labels"],
+  i18n: require("@/i18n"),
   data() {
     return {
       id2: Math.ceil(Math.random() * 1000),
@@ -125,7 +126,7 @@ export default {
                   ? (100 * this.vals[0]) / (this.total ? this.total : 1)
                   : 0,
 
-                name: this.labels ? this.labels[0] : " healthy",
+                name: (" " + this.$t(this.labels ? this.labels[0] : "healthy")),
                 title: {
                   offsetCenter: ["0%", "-40%"],
                 },
@@ -139,7 +140,7 @@ export default {
                   ? (100 * this.vals[1]) / (this.total ? this.total : 1)
                   : 0,
 
-                name: this.labels ? this.labels[1] : " unhealthy",
+                name: (" " + this.$t(this.labels ? this.labels[1] : "unhealthy")),
                 title: {
                   offsetCenter: ["0%", "20%"],
                 },
@@ -164,7 +165,7 @@ export default {
               borderRadius: 20,
               borderWidth: 1,
               formatter: (item) => {
-                return (item * this.total) / 100 + this.unit;
+                return (item * this.total) / 100 + this.$t(this.unit);
               },
             },
           },

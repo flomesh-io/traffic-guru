@@ -80,6 +80,9 @@ export default {
           word-break: keep-all;
           white-space: nowrap;
           margin-left: 10px;
+					background-color: #f5f5f5;
+					padding: 0 4px;
+					border-radius: 2px;
         }
       }
     }

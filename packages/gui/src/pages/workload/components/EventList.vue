@@ -33,24 +33,8 @@
         :data-source="events"
       >
         <template #bodyCell="{ column, record }">
-          <template v-if="column.dataIndex === 't'">
-            <div>
-              <a-tooltip
-                placement="topLeft"
-                :title="record.t"
-              >
-                <a href="javascript:void(0)">
-                  <svg
-                    class="icon svg"
-                    aria-hidden="true"
-                  >
-                    <use
-                      :xlink:href="$REST.KUBE.iconStatus[record.t]"
-                    />
-                  </svg>
-                </a>
-              </a-tooltip>
-            </div>
+          <template v-if="column.dataIndex === 'count'">
+            <a-badge :count="record.count" />
           </template>
         </template>
       </a-table>
@@ -61,8 +45,8 @@
 <script>
 const columns = [
   {
-    key: " ", 
-    dataIndex: "t",
+    key: "Reason", 
+    dataIndex: "reason",
   },
   {
     key: "Info", 
@@ -91,7 +75,6 @@ const columns = [
 ];
 export default {
   name: "EventList",
-  components: {},
   props: ["url", "hasSearch", "namespace"],
   i18n: require("@/i18n"),
   data() {
@@ -124,13 +107,13 @@ export default {
 
   methods: {
     MakeUrl() {
-      let append = this.$REST.KUBE.append(
+      let append = this.$REST.K8S.append(
         this.params.pageSize,
         this.params.pageNo,
         "d,creationTimestamp",
         this.params.key,
       );
-      return this.$REST.KUBE.encode(this.url, append, this.namespace);
+      return this.$REST.K8S.encode(this.url, append, this.namespace);
     },
 
     search(pageNo, pageSize) {
@@ -140,26 +123,25 @@ export default {
       }
       this.loading = true;
       this.$request(this.MakeUrl(), this.$METHOD.GET).then((res) => {
-        let _data = res.data;
-        this.events = this.reset(_data.events);
-        this.params.total = _data.listMeta.totalItems;
+        let _data = res.data; 
+        this.events = this.reset(_data.items); 
+        this.params.total = _data.count;
         this.loading = false;
       });
     },
 
     reset(list) {
       for (let i = 0; i < list.length; i++) {
-        list[i].uid = list[i].objectMeta.uid;
-        list[i].name = list[i].objectMeta.name;
-        list[i].namespace = list[i].objectMeta.namespace;
+        list[i].uid = list[i].metadata.uid;
+        list[i].name = list[i].metadata.name;
+        list[i].namespace = list[i].metadata.namespace;
         list[i].info = list[i].message;
-        list[i].source = list[i].sourceComponent + " " + list[i].sourceHost;
-        list[i].target = list[i].object;
+        list[i].source = list[i].source&&list[i].source.component?(list[i].source?.component + "/" + list[i].source?.host):'-';
+        list[i].target = list[i].involvedObject?.fieldPath;
         list[i].count = list[i].count;
-        list[i].first = new Date(list[i].firstSeen).toLocaleString();
-        list[i].lasted = new Date(list[i].lastSeen).toLocaleString();
+        list[i].first = list[i].firstTimestamp?new Date(list[i].firstTimestamp).toLocaleString():'-';
+        list[i].lasted = list[i].lastTimestamp?new Date(list[i].lastTimestamp).toLocaleString():'-';
         list[i].info = list[i].message;
-        list[i].t = list[i].type;
       }
       return list;
     },

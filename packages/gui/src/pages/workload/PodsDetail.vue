@@ -1,124 +1,7 @@
 <template>
   <PageLayout :title="$t('Pods')">
     <template #headerContent>
-      <DetailList
-        size="small"
-        :col="1"
-      >
-        <DetailListItem
-          v-if="pid != ''"
-          :term="$t('UID')"
-        >
-          {{
-            detail.objectMeta.uid
-          }}
-        </DetailListItem>
-        <DetailListItem
-          :term="$t('as')"
-        >
-          <a-input
-            read-only
-            :placeholder="$t('unset')"
-            v-model:value="detail.objectMeta.name"
-            class="bold width-300"
-          />
-        </DetailListItem>
-        <DetailListItem
-          :term="$t('Namespace')"
-        >
-          <a-input
-            read-only
-            :placeholder="$t('unset')"
-            v-model:value="detail.objectMeta.namespace"
-            class="width-200"
-          />
-        </DetailListItem>
-        <DetailListItem :term="$t('Creation Timestamp')">
-          {{
-            new Date(detail.objectMeta.creationTimestamp).toLocaleString()
-          }}
-        </DetailListItem>
-      </DetailList>
-      <DetailList
-        size="small"
-        :col="1"
-      >
-        <DetailListItem :term="$t('Labels')">
-          <a-tag
-            v-for="(key, index) in Object.keys(detail.objectMeta.labels || [])"
-            :key="index"
-            :closable="false"
-          >
-            {{ key }}:{{ detail.objectMeta.labels[key] }}
-          </a-tag>
-        </DetailListItem>
-        <DetailListItem :term="$t('Annotations')">
-          <a-tag
-            v-for="(key, index) in Object.keys(
-              detail.objectMeta.annotations || [],
-            )"
-            :key="index"
-            :closable="false"
-            class="mb-5"
-          >
-            <span v-if="key == 'objectset.rio.cattle.io/applied'">
-              <a-tooltip
-                placement="topLeft"
-                :title="detail.objectMeta.annotations[key]"
-              >
-                <a
-                  class="font-primary"
-                  href="javascript:void(0)"
-                >{{ key }}</a>
-              </a-tooltip>
-            </span>
-            <span v-else-if="key == proxyProfileKey">
-              <a-popover
-                trigger="click"
-                :title="key"
-              >
-                <template #content>
-                  <Json2YamlCard
-                    :is-create="false"
-                    :is-readonly="true"
-                    :is-pop="true"
-                    v-if="proxyProfile"
-                    :json-val="proxyProfile"
-                  />
-                </template>
-                <a
-                  class="font-primary"
-                  href="javascript:void(0)"
-                >{{ key }}</a>
-              </a-popover>
-            </span>
-            <span
-              v-else-if="
-                key == 'kubectl.kubernetes.io/last-applied-configuration'
-              "
-            >
-              <a-popover
-                trigger="click"
-                :title="key"
-              >
-                <template #content>
-                  <JsonEditor
-                    :is-j-s-o-n="true"
-                    :value="detail.objectMeta.annotations[key]"
-                  />
-                </template>
-                <a
-                  class="font-primary"
-                  href="javascript:void(0)"
-                >{{ key }}</a>
-              </a-popover>
-            </span>
-            <span
-              v-else
-            >{{ key }}:{{ detail.objectMeta.annotations[key] }}</span>
-          </a-tag>
-        </DetailListItem>
-      </DetailList>
+      <DetailHeader :d="detail" />
     </template>
     <template #action />
 
@@ -148,90 +31,60 @@
               >
                 <DetailListItem
                   :term="$t('node')"
+                  v-if="detail.spec"
                 >
                   <a
                     class="font-primary"
                     href="javascript:void(0)"
                   >{{
-                    detail.nodeName
+                    detail.spec.nodeName
                   }}</a>
                 </DetailListItem>
-                <DetailListItem :term="$t('Status')">
+                <DetailListItem
+                  v-if="detail.status"
+                  :term="$t('Status')"
+                >
                   {{
-                    detail.podPhase
+                    detail.status.phase
                   }}
                 </DetailListItem>
-                <DetailListItem :term="$t('IP')">
+                <DetailListItem
+                  v-if="detail.status"
+                  :term="$t('IP')"
+                >
                   {{
-                    detail.podIP
+                    detail.status.podIP
                   }}
                 </DetailListItem>
               </DetailList>
               <DetailList
                 size="small"
+                v-if="detail.status"
                 :col="3"
               >
                 <DetailListItem :term="$t('Qos Class')">
                   {{
-                    detail.qosClass
+                    detail.status.qosClass
                   }}
                 </DetailListItem>
                 <DetailListItem :term="$t('Restart')">
                   {{
-                    detail.restartCount
+                    detail.status.containerStatuses?detail.status.containerStatuses[0].restartCount:0
                   }}
                 </DetailListItem>
               </DetailList>
             </a-card>
-            <a-card
-              v-if="detail.rollingUpdateStrategy"
-              class="card mb-20"
-              :bordered="false"
+            <RollingUpdateCard
               :loading="loading"
-              :title="$t('Rolling Update Strategy')"
-            >
-              <DetailList
-                size="small"
-                :col="3"
-              >
-                <DetailListItem :term="$t('Max Surge')">
-                  {{
-                    detail.rollingUpdateStrategy.maxSurge
-                  }}
-                </DetailListItem>
-                <DetailListItem :term="$t('Max Unavailable')">
-                  {{
-                    detail.rollingUpdateStrategy.maxUnavailable
-                  }}
-                </DetailListItem>
-              </DetailList>
-            </a-card>
-            <a-card
-              v-if="detail.controller"
-              class="card mb-20"
-              :bordered="false"
+              :d="detail.spec?.updateStrategy"
+            />
+            <PodStatusCard
               :loading="loading"
-              :title="$t('Pod Status')"
-            >
-              <DetailList
-                size="small"
-                :col="3"
-              >
-                <DetailListItem :term="$t('Running')">
-                  {{
-                    detail.controller.pods.running
-                  }}
-                </DetailListItem>
-                <DetailListItem :term="$t('Desired')">
-                  {{
-                    detail.controller.pods.desired
-                  }}
-                </DetailListItem>
-              </DetailList>
-            </a-card>
+              :d="detail.controller?.pods"
+            />
             <a-card
               class="card mb-20"
-              v-if="detail.controller && detail.controller.objectMeta"
+              v-if="detail.controller && detail.controller.metadata"
               :bordered="false"
               :loading="loading"
               :title="$t('Controller')"
@@ -244,7 +97,7 @@
                   :term="$t('as')"
                 >
                   <a href="javascript:void(0)">{{
-                    detail.controller.objectMeta.name
+                    detail.controller.metadata.name
                   }}</a>
                 </DetailListItem>
                 <DetailListItem :term="$t('Kind')">
@@ -255,7 +108,7 @@
                 <DetailListItem :term="$t('Creation Timestamp')">
                   {{
                     new Date(
-                      detail.controller.objectMeta.creationTimestamp,
+                      detail.controller.metadata.creationTimestamp,
                     ).toLocaleString()
                   }}
                 </DetailListItem>
@@ -272,30 +125,24 @@
                 :col="1"
               >
                 <DetailListItem
-                  v-if="detail.controller.objectMeta.labels"
+                  v-if="detail.controller.metadata.labels"
                   :term="$t('Labels')"
                 >
                   <a-tag
                     v-for="(key, index) in Object.keys(
-                      detail.controller.objectMeta.labels || [],
+                      detail.controller.metadata.labels || [],
                     )"
                     :key="index"
                     :closable="false"
                   >
-                    {{ key }}:{{ detail.controller.objectMeta.labels[key] }}
+                    {{ key }}:{{ detail.controller.metadata.labels[key] }}
                   </a-tag>
                 </DetailListItem>
                 <DetailListItem
-                  v-if="detail.controller.containerImages"
+                  v-if="detail.controller"
                   :term="$t('Container Images')"
                 >
-                  <a-tag
-                    v-for="(item, index) in detail.controller.containerImages"
-                    :key="index"
-                    :closable="false"
-                  >
-                    {{ item }}
-                  </a-tag>
+                  <ImageTags :d="detail.controller" />
                 </DetailListItem>
               </DetailList>
             </a-card>
@@ -310,7 +157,7 @@
               :bordered="false"
               :loading="loading"
             >
-              <StatusList :d="detail.conditions || []" />
+              <StatusList :d="detail.status.conditions || []" />
             </a-card>
           </a-tab-pane>
           <a-tab-pane
@@ -319,13 +166,13 @@
           >
             <a-card
               class="card mb-20"
-              v-if="detail.containers"
+              v-if="detail.spec.containers"
               :bordered="false"
               :loading="loading"
               :title="$t('Containers')"
             >
               <DetailList
-                v-for="(container, index2) in detail.containers"
+                v-for="(container, index2) in detail.spec.containers"
                 :key="index2"
                 size="small"
                 :col="1"
@@ -365,7 +212,7 @@
                       <template v-else-if="column.dataIndex === 'volume'">
                         <div>
                           <a href="javascript:void(0)">{{
-                            record.volume.name
+                            record.volume?.name
                           }}</a>
                         </div>
                       </template>
@@ -387,7 +234,7 @@
               <EventList
                 :namespace="namespace"
                 :has-search="false"
-                :url="$REST.KUBE.POD + '/' + pid + '/event'"
+                :url="$REST.K8S.POD + '/' + pid + '/event'"
               />
             </a-card>
           </a-tab-pane>
@@ -398,15 +245,16 @@
 </template>
 
 <script>
-import JsonEditor from "@/components/editor/JsonEditor";
-import Json2YamlCard from "@/components/card/Json2YamlCard";
-
 import EventList from "./components/EventList";
 import StatusList from "./components/StatusList";
 import PageLayout from "@/layouts/PageLayout";
 import DetailList from "@/components/tool/DetailList";
 import { mapState } from "vuex";
 import DetailListItem from "@/components/tool/DetailListItem";
+import ImageTags from "./components/ImageTags";
+import DetailHeader from "./components/DetailHeader";
+import RollingUpdateCard from "./components/RollingUpdateCard";
+import PodStatusCard from "./components/PodStatusCard";
 
 const columns = [
   {
@@ -438,19 +286,21 @@ export default {
   name: "PodsDetail",
   i18n: require("@/i18n"),
   components: {
-    JsonEditor,
     DetailListItem,
     DetailList,
     PageLayout,
     EventList,
     StatusList,
-    Json2YamlCard,
+    ImageTags,
+    DetailHeader,
+    RollingUpdateCard,
+    PodStatusCard,
   },
 
   data() {
     return {
       detail: {
-        objectMeta: { labels: {}, annotations: {} },
+        metadata: { labels: {}, annotations: {} },
         typeMeta: {},
         jobStatus: {},
         controller: { pods: {} },
@@ -458,16 +308,14 @@ export default {
         selector: {},
         statusInfo: {},
         conditions: [],
-        rollingUpdateStrategy: {},
+        spec:{updateStrategy:{rollingUpdate:{}}}
       },
 
       loading: true,
       pid: "",
       namespace: "",
-      proxyProfile: null,
-      proxyProfileKey: "flomesh.io/proxy-profile",
       isMounted: false,
-      cumulativeMetrics: [],
+      metrics: [],
       params: {
         key: "",
         pageNo: 1,
@@ -499,7 +347,7 @@ export default {
       this.search();
     } else {
       this.detail = {
-        objectMeta: { labels: {}, annotations: {} },
+        metadata: { labels: {}, annotations: {} },
         typeMeta: {},
         jobStatus: {},
         controller: { pods: {} },
@@ -507,7 +355,7 @@ export default {
         selector: {},
         statusInfo: {},
         conditions: [],
-        rollingUpdateStrategy: {},
+        spec:{updateStrategy:{rollingUpdate:{}}}
       };
       this.loading = false;
     }
@@ -520,41 +368,19 @@ export default {
 
     search() {
       this.loading = true;
-      this.proxyProfile = null;
       this.$request(this.URL(), this.$METHOD.GET).then((res) => {
         this.detail = res.data;
-        if (
-          this.detail.objectMeta.annotations &&
-          this.detail.objectMeta.annotations[this.proxyProfileKey]
-        ) {
-          this.searchProfile(
-            this.detail.objectMeta.annotations[this.proxyProfileKey],
-          );
-        }
-
         this.loading = false;
       });
     },
 
     URL() {
       let append = "/" + this.pid;
-      return this.$REST.KUBE.encode(
-        this.$REST.KUBE.POD,
+      return this.$REST.K8S.encode(
+        this.$REST.K8S.POD,
         append,
         this.namespace,
       );
-    },
-
-    searchProfile(name) {
-      this.loading = true;
-      this.$request(this.URLProfile(name), this.$METHOD.GET).then((res) => {
-        this.proxyProfile = JSON.stringify(res.data);
-      });
-    },
-
-    URLProfile(name) {
-      let append = "/name/" + name;
-      return this.$REST.KUBE.encode(this.$REST.KUBE.SIDECAR_DETAIL, append);
     },
 
     valid() {

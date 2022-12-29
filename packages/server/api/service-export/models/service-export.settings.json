@@ -1,0 +1,30 @@
+{
+  "kind": "collectionType",
+  "collectionName": "service_exports",
+  "info": {
+    "name": "ServiceExport",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "service": {
+      "via": "serviceExport",
+      "model": "service"
+    },
+    "content": {
+      "type": "json"
+    },
+    "serviceImports": {
+      "via": "serviceExports",
+      "collection": "service-imports"
+    },
+    "clusterKey": {
+      "type": "string"
+    }
+  }
+}

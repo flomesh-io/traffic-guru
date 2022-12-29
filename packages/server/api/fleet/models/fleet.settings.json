@@ -52,8 +52,8 @@
       "type": "json"
     },
     "meshes": {
-      "collection": "mesh",
-      "via": "prometheus"
+      "via": "prometheus",
+      "collection": "mesh"
     }
   }
 }

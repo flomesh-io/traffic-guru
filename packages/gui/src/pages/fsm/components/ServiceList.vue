@@ -77,23 +77,7 @@
       >
         <template #bodyCell="{ column, record }">
           <template v-if="column.dataIndex === 't'">
-            <div>
-              <a-tooltip
-                placement="topLeft"
-                :title="record.t"
-              >
-                <a href="javascript:void(0)">
-                  <svg
-                    class="icon table-icon"
-                    aria-hidden="true"
-                  >
-                    <use
-                      :xlink:href="$REST.KUBE.iconStatus[record.t]"
-                    />
-                  </svg>
-                </a>
-              </a-tooltip>
-            </div>
+            <Status :d="{status:record.t}" />
           </template>
           <template v-else-if="column.dataIndex === 'gatewayPath'">
             <div>
@@ -104,6 +88,9 @@
                 @blur="updateGatewayPath(record)"
               />
             </div>
+          </template>
+          <template v-else-if="column.dataIndex === 'namespace'">
+            {{ record.registryName }} / {{ record.namespace }}
           </template>
           <template v-else-if="column.dataIndex === 'name'">
             <div>
@@ -123,6 +110,24 @@
                 {{ labelkey }}:{{ record.labels[labelkey] }}
               </a-tag>
             </div>
+          </template>
+
+          <template v-else-if="column.dataIndex === 'serviceExport'">
+            <a-tag v-if="record.serviceExport">
+              {{ record.serviceExport.content.path }} | {{ record.serviceExport.content.portNumber }}
+            </a-tag><span v-else>-</span>
+          </template>
+          <template v-else-if="column.dataIndex === 'serviceImports'">
+            <div v-if="record.serviceExport && record.serviceExport.serviceImports">
+              <a-tag
+                :key="index"
+                v-for="(serviceImport, index) in record.serviceExport.serviceImports"
+                :closable="false"
+              >
+                {{ serviceImport?.registry?.name }} / {{ serviceImport?.namespace }}
+              </a-tag>
+            </div>
+            <span v-else>-</span>
           </template>
           <template v-else-if="column.dataIndex === 'internalEndpointStr'">
             <div>
@@ -197,6 +202,7 @@ import {
 } from "@ant-design/icons-vue";
 import EnvSelector from "@/components/menu/EnvSelector";
 import SyncBar from "@/components/tool/SyncBar";
+import Status from "@/components/tag/Status";
 const shortcolumns = [
   {
     key: "as",
@@ -208,12 +214,7 @@ const shortcolumns = [
     dataIndex: "organizationName",
   },
   {
-    key: "registry",
-    dataIndex: "registryName",
-  },
-  {
     key: "Namespace",
-    width: 130,
     dataIndex: "namespace",
   },
   {
@@ -237,13 +238,7 @@ const short2columns = [
     dataIndex: "organizationName",
   },
   {
-    key: "Registry",
-    width: 330,
-    dataIndex: "registryName",
-  },
-  {
     key: "Namespace",
-    width: 330,
     dataIndex: "namespace",
   },
 ];
@@ -253,13 +248,7 @@ const short3columns = [
     dataIndex: "name",
   },
   {
-    key: "Registry",
-    width: 330,
-    dataIndex: "registryName",
-  },
-  {
     key: "Namespace",
-    width: 330,
     dataIndex: "namespace",
   },
   {
@@ -278,18 +267,13 @@ const columns = [
     dataIndex: "name",
   },
   {
-    key: "Organization",
-    width: 130,
-    dataIndex: "organizationName",
-  },
-  {
     key: "Namespace",
-    width: 130,
     dataIndex: "namespace",
   },
   {
-    key: "Registry",
-    dataIndex: "registryName",
+    key: "Organization",
+    width: 130,
+    dataIndex: "organizationName",
   },
   {
     key: "Labels",
@@ -297,12 +281,12 @@ const columns = [
     dataIndex: "labels",
   },
   {
-    key: "Internal Endpoint",
-    dataIndex: "internalEndpointStr",
+    key: "Export",
+    dataIndex: "serviceExport",
   },
   {
-    key: "External Endpoint",
-    dataIndex: "externalEndpointStr",
+    key: "Imports",
+    dataIndex: "serviceImports",
   },
   {
     key: "updTime",
@@ -323,10 +307,13 @@ export default {
     SyncBar,
     PlusCircleTwoTone,
     EnvSelector,
+    Status,
   },
 
   props: [
     "title",
+    "selector",
+    "namespace",
     "hasSearch",
     "namespaces",
     "mode",
@@ -403,6 +390,14 @@ export default {
 
       deep: true,
     },
+
+    embedServices: {
+      handler: function () {
+        this.search();
+      },
+
+      deep: true,
+    },
   },
 
   created() {
@@ -469,14 +464,20 @@ export default {
         let namespacesName = [];
         if (this.namespaces && this.namespaces.length > 0) {
           this.namespaces.forEach((namespace) => {
-            namespacesName.push(namespace.name);
+            namespacesName.push(namespace.id);
           });
-          where.namespace_in = namespacesName;
+          where.ns_in = namespacesName;
         } else if (this.namespaces && this.namespaces.length == 0) {
           this.list = [];
           this.total = 0;
           this.loading = false;
           return;
+        }
+        if (this.namespace){
+          where.namespace = this.namespace;
+        }
+        if (this.selector){
+          where.selector = this.selector;
         }
         let searchName = "getServices";
         if (this.mode == "mesh") {
@@ -484,7 +485,7 @@ export default {
         }
         this.$gql
           .query(
-            `${searchName}(where: $where, start: ${this.start}, limit: ${this.pageSize}){values{id,uid,fleet{id,name},organization{id,name},namespace,name,registry{id,name},content,updated_at},aggregate{totalCount}}`,
+            `${searchName}(where: $where, start: ${this.start}, limit: ${this.pageSize}){values{id,uid,serviceExport{id,content,serviceImports{id,registry{id,name},namespace}},fleet{id,name},organization{id,name},namespace,name,registry{id,name},content,updated_at},aggregate{totalCount}}`,
             { 
               where 
             },

@@ -29,7 +29,10 @@
         v-for="(item, index) in config.body"
         :key="index"
         class="mr-16"
-      >{{ $t(item.label) }} : {{ item.value }} {{ $t(item.unit) }}</span>
+      >{{ $t(item.label) }} <a-badge
+        :count="item.value"
+        :show-zero="true"
+      /> {{ $t(item.unit) }}</span>
     </div>
   </div>
 </template>

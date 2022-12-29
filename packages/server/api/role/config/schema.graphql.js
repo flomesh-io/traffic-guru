@@ -13,6 +13,7 @@ type RoleAggregators {
   `,
   query: `
     getRolesConnection(sort:String, limit:Int, start: Int, where: JSON, publicationState: PublicationState): RoleConnections
+    getRoles(sort:String, limit:Int, start: Int, where: JSON, publicationState: PublicationState): [UsersPermissionsRole]
     `,
   mutation: `
     `,
@@ -20,6 +21,9 @@ type RoleAggregators {
     Query: {
       getRolesConnection: {
         resolver: 'application::Role.Role.getRolesConnection',
+      },
+      getRoles: {
+        resolver: 'application::Role.Role.getRoles',
       },
     },
   },

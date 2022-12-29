@@ -128,7 +128,7 @@
           <template #default="{ item }">
             <a-card-meta>
               <template #title>
-                <div class="capitalize mb-3">
+                <div class="mb-3">
                   <a-badge
                     status="processing"
                     v-if="item.status == 'running' && item.type?.toLowerCase() == 'pipy'"
@@ -193,7 +193,7 @@
           >
             <FormItem
               name="name"
-              :rules="rules.name"
+              :rules="rules.uniqueName('fleets',{id:payload.id,type:payload.type})"
             >
               <a-input
                 :placeholder="$t('unset')"
@@ -615,6 +615,7 @@ import { Empty } from "ant-design-vue";
 import IdentityList from "@/components/table/IdentityList";
 import { watchHealthcheck } from "@/services/common";
 import FormItem from "@/components/tool/FormItem";
+import { mapState } from "vuex";
 
 export default {
   name: "Components",
@@ -637,17 +638,6 @@ export default {
   i18n: require("@/i18n"),
   data() {
     return {
-      rules: {
-        name: [
-          {
-            required: true,
-            message: "Name is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-      },
-
       isEdit: false,
       clickhouses: [],
       initContent: {},
@@ -688,7 +678,10 @@ export default {
     };
   },
 
-  computed: {},
+  computed: {
+    ...mapState("rules", ["rules"]),
+  },
+	
   created() {
     if (this.$isPro) {
       this.icons = {
@@ -750,7 +743,7 @@ export default {
           idleTimeout: "60s",
           maxConnectionsGlobal: "3000",
 
-          bgp: '{\n  "admin_port": "0.0.0.0:8080",\n  "debug": false,\n  "ipv6": false,\n  "asn4": false,\n  "afi_safi": [\n    [\n      1,\n      1\n    ]\n  ],\n  "bgp_addresses": [\n    "192.168.52.147:179"\n  ],\n  "my_asn": 7675,\n  "hold_time": 180,\n  "bgp_id": "192.168.52.148",\n  "withdrawn_routes": [],\n  "origin": 0,\n  "as_path": [\n    [\n      2,\n      [\n        7675\n      ]\n    ]\n  ],\n  "nexthop": "192.168.52.148",\n  "prefixes": []\n}',
+          bgp: '{\n  \"admin_port\": \"0.0.0.0:8080\",\n  \"bgp_nodes\": [\n    \"192.168.10.31\",\n    \"192.168.10.32\"\n  ],\n  \"debug\": false,\n  \"ipv6\": false,\n  \"asn4\": false,\n  \"afi_safi\": [\n    [\n      1,\n      1\n    ]\n  ],\n  \"bgp_addresses\": [\n    \"192.168.52.147\"\n  ],\n  \"my_asn\": 7675,\n  \"hold_time\": 180,\n  \"bgp_id\": \"192.168.52.148:179\",\n  \"withdrawn_routes\": [],\n  \"origin\": 0,\n  \"as_path\": [\n    [\n      2,\n      [\n        7675\n      ]\n    ]\n  ],\n  \"nexthop\": \"192.168.52.148\",\n  \"prefixes\": []\n}',
         },
 
         sidecar: {

@@ -289,7 +289,7 @@
           >
             <FormItem
               name="name"
-              :rules="rules.name"
+              :rules="rules.uniqueName('plugins',{id:payload.id})"
             >
               <a-input
                 :placeholder="$t('unset')"
@@ -495,36 +495,6 @@ export default {
   props: ["hideHead", "apply"],
   data() {
     return {
-      rules: {
-        name: [
-          {
-            required: true,
-            message: "This is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-
-        required: [
-          {
-            required: true,
-            message: "This is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-
-        arrayRequired: [
-          {
-            required: true,
-            type: "array",
-            message: "This is required",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-      },
-
       UPLOAD,
       BASE_URL,
       fileList: [],
@@ -610,7 +580,12 @@ export default {
   },
 
   computed: {
-    ...mapState("setting", ["layout", "pageWidth"]),
+    ...mapState({
+      rules: state => state.rules.rules,
+      layout: state => state.setting.layout,
+      pageWidth: state => state.setting.pageWidth,
+    }),
+
     start(){
       return (this.pageNo - 1) * this.pageSize;
     }

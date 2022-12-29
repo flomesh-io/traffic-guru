@@ -1,8 +1,6 @@
 <template>
   <div>
     <IngressList
-      :url="$REST.KUBE.INGRESS"
-      :metric="false"
       :has-search="true"
     />
   </div>

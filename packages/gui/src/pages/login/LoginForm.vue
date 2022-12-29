@@ -5,7 +5,6 @@
       :wrapper-col="{ span: 24 }"
       @finish="handleFinish"
       @finishFailed="handleFinishFailed"
-      :rules="getRules"
       ref="form"
     >
       <a-alert
@@ -16,7 +15,11 @@
         show-icon
         class="mb-24"
       />
-      <a-form-item name="mobile">
+      <FormItem
+        class="mb-20"
+        name="name"
+        :rules="rules.name"
+      >
         <MdInput
           icon="email"
           size="large"
@@ -27,8 +30,12 @@
         >
           {{ $t("User") }}
         </MdInput>
-      </a-form-item>
-      <a-form-item name="password">
+      </FormItem>
+      <FormItem
+        class="mb-20"
+        name="password"
+        :rules="rules.password"
+      >
         <MdInput
           type="password"
           icon="password"
@@ -43,15 +50,14 @@
         >
           {{ $t("Password") }}
         </MdInput>
-      </a-form-item>
-      <a-form-item name="snscode">
-        <SnsCode
-          ref="snscode"
-          v-model:value="formState.snscode"
-          @validate="validate"
-          :username="formState.name"
-        />
-      </a-form-item>
+      </FormItem>
+      <SnsCode
+        class="mb-20"
+        ref="snscode"
+        v-model:value="formState.snscode"
+        @validate="validate"
+        :username="formState.name"
+      />
       <div class="login-foot">
         <a-switch
           v-model:checked="formState.automatic"
@@ -101,6 +107,8 @@ import { ArrowRightOutlined } from "@ant-design/icons-vue";
 import { notification } from "ant-design-vue";
 import { h } from "vue";
 import { loadRoutes } from "@/utils/routerUtil";
+import { mapState } from "vuex";
+import FormItem from "@/components/tool/FormItem";
 
 export default {
   name: "LoginForm",
@@ -108,6 +116,7 @@ export default {
     SnsCode,
     MdInput,
     ArrowRightOutlined,
+    FormItem
   },
 
   i18n: require("./i18n"),
@@ -129,43 +138,13 @@ export default {
         password: "",
         automatic: true,
       },
-
-      rules: {
-        name: [
-          {
-            required: true,
-            message: "Please input a user",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-
-        password: [
-          {
-            required: true,
-            message: "Please input password",
-            whitespace: true,
-            trigger: "blur",
-          },
-        ],
-      },
     };
   },
 
   computed: {
+    ...mapState("rules", ["rules"]),
     systemName() {
       return this.$store.state.setting.systemName;
-    },
-
-    getRules() {
-      Object.keys(this.rules).map((key) => {
-        this.rules[key].map((rule) => {
-          rule.message = this.$t(rule.message);
-          return rule;
-        });
-        return key;
-      });
-      return this.rules;
     },
   },
 
