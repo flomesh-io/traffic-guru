@@ -54,6 +54,8 @@ module.exports = {
       if (result.type == 'k8s') {
         try {
           await strapi.services.registry.initK8sMetrics(result.id);
+          strapi.log.info('fetch k8s namespace');
+          await strapi.services.registry.fetchK8sNamespace(result.id);
         } catch (error) {
           strapi.log.error(error)
         }
@@ -62,8 +64,6 @@ module.exports = {
     beforeUpdate: async (params, data) => {
       const result = await strapi.query('registry').findOne({ id: params.id });
       if (result.type == 'k8s') {
-        strapi.log.info('fetch k8s namespace');
-        await strapi.services.registry.fetchK8sNamespace(params.id);
         const json = YAML.parse(data.config)
         if (json['current-context']) {
           data.address = json.clusters.find((e) => e.name == json['current-context']).cluster.server
