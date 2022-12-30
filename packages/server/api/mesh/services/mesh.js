@@ -81,13 +81,17 @@ module.exports = {
       await fsOpenAsync(kubeconfigPath);
     } catch (err) {
       if (err.code === 'ENOENT') {
-        const kubeconfig = JSON.parse(KUBE_CONFIG_TPL_STR);
-        kubeconfig.users[0].user.token = registry.content.credit;
-        kubeconfig.clusters[0].cluster.server = registry.address;
-        kubeconfig.clusters[0].cluster['certificate-authority-data'] =
-          registry.content.certificate;
-
-        await fsWriteFile(kubeconfigPath, yaml.dump(kubeconfig));
+        if (registry.config) {
+          await fsWriteFile(kubeconfigPath, registry.config);
+        } else {
+          const kubeconfig = JSON.parse(KUBE_CONFIG_TPL_STR);
+          kubeconfig.users[0].user.token = registry.content.credit;
+          kubeconfig.clusters[0].cluster.server = registry.address;
+          kubeconfig.clusters[0].cluster['certificate-authority-data'] =
+            registry.content.certificate;
+  
+          await fsWriteFile(kubeconfigPath, yaml.dump(kubeconfig));
+        }
       }
     }
     const optionsPath = path.join(KUBE_CONFIG_DIR, `${result.id}.options`);
@@ -340,13 +344,17 @@ module.exports = {
       await fsOpenAsync(kubeconfigPath);
     } catch (err) {
       if (err.code === 'ENOENT') {
-        const kubeconfig = JSON.parse(KUBE_CONFIG_TPL_STR);
-        kubeconfig.users[0].user.token = registry.content.credit;
-        kubeconfig.clusters[0].cluster.server = registry.address;
-        kubeconfig.clusters[0].cluster['certificate-authority-data'] =
-          registry.content.certificate;
+        if (registry.config) {
+          await fsWriteFile(kubeconfigPath, registry.config);
+        } else {
+          const kubeconfig = JSON.parse(KUBE_CONFIG_TPL_STR);
+          kubeconfig.users[0].user.token = registry.content.credit;
+          kubeconfig.clusters[0].cluster.server = registry.address;
+          kubeconfig.clusters[0].cluster['certificate-authority-data'] =
+            registry.content.certificate;
 
-        await fsWriteFile(kubeconfigPath, yaml.dump(kubeconfig));
+          await fsWriteFile(kubeconfigPath, yaml.dump(kubeconfig));
+        }
       }
     }
     const helmCmd = `helm uninstall -n ${result.namespace.name} --kubeconfig ${kubeconfigPath} ${result.name}  `;

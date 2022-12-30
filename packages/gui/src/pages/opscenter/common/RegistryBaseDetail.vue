@@ -60,18 +60,6 @@
               {{ detail.type }}
             </DetailListItem>
             <DetailListItem
-              v-if="detail.type == 'k8s'"
-              :rules="rules.required"
-              :name="['content', 'domain']"
-              :term="$t('Trust Domain')"
-            >
-              <a-input
-                :placeholder="$t('unset')"
-                v-model:value="detail.content.domain"
-                class="width-300"
-              />
-            </DetailListItem>
-            <DetailListItem
               :term="$t('Is Gateway')"
               v-if="$isPro"
             >
@@ -125,20 +113,61 @@
             :col="1"
           >
             <DetailListItem
+              v-if="detail.type != 'k8s'"
               :rules="rules.required"
               name="address"
               :term="$t('Location')"
             >
               <a-textarea
-                class="height-90"
                 v-model:value="detail.address"
-                :placeholder="$t('[protocol://hostname:port]')"
+                :placeholder="$t('protocol://hostname:port')"
                 allow-clear
               />
+            </DetailListItem>
+						
+            <DetailListItem
+              :term="$t('Config')"
+              :rules="rules.required"
+              :name="['config']"
+              v-if="detail.type == 'k8s'"
+            >
+              <a-upload
+                v-model:file-list="fileList"
+                :before-upload="beforeUpload"
+              >
+                <a-button>
+                  <UploadOutlined />
+                  {{ $t('select') }} k8s config
+                </a-button>
+              </a-upload>
+              <div
+                v-if="!!configJson && getCluster"
+                class="flex mt-10"
+              >
+                <div>
+                  <a-tag
+                    closable
+                    @close="clearConfig"
+                  >
+                    {{ getCluster.server }} ({{ configJson.apiVersion }})
+                  </a-tag>
+                </div>
+                <Status
+                  class="inline-block"
+                  v-if="!!configJson && configJson.kind == 'Config'"
+                  :d="{status:'success'}"
+                />
+                <Status
+                  class="inline-block"
+                  v-else-if="!!configJson"
+                  :d="{status:'failed'}"
+                />
+              </div>
             </DetailListItem>
             <DetailListItem
               :rules="rules.required"
               :name="['content', 'credit']"
+              v-if="detail.type != 'k8s'"
               :term="$t('Credit')"
             >
               <a-textarea
@@ -150,7 +179,7 @@
             </DetailListItem>
             <DetailListItem
               :term="$t('Certificate')"
-              v-if="detail.type == 'k8s'"
+              v-if="false"
             >
               <a-textarea
                 class="height-90"
@@ -207,15 +236,22 @@
 import _ from "lodash";
 import { Empty } from "ant-design-vue";
 import PageLayout from "@/layouts/PageLayout";
+import Status from "@/components/tag/Status";
 import DetailList from "@/components/tool/DetailList";
 import DetailListItem from "@/components/tool/DetailListItem";
 import { mapState } from "vuex";
+import {
+  UploadOutlined
+} from "@ant-design/icons-vue";
+let YAML = require("js-yaml");
 export default {
   name: "RegistryBaseDetail",
   i18n: require("@/i18n"),
   components: {
     DetailListItem,
     DetailList,
+    Status,
+    UploadOutlined,
     PageLayout,
   },
 
@@ -224,20 +260,22 @@ export default {
     return {
       connectLoading: false,
       namespaces: [],
+      fileList:[],
       simpleImage: Empty.PRESENTED_IMAGE_SIMPLE,
       service: `{
 		}`,
 
+      configJson: null,
       detail: {
         organization: null,
         type: "k8s",
         name: "",
+        config: null,
         content: {
-          domain: "",
           credit: "",
           autoUpstream: false,
           autoApplication: false,
-          isGateway: true,
+          isGateway: false,
           gatewayPath: "",
           gatewayPort: 0,
         },
@@ -253,6 +291,17 @@ export default {
 
   computed: {
     ...mapState("rules", ["rules"]),
+    getCluster(){
+      let cluster = null;
+      if(this.configJson && this.configJson.clusters) {
+        if(this.configJson['current-context']){
+          cluster = this.configJson.clusters.find(c => c.name == this.configJson['current-context']).cluster
+        } else {
+          cluster = this.configJson.clusters[0].cluster;
+        }
+      }
+      return cluster;
+    }
   },
 	
   created() {
@@ -263,12 +312,12 @@ export default {
         organization: null,
         type: "k8s",
         name: "",
+        config: null,
         content: {
-          domain: "cluster.local",
           credit: "",
           autoUpstream: false,
           autoApplication: false,
-          isGateway: true,
+          isGateway: false,
           gatewayPath: "",
           gatewayPort: 0
         },
@@ -281,6 +330,26 @@ export default {
   },
 
   methods: {
+    clearConfig(){
+      this.detail.config = null;
+      this.configJson = null;
+    },
+
+    beforeUpload(file) {
+      return new Promise(() => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+          if(reader.result){
+            let configText = atob(reader.result.split("base64,")[1]);
+            this.detail.config = configText;
+            this.configJson = YAML.load(configText);
+            console.log(this.configJson)
+          }
+        };
+      });
+    },
+
     valid() {
       if (this.detail.name == "") {
         this.$message.error(this.$t("The name cannot be empty"), 3);
@@ -361,9 +430,6 @@ export default {
       delete savedata.L4LBs;
       delete savedata.namespaces;
       delete savedata.L7Lbs;
-      if (savedata.type != "k8s") {
-        delete this.detail.content.domain;
-      }
       if (this.pid != "") {
         delete savedata.id;
         this.$gql
@@ -406,7 +472,7 @@ export default {
       this.loading = true;
       this.$gql
         .query(
-          `registry(id: ${this.pid}){id,name,type,address,content,namespaces{id,name,organization{id,name},services{id,uid,gatewayPath,fleet{id,name},organization{id,name},namespace,name,registry{id,name},content,created_at}}}`,
+          `registry(id: ${this.pid}){id,name,type,address,config,content,namespaces{id,name,organization{id,name},services{id,uid,gatewayPath,fleet{id,name},organization{id,name},namespace,name,registry{id,name},content,created_at}}}`,
         )
         .then((res) => {
           this.detail = res;
@@ -416,8 +482,10 @@ export default {
           if (!this.detail.content.credit) {
             this.detail.content.credit = "";
           }
-          if (!this.detail.content.domain) {
-            this.detail.content.domain = "";
+          if (!!this.detail.config) {
+            this.configJson = YAML.load(this.detail.config);
+          }else{
+            this.configJson = null;
           }
           if (this.detail.content.autoUpstream == null) {
             this.detail.content.autoUpstream = false;

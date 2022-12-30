@@ -194,7 +194,12 @@ module.exports = {
       system: {
         name: "Sys Setting ∣ 系统设置",
         "topology-editor": { name: "拓扑编辑器" },
-        components: { name: "UI组件" },
+        widget: { 
+					list: { name: "UI组件" },
+					creator: { name: "UI组件编辑器" },
+					editor: { name: "UI组件编辑器" },
+					preview: { name: "UI组件预览" },
+				},
         users: { name: "用户管理" },
         roles: { name: "角色管理" },
         organizations: {
@@ -400,7 +405,12 @@ module.exports = {
       system: {
         name: "System",
         "topology-editor": { name: "Topology Editor" },
-        components: { name: "UI Components" },
+        widget: { 
+					list: { name: "UI Widgets" },
+					creator: { name: "UI Widget Creator" },
+					editor: { name: "UI Widget Editor" },
+					preview: { name: "UI Widget Preview" },
+				},
         users: { name: "Users" },
         roles: { name: "Roles" },
         organizations: {
@@ -613,7 +623,12 @@ module.exports = {
       system: {
         name: "システム",
         "topology-editor": { name: "トポロジーエディタ" },
-        components: { name: "UI コンポーネント" },
+        widget: { 
+					list: { name: "UIコンポーネント" },
+					creator: { name: "UIコンポーネント編集" },
+					editor: { name: "UIコンポーネント編集" },
+					preview: { name: "UIコンポーネントプレビュー" },
+				},
         users: { name: "ユーザー管理" },
         roles: { name: "キャラクター管理" },
         organizations: {

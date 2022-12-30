@@ -93,7 +93,7 @@
           >
             <template #content>
               <JsonEditor
-                :is-j-s-o-n="true"
+                :is-json="true"
                 :value="d.metadata.annotations[key]"
               />
             </template>

@@ -174,7 +174,7 @@ export default {
       if (chartDom) {
         // this.$echarts.dispose(chartDom);
       }
-      let _unit = this.$t(this.unit||"") || "";
+      let _unit = this.$t && this.$t(this.unit||"") || "";
       let myChart = this.$echarts.init(chartDom);
       myChart.showLoading();
       let option = {

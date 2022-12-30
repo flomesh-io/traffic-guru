@@ -68,7 +68,6 @@ module.exports = {
       } else {
         path = `${PROMETHEUS_BASE}/?type=query_range&query=`;
       }
-      console.log(sql);
       return path + encodeURI(sql);
     },
   },

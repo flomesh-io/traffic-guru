@@ -18,9 +18,11 @@ module.exports = {
     const queryStr = new URLSearchParams(ctx.query).toString();
 
     let url = `${host}/api/v1/${type}`;
+    url = url.replace("//api/v1", "/api/v1")
     if (queryStr) {
       url = `${url}?${queryStr}`;
     }
+    strapi.log.info(url)
     const response = await axios({
       method: method,
       url: url,

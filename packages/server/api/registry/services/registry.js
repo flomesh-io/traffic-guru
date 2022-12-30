@@ -2,10 +2,6 @@
 
 const k8s = require('@kubernetes/client-node');
 const axios = require('axios');
-const https = require('https');
-const agent = new https.Agent({
-  rejectUnauthorized: false,
-});
 
 async function syncKubernetes(data) {
   const kc = await strapi.services.kubernetes.getKubeConfig(data.id, 'k8s');
@@ -45,16 +41,9 @@ async function syncKubernetes(data) {
   if (registry) {
     axios.defaults.timeout = 1000;
     try {
-      const response = await axios({
-        method: 'get',
-        url: data.address + '/apis/metrics.k8s.io/v1beta1/pods',
-        headers: {
-          Accept: 'application/json, text/plain, */*',
-          Authorization: 'Bearer ' + registry.content.credit,
-        },
-        httpsAgent: agent,
-      });
+      const k8sAxios = strapi.config.functions.kubeUtils.getK8sAxios(registry);
 
+      const response = await k8sAxios.get('/apis/metrics.k8s.io/v1beta1/pods')
       const now = new Date();
       const count = await strapi.query('metrics').count();
       if (count > 100000) {
@@ -80,6 +69,7 @@ async function syncKubernetes(data) {
           time: Math.round(now.getTime() / 1000),
         });
       }
+      
     } catch (error){
       strapi.log.error(error)
     }
@@ -97,13 +87,7 @@ module.exports = {
 
   async pingK8s(data) {
     strapi.log.info('===============>>>>>> service.registry -- pingK8s ');
-    const k8sConf = {
-      server: data.address,
-      certificate_authority_data: '',
-      user: 'default',
-      token: data.content.credit,
-    };
-    const k8sApi = await this.getK8sApi(k8sConf);
+    const k8sApi = await this.getK8sApi(data.config);
     try {
       await k8sApi.listNamespace();
       return {
@@ -126,8 +110,8 @@ module.exports = {
     strapi.log.info(
       '============>> service.registry.fetchK8sNamespace: reg-id = ' + regId
     );
-    const k8sConf = await this.getK8sConfig(regId);
-    const k8sApi = await this.getK8sApi(k8sConf);
+    const registry = await this.findOne({ id: regId });
+    const k8sApi = await this.getK8sApi(registry.config);
     try {
       const result = await k8sApi.listNamespace();
       const namespaces = await strapi
@@ -158,42 +142,15 @@ module.exports = {
     }
     return {
       server: registry.address,
-      certificate_authority_data: '',
+      certificate_authority_data: registry.content.certificate,
       user: 'default',
       token: registry.content.credit,
     };
   },
 
   async getK8sApi(conf) {
-    const cluster = {
-      name: 'cluster-name',
-      cluster: {
-        'certificate-authority-data': conf.certificate_authority_data,
-        server: conf.server,
-        skipTLSVerify: true,
-      },
-    };
-    const user = {
-      name: conf.user,
-      user: {
-        token: conf.token,
-      },
-    };
-    const context = {
-      name: 'context-name',
-      context: {
-        user: user.name,
-        cluster: cluster.name,
-      },
-    };
-
     const kc = new k8s.KubeConfig();
-    kc.loadFromOptions({
-      clusters: [cluster],
-      users: [user],
-      contexts: [context],
-      currentContext: context.name,
-    });
+    kc.loadFromString(conf)
     return kc.makeApiClient(k8s.CoreV1Api);
   },
 
@@ -244,10 +201,6 @@ module.exports = {
             };
             let isNew = true,
               isGateway = false;
-            console.log(
-              item.instance[0].port['$'] == gatewayPort,
-              item.instance[0].ipAddr == gatewayPath
-            );
             if (
               item.instance[0].port['$'] == gatewayPort &&
               item.instance[0].ipAddr == gatewayPath
@@ -336,18 +289,10 @@ module.exports = {
       let installed = false;
       try {
         axios.defaults.timeout = 1000;
-        await axios({
-          method: 'get',
-          url: registry.address + '/apis/metrics.k8s.io/v1beta1/pods',
-          headers: {
-            Accept: 'application/json, text/plain, */*',
-            Authorization: 'Bearer ' + registry.content.credit,
-          },
-          httpsAgent: agent,
-        });
+        const k8sAxios = strapi.config.functions.kubeUtils.getK8sAxios(registry);
+        await k8sAxios.get('/apis/metrics.k8s.io/v1beta1/pods');
         installed = true;
       } catch (error) {
-        console.log(error);
       }
       if (installed) {
         // Already installed

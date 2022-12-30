@@ -2,6 +2,7 @@
 
 const https = require("https");
 const axios = require("axios");
+const YAML = require('yaml');
 
 module.exports = {
   async getKubeEntitys(ctx, type) {
@@ -118,13 +119,32 @@ module.exports = {
     if (!reg?.address?.length) {
       throw new Error("The cluster is not registered.");
     }
-    return axios.create({
-      httpsAgent: new https.Agent({ rejectUnauthorized: false }),
-      baseURL: reg.address,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + reg.content.credit,
-      },
-    });
+
+    const json = YAML.parse(reg.config)
+    const cluster = json.clusters.find((e) => e.name == json['current-context']);
+    const user = json.users.find((e) => e.name == json['current-context']);
+
+    if (user.user.token) {
+      return axios.create({
+        httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+        baseURL: cluster.cluster.server,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + user.user.token,
+        },
+      });
+    } else {
+      const cert = new Buffer.from(user.user["client-certificate-data"], "base64").toString() ;
+      const key = new Buffer.from(user.user["client-key-data"], "base64").toString();
+      
+      return axios.create({
+        httpsAgent: new https.Agent({ cert, key, rejectUnauthorized: false}),
+        baseURL: cluster.cluster.server,
+        headers: {
+          "Content-Type": "application/json"
+        },
+      });
+    }
+
   }
 };

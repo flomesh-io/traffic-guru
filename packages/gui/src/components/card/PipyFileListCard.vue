@@ -30,14 +30,14 @@
           v-if="content[file].type == 'json'"
           :is-readonly="isReadonly"
           :id="file"
-          :is-j-s-o-n="true"
+          :is-json="true"
           v-model:value="content[file].value"
         />
         <JsEditor
           v-else-if="content[file].type == 'js'"
           :is-readonly="isReadonly"
           :id="file"
-          :is-j-s-o-n="true"
+          :is-json="true"
           v-model:value="content[file].value"
         />
       </a-tab-pane>

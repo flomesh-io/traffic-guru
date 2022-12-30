@@ -12,7 +12,7 @@ import "monaco-editor/esm/vs/editor/contrib/find/findController.js";
 
 export default {
   name: "Monacoeditor",
-  props: ["content", "option", "height", "isReadonly", "id"],
+  props: ["content", "option", "height", "isReadonly", "id", "theme"],
   setup(props, ctx) {
     let inst = null;
     let code = reactive({ val: props.content });
@@ -30,7 +30,7 @@ export default {
     onMounted(() => {
       inst = monaco.editor.create(document.getElementById(props.id), {
         value: props.content,
-        theme: "vs-dark",
+        theme: props.theme || "vs-dark",
         language: props.option.mode,
         readOnly: props.isReadonly,
       });

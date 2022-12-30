@@ -6,6 +6,7 @@
       :option="cmOptions"
       @change="change"
       :height="height"
+      :theme="theme"
       :is-readonly="isReadonly"
     />
   </div>
@@ -18,7 +19,7 @@ import "monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution"
 export default {
   name: "JsEditor",
   components: { monacoeditor },
-  props: ["value", "height", "isReadonly", "id"],
+  props: ["value", "height", "isReadonly", "id", "theme"],
   data() {
     return {
       code: "",

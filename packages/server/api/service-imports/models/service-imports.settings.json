@@ -16,8 +16,8 @@
       "type": "string"
     },
     "registry": {
-      "model": "registry",
-      "via": "serviceImports"
+      "via": "serviceImports",
+      "model": "registry"
     },
     "content": {
       "type": "json"

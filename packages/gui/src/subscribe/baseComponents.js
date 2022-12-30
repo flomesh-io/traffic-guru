@@ -95,19 +95,19 @@ const baseComponents = {
     callback: `res => {
     /*TODO*/
     return {
-        config:{
-            icon:require('@/assets/img/lb.png'),
-            total:5,
-            unit:'unitge',
-            body:[
-                {label:'Type A',value:2,unit:''},
-                {label:'Type B',value:3,unit:''}
-            ],
-            foot:[
-                {label:'activeClient',value:1},
-                {label:'activeTarget',value:2}
-            ]
-        }
+      config:{
+        icon:require('@/assets/img/lb.png'),
+        total:5,
+        unit:'unitge',
+        body:[
+          {label:'Type A',value:2,unit:''},
+          {label:'Type B',value:3,unit:''}
+        ],
+        foot:[
+          {label:'activeClient',value:1},
+          {label:'activeTarget',value:2}
+        ]
+      }
     }
 }`,
   },
@@ -119,8 +119,8 @@ const baseComponents = {
     callback: `res => {
     /*TODO*/
     return {
-			  label:'',
-        barData:[{type:'typeA',date:'xAxis',value:0}]
+      label:'',
+      barData:[{type:'typeA',date:'xAxis',value:0}]
     }
 }`,
   },
@@ -132,7 +132,7 @@ const baseComponents = {
     callback: `res => {
     /*TODO*/
     return {
-        group:{bars:[{name:'name1',amount:0,usedAmount:0}]}
+      group:{bars:[{name:'name1',amount:0,usedAmount:0}]}
     }
 }`,
   },
@@ -144,19 +144,19 @@ const baseComponents = {
     callback: `res => {
     /*TODO*/
     return {
-				id: 'Test-MiniArea',
-				colors: ['#8bd4a1', '#fb9690'],
-				height: 240,
-				padding: [0, 0, 0, 0],
-				axis: false,
-				unit: 'unitge',
-				showy: false,
-				dv:[
-					{type:'typeA',date:'2022-11-11',value:20},
-					{type:'typeA',date:'2022-11-12',value:30},
-					{type:'typeB',date:'2022-11-11',value:30},
-					{type:'typeB',date:'2022-11-12',value:60},
-				]
+      id: 'Test-MiniArea',
+      colors: ['#8bd4a1', '#fb9690'],
+      height: 240,
+      padding: [0, 0, 0, 0],
+      axis: false,
+      unit: 'unitge',
+      showy: false,
+      dv:[
+        {type:'typeA',date:'2022-11-11',value:20},
+        {type:'typeA',date:'2022-11-12',value:30},
+        {type:'typeB',date:'2022-11-11',value:30},
+        {type:'typeB',date:'2022-11-12',value:60},
+      ]
     }
 }`,
   },
@@ -168,10 +168,10 @@ const baseComponents = {
     callback: `res => {
     /*TODO*/
     return {
-			id: 'Test-MiniBar',
-			height: 240,
-			axis: false,
-			dv:[{type:'typeA',date:'type1',value:10}]
+      id: 'Test-MiniBar',
+      height: 240,
+      axis: false,
+      dv:[{type:'typeA',date:'type1',value:10}]
     }
 }`,
   },
@@ -183,12 +183,12 @@ const baseComponents = {
     callback: `res => {
     /*TODO*/
     return {
-        colors:['#8bd4a1','#fac858','#fb9690'],
-				dv:[
-					{type:'Success',value:'250',name:'Success'},
-					{type:'Error',value:'150',name:'Error'},
-					{type:'Warn',value:'50',name:'Warn'}
-				]
+      colors:['#8bd4a1','#fac858','#fb9690'],
+      dv:[
+        {type:'Success',value:'250',name:'Success'},
+        {type:'Error',value:'150',name:'Error'},
+        {type:'Warn',value:'50',name:'Warn'}
+      ]
     }
 }`,
   },
@@ -200,16 +200,16 @@ const baseComponents = {
     callback: `res => {
     /*TODO*/
     return {
-        tops:[
-					{title:'Index A',items:[
-						{title:'Type A top',list:[{name:'Item A',value:'999'},{name:'Item B',value:'888'},{name:'Item C',value:'111'}]},
-						{title:'Type B top',list:[{name:'Item A',value:'999'},{name:'Item B',value:'555'},{name:'Item C',value:'333'}]},
-					]},
-					{title:'Index B',items:[
-						{title:'Type A top',list:[{name:'Item A',value:'999'},{name:'Item B',value:'333'},{name:'Item C',value:'222'}]},
-						{title:'Type B top',list:[{name:'Item A',value:'999'},{name:'Item B',value:'222'},{name:'Item C',value:'111'}]},
-					]}
-        ]
+      tops:[
+        {title:'Index A',items:[
+          {title:'Type A top',list:[{name:'Item A',value:'999'},{name:'Item B',value:'888'},{name:'Item C',value:'111'}]},
+          {title:'Type B top',list:[{name:'Item A',value:'999'},{name:'Item B',value:'555'},{name:'Item C',value:'333'}]},
+        ]},
+        {title:'Index B',items:[
+          {title:'Type A top',list:[{name:'Item A',value:'999'},{name:'Item B',value:'333'},{name:'Item C',value:'222'}]},
+          {title:'Type B top',list:[{name:'Item A',value:'999'},{name:'Item B',value:'222'},{name:'Item C',value:'111'}]},
+        ]}
+      ]
     }
 }`,
   },
@@ -221,7 +221,10 @@ const baseComponents = {
     callback: `res => {
     /*TODO*/
     return {
-        fields:[{title:'typeA',value:0,unit:'unitge'},{title:'typeB',value:0,unit:'unitge'}]
+      fields:[
+        {title:'typeA',value:0,unit:'unitge'},
+        {title:'typeB',value:0,unit:'unitge'}
+      ]
     }
 }`,
   },
@@ -233,13 +236,13 @@ const baseComponents = {
     callback: `res => {
     /*TODO*/
     return {
-        id:'XXX',
-				format:'{value}',
-				vals: [
-					{ title:'Running',value:30,color:'#00adef' },
-					{ title:'Completed',value:20,color:'#8bd4a1' },
-					{ title:'Failed',value:10,color:'#fb9690' }
-				],
+      id:'XXX',
+      format:'{value}',
+      vals: [
+        { title:'Running',value:30,color:'#00adef' },
+        { title:'Completed',value:20,color:'#8bd4a1' },
+        { title:'Failed',value:10,color:'#fb9690' }
+      ],
     }
 }`,
   },
@@ -251,13 +254,10 @@ const baseComponents = {
     callback: `res => {
     /*TODO*/
     return {
-        id:'XXX',
-		total:1000,
-		unit:'unitge',
-        vals:[
-            20,
-            30,
-        ]
+      id: 'XXX',
+      total: 1000,
+      unit: 'unitge',
+      vals: [ 20, 30 ]
     }
 }`,
   },

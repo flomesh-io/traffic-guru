@@ -1,5 +1,7 @@
 'use strict';
 
+const YAML = require('yaml');
+
 module.exports = {
   lifecycles: {
     beforeCreate: async (data) => {
@@ -11,19 +13,28 @@ module.exports = {
           );
         }
       }
-      const regQerys = await strapi
-        .query('registry')
-        .find({ address: data.address });
-      if (!(Array.prototype.isPrototypeOf(regQerys) && regQerys.length === 0)) {
-        throw new Error('The center is registered!');
-      }
       if (data.type == 'k8s') {
         const pingResult = await strapi.services.registry.pingK8s(data);
         if (!pingResult.isOK) {
           throw new Error('Illegal registration information!');
         }
+        if (!data.content.domain) {
+          data.content.domain = "cluster.local";
+        }
+        const json = YAML.parse(data.config)
+        if (json['current-context']) {
+          data.address = json.clusters.find((e) => e.name == json['current-context']).cluster.server
+        } else {
+          data.address = json.clusters[0].cluster.server
+        }
       } else {
         throw new Error(`Invalid registry type: ${data.type}`);
+      }
+      const regQerys = await strapi
+        .query('registry')
+        .find({ address: data.address });
+      if (!(Array.prototype.isPrototypeOf(regQerys) && regQerys.length === 0)) {
+        throw new Error('The center is registered!');
       }
     },
     afterCreate: async (result) => {
@@ -48,11 +59,17 @@ module.exports = {
         }
       }
     },
-    beforeUpdate: async (params) => {
+    beforeUpdate: async (params, data) => {
       const result = await strapi.query('registry').findOne({ id: params.id });
       if (result.type == 'k8s') {
         strapi.log.info('fetch k8s namespace');
         await strapi.services.registry.fetchK8sNamespace(params.id);
+        const json = YAML.parse(data.config)
+        if (json['current-context']) {
+          data.address = json.clusters.find((e) => e.name == json['current-context']).cluster.server
+        } else {
+          data.address = json.clusters[0].cluster.server
+        }
       } else {
         strapi.log.info('fetch xxx namespace');
       }

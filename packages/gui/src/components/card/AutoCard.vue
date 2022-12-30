@@ -12,7 +12,7 @@
       v-if="!data.noTitle"
     >
       <div class="handle move">
-        {{ title }}
+        {{ getTitle }}
       </div>
     </template>
     <template
@@ -106,6 +106,7 @@ import {
 import { getCurrentInstance, computed, shallowReactive, watch } from "vue";
 import { clickhouseResult2Array } from "@/utils/util";
 import { setDashboard } from "@/services/dashboard";
+import { customQuery } from "@/services/prometheus";
 
 export default {
   name: "AutoCard",
@@ -153,7 +154,7 @@ export default {
       source: null,
       loading: true,
     });
-    const title = computed(() => proxy.$t(data.noTitle ? "" : data.title));
+    const getTitle = computed(() => proxy.$t(data.noTitle ? "" : data.title));
     let subscribes = computed(() => props.subscribes);
     const ver = computed(() => props.ver);
     const config = computed(() => props.config);
@@ -224,6 +225,7 @@ export default {
       }
     };
     let serviceNormalCallback = (res, callback) => {
+      ctx.emit("resp", {type:'normal',data:res});
       data.loading = false;
       data.resData = callback ? callback(res) : null;
       if (!data.tag) {
@@ -238,6 +240,7 @@ export default {
       }, 10);
     };
     let serviceCustomCallback = (res, callback) => {
+      ctx.emit("resp", {type:'custom',data:res});
       data.loading = false;
       data.resData = callback ? callback(res) : null;
       data.tag = subscribe.baseComponents[data.config.tag.name].component;
@@ -272,9 +275,14 @@ export default {
           })
           .then((res) => {
             serviceNormalCallback(res, callback);
+          })
+          .catch(error => {
+            proxy.$message.error(error.toString(), 3);
+            ctx.emit("resp", {type:'normal',error:error.toString()});
           });
       } else {
         serviceNormalCallback(null, callback);
+        ctx.emit("resp", {type:'normal',data:{}});
       }
     };
     let renderCardByCustom = () => {
@@ -292,11 +300,16 @@ export default {
     };
     let reqCustomService = () => {
       const callback = eval(data.config.data);
-      if (data.config.service) {
-        if (data.config.service.type == "clickhouse") {
+      let _service = data.config.service;
+      if (_service && (
+        ( _service.type == "clickhouse" && !!_service.clickhouseSQL) || 
+        ( _service.type == "prometheus" && !!_service.prometheusSQL) || 
+        ( _service.type == "rest" && !!_service.path)
+      )) {
+        if (_service.type == "clickhouse") {
           proxy
             .$request(
-              proxy.$REST.CLICKHOUSE.QUERY(data.config.service.clickhouseSQL),
+              proxy.$REST.CLICKHOUSE.QUERY(_service.clickhouseSQL),
               proxy.$METHOD.GET,
             )
             .then((res) => {
@@ -304,31 +317,45 @@ export default {
                 clickhouseResult2Array(res.data),
                 callback,
               );
+            })
+            .catch(error => {
+              proxy.$message.error(error.toString(), 3);
+              ctx.emit("resp", {type:'custom',error:error.toString()});
             });
-        } else if (data.config.service.type == "prometheus") {
-          proxy
-            .$request(
-              proxy.$REST.PROMETHEUS.QUERY_RANGE(
-                data.config.service.prometheusSQL,
-              ),
-              proxy.$METHOD.GET,
-            )
+        } else if (_service.type == "prometheus") {
+          customQuery(_service.prometheusSQL,true)({
+            ...props.params,
+            pid: props.pid,
+            where: props.where,
+            filters: props.filters,
+            apply: props.apply,
+            kind: props.kind,
+          })
             .then((res) => {
               serviceCustomCallback(res.data, callback);
+            })
+            .catch(error => {
+              proxy.$message.error(error.toString(), 3);
+              ctx.emit("resp", {type:'custom',error:error.toString()});
             });
         } else {
           proxy
             .$request(
-              "http://" + data.config.service.path,
-              proxy.$METHOD[data.config.service.method],
-              JSON.parse(data.config.service.payload),
+              "http://" + _service.path,
+              proxy.$METHOD[_service.method],
+              JSON.parse(_service.payload),
             )
             .then((res) => {
               serviceCustomCallback(res, callback);
+            })
+            .catch(error => {
+              proxy.$message.error(error.toString(), 3);
+              ctx.emit("resp", {type:'custom',error:error.toString()});
             });
         }
       } else {
         serviceCustomCallback(null, callback);
+        ctx.emit("resp", {type:'custom',data:{}});
       }
     };
     let renderCard = () => {
@@ -344,7 +371,7 @@ export default {
     renderCard();
     return {
       data,
-      title,
+      getTitle,
       getSubscribe,
       subscribeChange,
       toggleRuntime,

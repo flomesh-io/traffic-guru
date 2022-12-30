@@ -55,6 +55,9 @@
     "serviceImports": {
       "via": "registry",
       "collection": "service-imports"
+    },
+    "config": {
+      "type": "text"
     }
   }
 }

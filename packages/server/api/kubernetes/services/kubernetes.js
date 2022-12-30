@@ -25,37 +25,44 @@ module.exports = {
 
   // eslint-disable-next-line no-unused-vars
   async getKubeConfig(clusterId, type) {
-    const conf = await strapi.services.registry.getK8sConfig(clusterId);
-
-    const cluster = {
-      name: 'cluster-name',
-      cluster: {
-        'certificate-authority-data': conf.certificate_authority_data,
-        server: conf.server,
-        skipTLSVerify: true,
-      },
-    };
-    const user = {
-      name: conf.user,
-      user: {
-        token: conf.token,
-      },
-    };
-    const context = {
-      name: 'context-name',
-      context: {
-        user: user.name,
-        cluster: cluster.name,
-      },
-    };
+    const registry = await strapi.query("registry").findOne({id: clusterId})
+    if (!registry) throw new Error("Please set and select a registry");
 
     const kc = new k8s.KubeConfig();
-    kc.loadFromOptions({
-      clusters: [cluster],
-      users: [user],
-      contexts: [context],
-      currentContext: context.name,
-    });
+    if (registry.config) {
+      kc.loadFromString(registry.config);
+    } else {
+      const conf = await strapi.services.registry.getK8sConfig(clusterId);
+  
+      const cluster = {
+        name: 'cluster-name',
+        cluster: {
+          'certificate-authority-data': conf.certificate_authority_data,
+          server: conf.server,
+          skipTLSVerify: true,
+        },
+      };
+      const user = {
+        name: conf.user,
+        user: {
+          token: conf.token,
+        },
+      };
+      const context = {
+        name: 'context-name',
+        context: {
+          user: user.name,
+          cluster: cluster.name,
+        },
+      };
+  
+      kc.loadFromOptions({
+        clusters: [cluster],
+        users: [user],
+        contexts: [context],
+        currentContext: context.name,
+      });
+    }
     return kc;
   },
 
@@ -535,7 +542,6 @@ module.exports = {
       type = type.slice(0,1).toUpperCase() + type.slice(1);
     }
     const fieldLable = `involvedObject.kind=${type},involvedObject.name=${name}`
-    console.log(fieldLable,namespace)
     const events = await k8sCoreApi.listNamespacedEvent(namespace,null,null,null,fieldLable);
 
     ctx.response.body = events.body

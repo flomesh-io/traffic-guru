@@ -5,13 +5,7 @@ module.exports = {
     strapi.log.info(
       '============>> service.namespace.fetchK8sService: ns = ' + nsData.name
     );
-    const k8sConf = {
-      server: nsData.registry.address,
-      certificate_authority_data: '',
-      user: 'default',
-      token: nsData.registry.content.credit,
-    };
-    const k8sApi = await strapi.services.registry.getK8sApi(k8sConf);
+    const k8sApi = await strapi.services.registry.getK8sApi(nsData.registry.config);
     try {
       const result = await k8sApi.listNamespacedService(nsData.name);
       result.body.items.forEach(async (item) => {

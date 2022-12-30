@@ -114,7 +114,7 @@
               >
                 <template #content>
                   <JsonEditor
-                    :is-j-s-o-n="true"
+                    :is-json="true"
                     :value="detail.content.metadata.annotations[key]"
                   />
                 </template>

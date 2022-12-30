@@ -119,6 +119,9 @@ export async function deleteUserWidget(id) {
 export async function getUserWidgets() {
   return query(`widgets{id,name,shared,user_id,content}`);
 }
+export async function getUserWidget(id) {
+  return query(`widget(id:${id}){id,name,shared,user_id,content}`);
+}
 
 export const SAMPLE_WIDGET = {
   id: "TEST-CUSTOM",
@@ -186,29 +189,33 @@ export const PROMETHEUS_SAMPLE_WIDGET = {
     method: "GET",
     payload: "{}",
     clickhouseSQL: "",
-    prometheusSQL: "sum(rate(http_requests_count[5m]))",
+    prometheusSQL: "sum(pipy_chunk_size)",
   },
   col: 6,
   data: `res => {
 	let dv = [];
-	if(!res || !res.data || !res.data.result){
-		return null
-	}
-	res.data.result.forEach((item,index) => {
-		dv.push({
-			type:'item'+index,
-			value:(item.value[1]*1).toFixed(2),
-			date:new Date(item.value[0]*1000).toISOString().split('.')[0].replace('T',' ')
+	if(res.data?.result){
+		res.data.result.forEach((result,i) => {
+			result.values.forEach((value,j) => {
+				if(value[1]){
+					dv.push({
+						type:'item'+i,
+						value:(value[1]*1).toFixed(2),
+						date:new Date(value[0]*1000).toISOString().split('.')[0].replace('T',' ')
+					})
+				}
+			})
 		})
-	})
+	}
 	return {
 		id: 'Test-Prometheus-MiniArea',
 		colors: ['#8bd4a1', '#fb9690'],
 		height: 240,
+		padding: [0, 0, 0, 0],
 		axis: false,
-		unit: 'MB',
+		unit: 'unitge',
 		showy: false,
-		dv:dv
+		dv
 	}
 }`,
 };

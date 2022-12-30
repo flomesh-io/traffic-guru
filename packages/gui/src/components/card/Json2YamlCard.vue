@@ -17,7 +17,7 @@
       :height="height"
       :is-readonly="isReadonly"
       v-if="configKey == 'JSON'"
-      :is-j-s-o-n="true"
+      :is-json="true"
       :noreset="!isReadonly"
       v-model:value="json"
     />

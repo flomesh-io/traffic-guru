@@ -2,6 +2,21 @@ import { request, METHOD } from "@/utils/request";
 import api from "@/services/api";
 import _ from "lodash";
 
+export function customQuery(query, isInit) {
+  return async function (params) {
+    let timelineQL = params.filters?.timelineQL;
+    const url = getUrl(
+      params.kind,
+      params.mesh,
+      params.namespaceId,
+      timelineQL,
+      query,
+      isInit,
+    );
+    return request(url, METHOD.GET);
+  };
+}
+
 export function getTPS(isInit) {
   return async function (params) {
     let timelineQL = params.filters?.timelineQL;
@@ -104,9 +119,9 @@ export function mapData(lastData, resStr, make) {
 }
 
 export function getUrl(kind, id, namespace, timelineQL, query, isInit) {
-  let timeFilter = `${timelineQL}`;
-  let append = isInit ? `${query}${timeFilter}` : query;
   if (isInit) {
+		let timeFilter = timelineQL ? timelineQL : getTimelinePQL(20,100);
+		let append = `${query}${timeFilter}`;
     return api.PROMETHEUS.QUERY_RANGE(
       append,
       namespace,
@@ -114,7 +129,7 @@ export function getUrl(kind, id, namespace, timelineQL, query, isInit) {
     );
   } else {
     return api.PROMETHEUS.QUERY(
-      append,
+      query,
       namespace,
       kind == "mesh" ? id : null,
     );

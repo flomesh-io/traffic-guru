@@ -14,14 +14,17 @@
           key="1"
           :tab="$t('Namespace')"
         >
-          <a-empty
-            :image="simpleImage"
+          <a-result
             v-if="pid == ''"
-            class="mt-100"
-            :description="
-              $t('Please save the registration certificate first')
-            "
-          />
+            :sub-title="$t('Please save the registration certificate first')"
+          >
+            <template #icon>
+              <img
+                src="../../assets/img/empty.svg"
+                style="width: 200px"
+              >
+            </template>
+          </a-result>
 
           <a-row
             class="row-mg"
@@ -83,7 +86,6 @@
 </template>
 
 <script>
-import { Empty } from "ant-design-vue";
 import RegistryBaseDetail from "./common/RegistryBaseDetail";
 import { RightOutlined } from "@ant-design/icons-vue";
 import { mapState } from "vuex";
@@ -101,7 +103,6 @@ export default {
     return {
       selectedKeys: [],
       selectedNS: [],
-      simpleImage: Empty.PRESENTED_IMAGE_SIMPLE,
       namespaces: [],
       detail: {
         organization: null,

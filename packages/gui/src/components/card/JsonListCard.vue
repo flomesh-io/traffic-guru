@@ -25,7 +25,7 @@
       >
         <JsonEditor
           :id="file + '.json'"
-          :is-j-s-o-n="true"
+          :is-json="true"
           v-model:value="content[file]"
         />
       </a-tab-pane>

@@ -108,13 +108,40 @@ const system = {
       component: () => import("@/pages/system/Users"),
     },
     {
-      path: "components",
-      name: "UI Components",
+      path: "widget/list",
+      name: "UI Widgets",
       meta: {
         authority: "widget:find",
         icon: BuildOutlined,
       },
-      component: () => import("@/pages/system/Components"),
+      component: () => import("@/pages/system/Widgets"),
+    },
+    {
+      path: "widget/creator",
+      name: "UI Widget Creator",
+      meta: {
+        authority: "widget:find",
+        invisible: true,
+      },
+      component: () => import("@/pages/system/WidgetEditor"),
+    },
+    {
+      path: "widget/editor/:id",
+      name: "UI Widget Editor",
+      meta: {
+        authority: "widget:find",
+        invisible: true,
+      },
+      component: () => import("@/pages/system/WidgetEditor"),
+    },
+    {
+      path: "widget/preview/:name",
+      name: "UI Widget Preview",
+      meta: {
+        authority: "widget:find",
+        invisible: true,
+      },
+      component: () => import("@/pages/system/WidgetEditor"),
     },
   ],
 };
