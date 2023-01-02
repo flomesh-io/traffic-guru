@@ -2,6 +2,7 @@
 
 const axios = require('axios');
 const querystring = require('querystring');
+const fs = require('fs');
 
 module.exports = {
   async proxy(ctx) {
@@ -76,5 +77,71 @@ module.exports = {
       return ctx.response.body;
     }
     return 0;
+  },
+
+  async createTable(pipy, id) {
+    if (!pipy?.content?.log?.bind && !id) return
+    const fleet = await strapi
+      .query('fleet')
+      .findOne({ id: id ? id: pipy.content.log.bind.id });
+    if (!fleet) {
+      return;
+    }
+    const tableName = id ? "log" : pipy.content.log.table;
+
+    const config = fleet.content;
+    const method = 'POST';
+
+    let queryTable = `select count() from system.tables where name ='${tableName}'`;
+
+    queryTable = querystring.escape(queryTable);
+    const urlQueryTable = `http://${config.host}:${config.port}/?database=${config.database}&query=${queryTable}`;
+
+    let response;
+    try {
+      if (config.user) {
+        const base64Str = new Buffer.from(
+          config.user + ':' + config.password
+        ).toString('base64');
+        response = await axios({
+          method: method,
+          url: urlQueryTable,
+          headers: { Authorization: 'Basic ' + base64Str },
+          timeout: 30000,
+        });
+      } else {
+        response = await axios({
+          method: method,
+          url: urlQueryTable,
+        });
+      }
+
+      if (response.data == 0) {
+        const ddl = fs.readFileSync(`${__dirname}/log.ddl`, 'utf8');
+
+        let createTable = ddl.replace('default.log', tableName);
+        createTable = querystring.escape(createTable);
+        const urlCreateTable = `http://${config.host}:${config.port}/?database=${config.database}&query=${createTable}`;
+
+        if (config.user) {
+          const base64Str = new Buffer.from(
+            config.user + ':' + config.password
+          ).toString('base64');
+          response = await axios({
+            method: method,
+            url: urlCreateTable,
+            headers: { Authorization: 'Basic ' + base64Str },
+            timeout: 30000,
+          });
+        } else {
+          response = await axios({
+            method: method,
+            url: urlCreateTable,
+          });
+        }
+      }
+    } catch (error) {
+      strapi.log.error(error);
+    }
   },
 };

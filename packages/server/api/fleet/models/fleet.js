@@ -17,6 +17,10 @@ module.exports = {
         for (const clickhouse of clickhouses) {
           strapi.query('fleet').update({ id: clickhouse.id }, { apply: false });
         }
+
+      }
+      if (result.type === 'clickhouse') {
+        await strapi.services.clickhouse.createTable(null, result.id);
       }
     },
     afterUpdate: async (result, params, data) => {
@@ -47,6 +51,7 @@ module.exports = {
             await strapi.services.fleet.deploy(ing);
           }
         }
+        await strapi.services.clickhouse.createTable(null, result.id);
       }
 
       // remove config cache file
