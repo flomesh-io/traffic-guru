@@ -2,6 +2,14 @@
 
 module.exports = {
   lifecycles: {
+    async beforeCreate() {
+      const ch = await strapi
+        .query('fleet')
+        .findOne({ type: 'clickhouse', apply: true });
+      if (!ch) {
+        throw new Error('Please add clickhouse to the component first');
+      }
+    },
     async afterCreate(result) {
       await strapi.services.mesh.osmInstall(result);
     },
