@@ -24,7 +24,7 @@ module.exports = {
       }
     },
     afterUpdate: async (result, params, data) => {
-      if (!data || !data.type) return;
+      if (!data || !result.type) return;
 
       if (result.type === 'clickhouse' && result.apply) {
         const clickhouses = await strapi.query('fleet').find({

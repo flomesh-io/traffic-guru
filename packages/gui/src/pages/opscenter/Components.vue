@@ -128,6 +128,28 @@
           <template #default="{ item }">
             <a-card-meta>
               <template #title>
+                <span
+                  v-if="(item?.type || '').toLowerCase() == 'clickhouse'"
+                  class="card-span toggle-card-item"
+                >
+                  <a-divider type="vertical" />
+                  <a-tooltip placement="topLeft">
+                    <template #title>
+                      <span>{{ item.apply?$t('Actived'):$t('Click here to apply this one') }}</span>
+                    </template>
+                    <CaretRightOutlined
+                      @click="apply(item)"
+                      v-permission="['admin']"
+                      v-if="!item.apply"
+                      class="font-20 gray handle icon-menu-sm relative"
+                    />
+                    <Status
+                      v-else
+                      :d="{status:'success'}" 
+                      class="font-primary icon-menu-sm"
+                    />
+                  </a-tooltip>
+                </span>
                 <div class="mb-3">
                   <a-badge
                     status="processing"
@@ -229,27 +251,6 @@
                 </span>
               </a-select-option>
             </a-select>
-          </a-descriptions-item>
-          <a-descriptions-item
-            v-if="(payload?.type || '').toLowerCase() == 'clickhouse'"
-            :class="{ 'hide-row': !isEdit }"
-            :label="$t('Apply')"
-            :span="3"
-          >
-            <a-switch
-              v-permission="['admin']"
-              v-model:checked="payload.apply"
-            />
-            <StopOutlined
-              v-permission="['!admin']"
-              v-if="!payload.apply"
-              class="danger font-18"
-            />
-            <CheckCircleFilled
-              v-permission="['!admin']"
-              v-if="payload.apply"
-              class="font-18 success"
-            />
           </a-descriptions-item>
           <a-descriptions-item
             v-if="
@@ -605,7 +606,12 @@
 import _ from "lodash";
 import Json2YamlCard from "@/components/card/Json2YamlCard";
 import JsonEditor from "@/components/editor/JsonEditor";
-import { InfoCircleOutlined, PlusCircleTwoTone, CheckCircleFilled, StopOutlined } from "@ant-design/icons-vue";
+import Status from "@/components/tag/Status";
+import { 
+  InfoCircleOutlined, 
+  PlusCircleTwoTone, 
+  CaretRightOutlined,
+} from "@ant-design/icons-vue";
 import PageLayout from "@/layouts/PageLayout";
 import HeadInfo from "@/components/tool/HeadInfo";
 import CardList from "@/components/card/CardList";
@@ -627,12 +633,12 @@ export default {
     PlusCircleTwoTone,
     Json2YamlCard,
     RingStatus,
+    Status,
     MiniArea,
     IdentityList,
-    CheckCircleFilled,
-    StopOutlined,
     FormItem,
     JsonEditor,
+    CaretRightOutlined,
   },
 
   i18n: require("@/i18n"),
@@ -885,7 +891,7 @@ export default {
         type: this.$isPro ? "pipy" : "prometheus",
         content: "",
         json: {},
-        apply:false,
+        apply:true,
         template: null,
       };
       this.renderCallback();
@@ -939,6 +945,29 @@ export default {
         }
       }
       return true;
+    },
+
+    apply(item) {
+      this.$gql
+        .mutation(
+          `updateFleet(input: $input){fleet{id}}`,
+          {
+            input: {
+              where: { id: item.id },
+              data: {
+                apply: true
+              },
+            },
+          },
+          {
+            input: "updateFleetInput",
+          },
+        )
+        .then(() => {
+          this.$message.success(this.$t("Save successfully"), 3);
+          this.visible = false;
+          this.loaddata();
+        });
     },
 
     handleOk() {

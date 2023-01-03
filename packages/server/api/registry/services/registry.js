@@ -57,6 +57,7 @@ async function syncKubernetes(data) {
           }
           
         } catch (error) {
+          strapi.log.error("Sync metrics");
           strapi.log.error(error);
         }
       }
@@ -71,6 +72,7 @@ async function syncKubernetes(data) {
       }
       
     } catch (error){
+      strapi.log.error("Get metrics");
       strapi.log.error(error)
     }
   }
@@ -107,9 +109,6 @@ module.exports = {
   },
 
   async fetchK8sNamespace(regId) {
-    strapi.log.info(
-      '============>> service.registry.fetchK8sNamespace: reg-id = ' + regId
-    );
     const registry = await this.findOne({ id: regId });
     const k8sApi = await this.getK8sApi(registry.config);
     try {
@@ -118,10 +117,8 @@ module.exports = {
         .query('namespace')
         .find({ registry: regId });
       result.body.items.forEach(async (item) => {
-        strapi.log.info(
-          '      ======>>>> fetch namespace: ' + item.metadata.name
-        );
         if (!namespaces.find((n) => n.name == item.metadata.name)) {
+          strapi.log.info('fetch new namespace: ' + item.metadata.name);
           strapi.services.namespace.create({
             name: item.metadata.name,
             registry: regId,
@@ -394,7 +391,7 @@ module.exports = {
     // RoleBinding metrics-server-auth-reader========================
     exists = false;
     try {
-      await k8sRabcApi.readClusterRoleBinding('metrics-server-auth-reader');
+      await k8sRabcApi.readNamespacedRoleBinding('metrics-server-auth-reader', 'kube-system');
       exists = true;
     } catch (error) {}
     if (!exists) {
@@ -421,7 +418,7 @@ module.exports = {
           },
         ],
       };
-      await k8sRabcApi.createClusterRoleBinding(content);
+      await k8sRabcApi.createNamespacedRoleBinding('kube-system', content);
     } else {
     }
 
@@ -606,7 +603,7 @@ module.exports = {
           },
         },
       };
-      await k8sCoreApi.createNamespacedDeployment('kube-system', content);
+      await k8sAppApi.createNamespacedDeployment('kube-system', content);
     }
 
     // APIService ========================

@@ -15,9 +15,14 @@ async function syncRegistries() {
   const all = await strapi.query('registry').find();
   for (const data of all) {
     try {
-      strapi.services.registry.sync(data);
+      await strapi.services.registry.fetchK8sNamespace(data.id);
     } catch (err) {
-      strapi.log.error(err.message);
+      strapi.log.error(err);
+    }
+    try {
+      await strapi.services.registry.sync(data);
+    } catch (err) {
+      strapi.log.error(err);
     }
   }
   

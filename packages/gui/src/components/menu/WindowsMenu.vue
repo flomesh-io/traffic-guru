@@ -31,6 +31,7 @@
       :class="contentIndex >= 0 ? 'select' : ''"
       placement="bottom"
       :height="600"
+      :destroy-on-close="true"
       :visible="visible"
       mask-style="background:rgba(0,0,0,0)"
       :closable="false"

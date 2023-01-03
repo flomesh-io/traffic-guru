@@ -385,21 +385,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-  .card-swap {
-    fill: #999;
-    height: 20px;
-    width: 20px;
-    top: 1px;
-    z-index: 100;
-    font-size: 18px;
-    color: #999;
-  }
-  .card-span {
-    position: absolute;
-    z-index: 100;
-    right: 25px;
-    top: 15px;
-  }
   .toggle-card {
     cursor: pointer;
     transition: all 0.3s;
