@@ -112,7 +112,7 @@ $ yarn serve:gui
 Please refer to [quick-start](https://clickhouse.com/docs/en/quick-start/).
 - Add the ClickHouse configuration on the registry page
 
-![ clickhouse configuration](./doc/images/clickhouse.png)
+![ clickhouse configuration](./docs/images/clickhouse.png)
 
 |     VAR     |           DESCRIPTION            |
 | :---------: | :------------------------------: |
@@ -130,7 +130,7 @@ Please refer to [kubernetes-doc](https://kubernetes.io/docs/home/).
 Please refer to [web-ui-dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/).
 - Add the K8s configuration on the registry page
 
-![ K8s configuration](./doc/images/k8s.png)
+![ K8s configuration](./docs/images/k8s.png)
 
 |        VAR        |           DESCRIPTION            |
 | :---------------: | :------------------------------: |
