@@ -76,4 +76,4 @@ $ yarn serve:gui
 |  Certificate      |        K8s CA cert               |
 
 ## Helm运行
-参考 [Helm运行](../../charts/README.md)
+参考 [Helm运行](../../charts/traffic-guru/README.md)
