@@ -45,9 +45,12 @@ helm repo add bitnami https://charts.bitnami.com/bitnami
 Install **Clickhouse** server with username `flomesh` and password `password`
 
 ```shell
-helm install my-release bitnami/clickhouse --namespace click-house --create-namespace \
+helm install clickhouse bitnami/clickhouse --namespace click-house --create-namespace \
  --set auth.username=flomesh \
- --set auth.password=password
+ --set auth.password=password \
+ --set shards=1 \
+ --set replicaCount=1 \
+ --set zookeeper.enabled=false
 ```
 
 ## Install traffic-guru
@@ -106,7 +109,7 @@ In pop-up window, choose type "Clickhouse" and attach content below in "Config" 
 
 ```yaml
 ---
-  host: "my-release-clickhouse.svc.cluster.local"
+  host: "clickhouse.click-house.svc.cluster.local"
   port: 8123
   user: “flomesh”
   password: "password"
