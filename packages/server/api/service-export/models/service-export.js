@@ -49,21 +49,40 @@ module.exports = {
         }
       }
     },
-    async afterUpdate() {
-      // get all registries
-      const regs = await strapi.query('registry').find();
-      for (let index = 0; index < regs.length; index++) {
-        if (regs[index].type === 'k8s') {
-          // sync service imports from k8s
-          await strapi.services['service-imports'].syncCreateSvcImports(regs[index]);
-        }
-      }
-    },
 
-    async afterUpdate() {
-      /////////////
-      //TODO:: 更新k8s svc-exports
-      /////////////
+    async afterUpdate(result) {
+      const svc = await strapi.query('service').findOne({
+        id: result.service.id
+      });
+      const svcExportData = {
+        apiVersion: 'flomesh.io/v1alpha1',
+        kind: 'ServiceExport',
+        metadata: {
+          namespace: svc.namespace,
+          name: svc.name,
+        },
+        spec: {
+          rules: [{
+            portNumber: result.content.portNumber,
+            path: result.content.path,
+            pathType: 'Prefix',
+          }],
+        }
+      };
+      // update service exports in k8s
+      const k8sAxios = strapi.config.functions.kubeUtils.getK8sAxios(svc.registry);
+      const svcExportsUrl = '/apis/flomesh.io/v1alpha1/namespaces/' + svc.namespace + '/serviceexports/' + svc.name;
+      await k8sAxios.get(svcExportsUrl).then(function (response) {
+        // get resourceVersion for update
+        svcExportData.metadata.resourceVersion = response.data.metadata.resourceVersion;
+        k8sAxios.put(svcExportsUrl, svcExportData).catch(function (error) {
+          strapi.log.error(error);
+          throw new Error('ErieCanal ' + error);
+        });
+      }).catch(function (error) {
+        strapi.log.error(error);
+        throw new Error('ErieCanal ' + error);
+      });
     },
 
     async beforeDelete(params) {

@@ -121,7 +121,7 @@ module.exports = {
     });
 
     if (result.mcsEnable) {
-      let helmFsmCmd = `helm repo add fsm https://charts.flomesh.io && helm install --namespace ${result.namespace.name} --kubeconfig ${kubeconfigPath} --set fsm.logLevel=5 --version=0.2.0-alpha.10 fsm fsm/fsm --create-namespace`;
+      let helmFsmCmd = `helm repo add fsm https://charts.flomesh.io && helm install --namespace ${result.namespace.name} --kubeconfig ${kubeconfigPath} --set fsm.logLevel=5 --version=0.2.0-beta.3 fsm fsm/fsm --create-namespace`;
 
       if (result.timeout) {
         helmFsmCmd += ' --timeout ${result.timeout}';

@@ -450,7 +450,6 @@ module.exports = {
       item.active = active;
       item.notWorking = notWorking;
     } else if (type == "daemonset") {
-      podLabel = "app=" + item.metadata.name
       const nodes = await k8sCoreApi.listNode()
       desired--
       for (const node of nodes.body.items) {
@@ -461,21 +460,28 @@ module.exports = {
           }
         }
       }
+      item.podInfo = {desired: desired, succeeded: 0, running: item.status.numberAvailable ? item.status.numberAvailable : 0}
+
     } else if (type == "deployment") {
-      podLabel = "k8s-app=" + item.metadata.name
       desired = item.spec.replicas
+      item.podInfo = {desired: desired, succeeded: 0, running: item.status.availableReplicas ? item.status.availableReplicas : 0}
 
     } else if (type == "job") {
       podLabel = "job-name=" + item.metadata.name
     } else if (type == "replicaset") {
-      podLabel = "app=" + item.metadata.labels["app"] + ",pod-template-hash=" + item.metadata.labels["pod-template-hash"]
       desired = item.spec.replicas
+      item.podInfo = {desired: desired, succeeded: 0, running: item.status.availableReplicas ? item.status.availableReplicas : 0}
+
     } else if (type == "replicationcontroller") {
+
       desired = item.status.replicas
-      podLabel = "app=" + item.metadata.name
+      item.podInfo = {desired: desired, succeeded: 0, running: item.status.availableReplicas ? item.status.availableReplicas : 0}
+
     } else if (type == "statefulset") {
-      podLabel = "app=" + item.metadata.name
+
       desired = item.spec.replicas
+      item.podInfo = {desired: desired, succeeded: 0, running: item.status.readyReplicas ? item.status.readyReplicas : 0}
+
     } 
 
     if (podLabel || fieldLable) {
