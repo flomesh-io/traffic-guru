@@ -23,13 +23,13 @@ curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 ### Mysql
 
 ```shell
-helm repo add my-repo https://charts.bitnami.com/bitnami
+helm repo add bitnami https://charts.bitnami.com/bitnami
 ```
 
 Install Mysql, set default `root` password to `root`, create a **database** `flomesh` with user `flomesh` and password `Flomesh1234`
 
 ```shell
-helm install my-release my-repo/mysql  --namespace mysql-operator --create-namespace  \
+helm install mysql bitnami/mysql  --namespace mysql --create-namespace  \
     --set auth.database=flomesh \
     --set auth.username=flomesh \
     --set auth.password=Flomesh1234 \
@@ -66,7 +66,7 @@ helm install \
 	traffic-guru \
 	flomesh/traffic-guru \
 	--set gui.tag=0.0.7-4 \
-	--set database.host=my-release-mysql.mysql-operator.svc.cluster.local \
+	--set database.host=mysql.mysql.svc.cluster.local \
 	--set database.port=3306 \
 	--set database.username=flomesh \
 	--set database.password=Flomesh1234 \
