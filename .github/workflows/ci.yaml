@@ -1,0 +1,70 @@
+name: Build
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - '*'
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  set-release-version:
+    name: set-release-version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set RELEASE_VERSION
+        id: version
+        run: |
+          pwd
+          ls -l
+          CI_COMMIT_DATE=$(date +%Y%m%d%H%M)
+          echo "CI_COMMIT_DATE=${CI_COMMIT_DATE}" >> $GITHUB_ENV
+          git fetch --tags
+          RELEASE_VERSION=`git name-rev --tags --name-only $(git rev-parse HEAD)`
+          if [ $RELEASE_VERSION = 'undefined' ]
+          then
+              echo "release_version=nightly-${CI_COMMIT_DATE}" >> $GITHUB_OUTPUT
+              echo "version=nightly" >> $GITHUB_OUTPUT
+              echo "commit_date=${CI_COMMIT_DATE}" >> $GITHUB_OUTPUT
+          else
+              echo "release_version=${RELEASE_VERSION}" >> $GITHUB_OUTPUT
+              echo "commit_date=${CI_COMMIT_DATE}" >> $GITHUB_OUTPUT
+          fi
+
+    outputs:
+      release_version: ${{steps.version.outputs.release_version}}
+      commit_date: ${{steps.version.outputs.commit_date}}
+
+  build-image:
+    needs: set-release-version
+    name: build-image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Setup buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: ${{secrets.IMAGE}}:latest,${{secrets.IMAGE}}:${{needs.set-release-version.outputs.release_version}}
+          file: dockerfiles/Dockerfile
+
