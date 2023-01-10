@@ -14,7 +14,10 @@
         :sm="24"
         :xs="24"
       >
-        <a-tabs type="card">
+        <a-tabs
+          type="card"
+          :destroy-inactive-tab-pane="true"
+        >
           <a-tab-pane
             key="1"
             :tab="$t('Overview')"
@@ -234,8 +237,37 @@
               <EventList
                 :namespace="namespace"
                 :has-search="false"
-                :url="$REST.K8S.POD + '/' + pid + '/event'"
+                :url="$REST.K8S.POD + '/' + pid +'/event'"
               />
+            </a-card>
+          </a-tab-pane>
+          <a-tab-pane
+            key="6"
+            :tab="$t('Log')"
+            v-if="selectContainer"
+          >
+            <a-card
+              class="card nopd"
+              :bordered="false"
+              :loading="loading"
+            >
+              <LogList
+                :namespace="namespace"
+                :has-search="true"
+                :url="$REST.K8S.POD + '/' + pid + '/' + selectContainer + '/log'"
+              >
+                <template #extra>
+                  <a-select v-model:value="selectContainer">
+                    <a-select-option 
+                      v-for="(container, index3) in detail.spec.containers" 
+                      :key="index3" 
+                      :value="container.name"
+                    >
+                      {{ container.name }}
+                    </a-select-option>
+                  </a-select>
+                </template>
+              </LogList>
             </a-card>
           </a-tab-pane>
         </a-tabs>
@@ -246,6 +278,7 @@
 
 <script>
 import EventList from "./components/EventList";
+import LogList from "./components/LogList";
 import StatusList from "./components/StatusList";
 import PageLayout from "@/layouts/PageLayout";
 import DetailList from "@/components/tool/DetailList";
@@ -290,6 +323,7 @@ export default {
     DetailList,
     PageLayout,
     EventList,
+    LogList,
     StatusList,
     ImageTags,
     DetailHeader,
@@ -299,6 +333,7 @@ export default {
 
   data() {
     return {
+      selectContainer: null,
       detail: {
         metadata: { labels: {}, annotations: {} },
         typeMeta: {},
@@ -370,6 +405,9 @@ export default {
       this.loading = true;
       this.$request(this.URL(), this.$METHOD.GET).then((res) => {
         this.detail = res.data;
+        if(this.detail.spec.containers.length >0){
+          this.selectContainer = this.detail.spec.containers[0].name;
+        }
         this.loading = false;
       });
     },

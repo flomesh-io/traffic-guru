@@ -473,12 +473,10 @@ module.exports = {
       item.podInfo = {desired: desired, succeeded: 0, running: item.status.availableReplicas ? item.status.availableReplicas : 0}
 
     } else if (type == "replicationcontroller") {
-
       desired = item.status.replicas
       item.podInfo = {desired: desired, succeeded: 0, running: item.status.availableReplicas ? item.status.availableReplicas : 0}
 
     } else if (type == "statefulset") {
-
       desired = item.spec.replicas
       item.podInfo = {desired: desired, succeeded: 0, running: item.status.readyReplicas ? item.status.readyReplicas : 0}
 
@@ -551,5 +549,36 @@ module.exports = {
     const events = await k8sCoreApi.listNamespacedEvent(namespace,null,null,null,fieldLable);
 
     ctx.response.body = events.body
+  },
+
+  async getK8sLogs(ctx) {
+    const name = ctx.params.name;
+    const namespace = ctx.params.namespace;
+    const container = ctx.params.container;
+    let page = ctx.query.page;
+    const pageSize = ctx.query.itemsPerPage || 100;
+    const search = ctx.query.search;
+    const clusterId = ctx.headers.schema_id || '';
+    const kc = await strapi.services.kubernetes.getKubeConfig(
+      clusterId,
+      "k8s"
+    );
+    const k8sCoreApi = kc.makeApiClient(k8s.CoreV1Api);
+    const logs = await k8sCoreApi.readNamespacedPodLog(name, namespace, container, false, true, undefined, undefined, undefined, undefined, 100000);
+
+    let lines = logs.body.split("\n")
+    
+    if (search) {
+      lines = lines.filter(((l) => l.indexOf(search) > -1))
+    }
+
+    const countPage = Math.ceil(lines.length / pageSize)
+    if (!page) {
+      page = countPage;
+    }
+
+    lines = lines.slice((page -1) * pageSize, page * pageSize)
+
+    ctx.response.body = {countPage, logs: lines.join("\n")}
   },
 };

@@ -47,6 +47,12 @@
     },
     "mcsEnable": {
       "type": "boolean"
+    },
+    "osmMessage": {
+      "type": "text"
+    },
+    "fsmMessage": {
+      "type": "text"
     }
   }
 }

@@ -12,6 +12,9 @@ module.exports = {
   async getK8sEvent(ctx) {
     await strapi.services.kubernetes.getK8sEvent(ctx)
   },
+  async getK8sLogs(ctx) {
+    await strapi.services.kubernetes.getK8sLogs(ctx)
+  },
   async namespaces(ctx) {
     const clusterId = ctx.query.id;
     const k8s_schema_type = ctx.headers.schema_type || '';

@@ -72,14 +72,14 @@ module.exports = {
     },
   },
   K8S: {
-    append: (size, page, sort, filter) => {
+    append: (size, page, sort, filter, search) => {
       return (
         "?itemsPerPage=" +
         size +
-        "&page=" +
-        page +
+        (page ? "&page=" + page : "") +
         (sort ? "&sortBy=" + sort : "") +
-        (filter ? "&filterBy=name," + filter : "")
+        (filter ? "&filterBy=name," + filter : "") +
+        (search ? "&search=" + search : "")
       );
     },
     encode: (url, append, ns) => {

@@ -25,7 +25,7 @@
           v-if="detail.status?.mcs"
           :term="$t('MCS')"
         >
-          <Status :d="{status:detail.status?.mcs}" />
+          <Status :d="{status:detail.status?.mcs,message:detail.fsmMessage}" />
         </DetailListItem>
         <DetailListItem :term="$t('Creation Timestamp')">
           {{
@@ -605,7 +605,7 @@ export default {
       this.loading = true;
       this.$gql
         .query(
-          `mesh(id:${this.pid}){id,config,prometheus{id,name},namespace{id,name,registry{id,name}},status,name,bindNamespaces{id,name},created_at}`,
+          `mesh(id:${this.pid}){id,config,fsmMessage,prometheus{id,name},namespace{id,name,registry{id,name}},status,name,bindNamespaces{id,name},created_at}`,
         )
         .then((res) => {
           this.detail = res;

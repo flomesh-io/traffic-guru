@@ -126,7 +126,7 @@ const rules = {
 	password: [
 		{
 			min: 8,
-			pattern: /[A-Z].{7,}/,
+			pattern: /.{8,}/,
 			required: true,
 			message: "Password least 8 characters long",
 			whitespace: true,

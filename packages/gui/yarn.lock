@@ -3176,13 +3176,13 @@ dotenv@^10.0.0:
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-10.0.0.tgz#3d4227b8fb95f81096cdd2b66653fb2c7085ba81"
   integrity sha512-rlBi9d8jpv9Sf1klPjNfFAuWDjKLwTIJJ/VxtoTwIR6hnZxcEOQCZg2oIL3MWBYw5GpUDKOEnND7LXTbIpQ03Q==
 
-drag-topology-editor-vue3@1.0.12:
-  version "1.0.12"
-  resolved "https://registry.yarnpkg.com/drag-topology-editor-vue3/-/drag-topology-editor-vue3-1.0.12.tgz#e59cc671d9e0d56cc459c3d9cfc596e2905296db"
-  integrity sha512-SUkg/HiW851IP9UhojgpaOKoOaqk+Nq3GgoyQyJFyohuWqwyQTDBmfwkbRbRt8ZJUy4Huxe+s20QGJ8Zy9Mvgg==
+drag-topology-editor-vue3@^1.1.4:
+  version "1.1.4"
+  resolved "https://registry.yarnpkg.com/drag-topology-editor-vue3/-/drag-topology-editor-vue3-1.1.4.tgz#8d1f51d106ae92105b39f9f2cac3ab24885303bc"
+  integrity sha512-sPY8S3T0na0gd5EZyVLVc8nKyVAanDqrCndcpb0G+KNIPSo4IgKIOMIrV62bjSiEAGa7PynZOKld4DGRuGRxzQ==
   dependencies:
     core-js "^3.6.5"
-    vue "^3.0.11"
+    vue "^3.2.21"
 
 duplexer@^0.1.2:
   version "0.1.2"
@@ -7241,7 +7241,7 @@ vue-types@^3.0.0:
   dependencies:
     is-plain-object "3.0.1"
 
-vue@^3.0.11, vue@^3.2.21:
+vue@^3.2.21:
   version "3.2.45"
   resolved "https://registry.yarnpkg.com/vue/-/vue-3.2.45.tgz#94a116784447eb7dbd892167784619fef379b3c8"
   integrity sha512-9Nx/Mg2b2xWlXykmCwiTUCWHbWIj53bnkizBxKai1g61f2Xit700A1ljowpTIM11e3uipOeiPcSqnmBg6gyiaA==

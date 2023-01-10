@@ -118,6 +118,14 @@ module.exports = {
 
     exec(helmCmd, function (error, stdout, stderr) {
       strapi.log.info(error, stdout, stderr, __dirname);
+      if (error) {
+        let message = error.message.split("\n")
+        message = message.filter((m) => m.indexOf("WARNING") == -1)
+        message = message.join("\n")
+        strapi.query("mesh").update({id: result.id}, {
+          osmMessage: message
+        })
+      }
     });
 
     if (result.mcsEnable) {
@@ -132,6 +140,14 @@ module.exports = {
 
       exec(helmFsmCmd, function (error, stdout, stderr) {
         strapi.log.info(error, stdout, stderr, __dirname);
+        if (error) {
+          let message = error.message.split("\n")
+          message = message.filter((m) => m.indexOf("WARNING") == -1)
+          message = message.join("\n")
+          strapi.query("mesh").update({id: result.id}, {
+            fsmMessage: message
+          })
+        }
 
          const addCluster = async () => {
           const kc = await strapi.services.kubernetes.getKubeConfig(
@@ -197,6 +213,7 @@ module.exports = {
     }
   },
   async osmUpdate(result) {
+    if (!result.config) return;
     const registry = await strapi
       .query('registry')
       .findOne({ id: result.namespace.registry });

@@ -80,16 +80,16 @@
             </div>
           </template>
           <template v-else-if="column.dataIndex === 'status.bootstrap'">
-            <Status :d="{status:record.status.bootstrap}" />
+            <Status :d="{status:record.status.bootstrap,message:record.osmMessage}" />
           </template>
           <template v-else-if="column.dataIndex === 'status.controller'">
-            <Status :d="{status:record.status.controller}" />
+            <Status :d="{status:record.status.controller,message:record.osmMessage}" />
           </template>
           <template v-else-if="column.dataIndex === 'status.injector'">
-            <Status :d="{status:record.status.injector}" />
+            <Status :d="{status:record.status.injector,message:record.osmMessage}" />
           </template>
           <template v-else-if="column.dataIndex === 'status.mcs'">
-            <Status :d="{status:record.status.mcs}" />
+            <Status :d="{status:record.status.mcs,message:record.fsmMessage}" />
           </template>
           <template v-else-if="column.dataIndex === 'virtualServices'">
             <div v-if="record.virtualServices">
@@ -716,7 +716,7 @@ export default {
       const where = { name_contains: this.key };
       this.$gql
         .query(
-          `meshesConnection(where: $where, start: ${this.start}, limit: ${this.pageSize}){values{id,config,namespace{id,registry{id,name},name},status,name,bindNamespaces{id,name},created_at},aggregate{totalCount}}`,
+          `meshesConnection(where: $where, start: ${this.start}, limit: ${this.pageSize}){values{id,config,osmMessage,fsmMessage,namespace{id,registry{id,name},name},status,name,bindNamespaces{id,name},created_at},aggregate{totalCount}}`,
           { where },
         )
         .then((res) => {

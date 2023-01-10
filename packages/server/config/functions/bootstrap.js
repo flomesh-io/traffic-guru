@@ -70,6 +70,25 @@ module.exports = async () => {
         .update({ id: permission.id }, { enabled: true });
     }
 
+    const userCount = await strapi.query('user', 'users-permissions').count();
+    if (userCount == 0) {
+      const adminUser = {
+        username: 'admin',
+        email: 'admin@flomesh.cn',
+        password: 'flomesh123',
+        role: 1,
+        confirmed: true,
+        blocked: false,
+        provider: "local"
+      }
+      adminUser.password = await strapi.plugins['users-permissions'].services.user.hashPassword(
+        adminUser
+      )
+      await strapi
+        .query('user', 'users-permissions')
+        .create(adminUser);
+    }
+
     const clickhouses = await strapi
       .query('fleet')
       .find({ type: 'clickhouse' });

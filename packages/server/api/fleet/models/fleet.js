@@ -3,7 +3,6 @@
 module.exports = {
   lifecycles: {
     afterCreate: async (result, data) => {
-      strapi.log.info('afterCreate', data);
       if (!data || !data.type) return;
 
       if (result.type === 'clickhouse' && result.apply) {

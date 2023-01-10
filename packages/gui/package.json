@@ -18,6 +18,7 @@
     "core-js": "^3.6.5",
     "date-fns": "^2.14.0",
     "default-passive-events": "^2.0.0",
+    "drag-topology-editor-vue3": "^1.1.4",
     "echarts": "5.0.2",
     "enquire.js": "^2.1.6",
     "highlight.js": "^10.2.1",

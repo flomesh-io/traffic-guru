@@ -47,6 +47,14 @@
       "config": {
         "policies": []
       }
+    },
+    {
+      "method": "GET",
+      "path": "/k8s/pod/:namespace/:name/:container/log",
+      "handler": "kubernetes.getK8sLogs",
+      "config": {
+        "policies": []
+      }
     }
   ]
 }
