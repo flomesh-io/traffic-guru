@@ -5,7 +5,7 @@ JWT=""
 function login() {
     RET=$(curl --silent -X POST -H "Content-Type: application/json" \
         -d '{"query":"mutation($input: UsersPermissionsLoginInput!){login(input: $input){jwt,user{id,username,email,role{id,name,type,description}}}}","variables":{"input":{"identifier":"admin","password":"flomesh123"}},"update":null}' \
-         http://192.168.10.85:30000/graphql)
+         http://$HOST_IP:$NODE_PORT/graphql)
     JWT=$(echo $RET |  jq -r '.data.login.jwt')
     if [ "$JWT" == "null" ]; then
       JWT=""
@@ -23,7 +23,7 @@ function add_component() {
     RET=$(curl --silent -X POST -H "Content-Type: application/json" \
            -H "Authorization: Bearer $JWT" \
            -d '{"query":"mutation($input: createFleetInput){createFleet(input: $input){fleet{id}}}","variables":{"input":{"data":{"content":{"host":"clickhouse.click-house.svc.cluster.local","port":8123,"user":"“flomesh”","password":"password","database":"default"},"name":"clickhouse","type":"clickhouse","apply":true,"template":null}}}}' \
-           http://192.168.10.85:30000/graphql
+           http://$HOST_IP:$NODE_PORT/graphql
     )
     RESP=$(echo $RET | jq '.data.createFleet.fleet.id')
     if [ "$RESP" == "null" ]; then
@@ -40,7 +40,7 @@ function add_component() {
 function add_registry() {
     config=$(<${kubeconfig_guru})
     config="${config//$'\n'/"\n"}"
-    RET=$(curl --silent -X POST http://192.168.10.85:30000/graphql \
+    RET=$(curl --silent -X POST http://$HOST_IP:$NODE_PORT/graphql \
            -H "Content-Type: application/json" \
            -H "Authorization: Bearer $JWT" \
            -d '{"query":"mutation($input: createRegistryInput){createRegistry(input: $input){registry{id}}}","variables":{"input":{"data":{"organization":null,"type":"k8s","name":"guru-cluster","config":"'"$config"'","content":{"credit":"","autoUpstream":false,"autoApplication":false,"isGateway":false,"gatewayPath":"","gatewayPort":0},"address":""}}}}' 
