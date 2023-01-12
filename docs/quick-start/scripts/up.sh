@@ -53,7 +53,7 @@ function create_cluster() {
 function install_deps() {
    echo "installing mysql database"
    helm repo add bitnami https://charts.bitnami.com/bitnami
-   helm install mysql bitnami/mysql  --namespace mysql --create-namespace  \
+   helm install --kubeconfig ${kubeconfig_guru} mysql bitnami/mysql  --namespace mysql --create-namespace  \
     --set auth.database=${DB_NAME} \
     --set auth.username=${DB_USER} \
     --set auth.password=${DB_PWD} \
@@ -61,7 +61,7 @@ function install_deps() {
 
    echo "installing clickhouse server"
    helm repo add bitnami https://charts.bitnami.com/bitnami
-   helm install clickhouse bitnami/clickhouse --namespace click-house --create-namespace \
+   helm install --kubeconfig ${kubeconfig_guru} clickhouse bitnami/clickhouse --namespace click-house --create-namespace \
     --set auth.username=flomesh \
     --set auth.password=password \
     --set shards=1 \
@@ -73,14 +73,14 @@ function install_deps() {
 function install_traffic_guru() {
     echo "installing traffic guru"
     helm repo add flomesh https://flomesh-io.github.io/helm-charts
-    helm install traffic-guru flomesh/traffic-guru --namespace traffic-guru --create-namespace \
+    helm install --kubeconfig ${kubeconfig_guru} traffic-guru flomesh/traffic-guru --namespace traffic-guru --create-namespace \
         --set gui.tag=${TRAFFIC_GURU_VERSION} \
         --set database.host=mysql.mysql.svc.cluster.local \
         --set database.port=3306 \
         --set database.username=${DB_USER} \
         --set database.password=${DB_PWD} \
         --set service.type=NodePort
-        
+
     wait_for_pods "traffic-guru"
 }
 
