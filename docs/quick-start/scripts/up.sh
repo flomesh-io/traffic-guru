@@ -34,7 +34,6 @@ function wait_for_pods() {
     echo "waiting for pods to be ready"
     sleep 3
     $KUBE wait --for=condition=ready pod -n $1 --all --timeout=180s
-
 }
 
 function create_cluster() {
@@ -45,7 +44,6 @@ function create_cluster() {
     --port "${NODE_PORT}:30000@server:0" \
     --servers-memory 4g \
     --k3s-arg "--disable=traefik@server:0" \
-    --network multi-clusters \
     --timeout 120s \
     --wait 
 }
@@ -59,6 +57,8 @@ function install_deps() {
     --set auth.password=${DB_PWD} \
     --set auth.rootPassword=root
 
+   wait_for_pods "mysql"
+
    echo "installing clickhouse server"
    helm repo add bitnami https://charts.bitnami.com/bitnami
    helm install --kubeconfig ${kubeconfig_guru} clickhouse bitnami/clickhouse --namespace click-house --create-namespace \
@@ -68,6 +68,7 @@ function install_deps() {
     --set replicaCount=1 \
     --set zookeeper.enabled=false
 
+   wait_for_pods "click-house"
 }
 
 function install_traffic_guru() {
@@ -101,6 +102,10 @@ check_command "helm" "curl https://raw.githubusercontent.com/helm/helm/main/scri
 create_cluster
 
 k3d kubeconfig get ${CLUSTER_NAME} > "${kubeconfig_guru}"
+
+# wait base pods up
+sleep 5
+wait_for_pods "kube-system"
 
 # install dependent services
 install_deps
