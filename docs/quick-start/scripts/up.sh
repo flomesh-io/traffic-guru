@@ -1,6 +1,7 @@
 #!/bin/bash
 
 cd $(dirname ${BASH_SOURCE})
+. ./utils.sh
 
 set -e
 
@@ -117,3 +118,12 @@ echo "Traffic Guru is installed and available. Login to GUI as"
 echo "URL: http://${HOST_IP}:${NODE_PORT}/flomesh/"
 echo "USER: admin"
 echo "PASSWORD: flomesh123"
+
+echo "Trying Logging in with demo credentials"
+login
+
+echo "Adding Clickhouse component"
+add_component
+
+echo "Adding Registry"
+add_registry
