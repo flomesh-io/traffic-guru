@@ -448,23 +448,6 @@
                 />
               </FormItem>
             </a-descriptions-item>
-            <a-descriptions-item :span="1">
-              <template #label>
-                {{ $t("Enable Pipy Ingress") }}
-                <a-tooltip
-                  :title="
-                    $t(
-                      'Check this option to deployment of fsm control plane and gateway',
-                    )
-                  "
-                >
-                  <ExclamationCircleOutlined class="font-primary" />
-                </a-tooltip>
-              </template>
-              <FormItem>
-                <a-switch v-model:checked="payload.options.fsm.enabled" />
-              </FormItem>
-            </a-descriptions-item>
           </a-descriptions>
         </a-form>
       </a-tab-pane>
