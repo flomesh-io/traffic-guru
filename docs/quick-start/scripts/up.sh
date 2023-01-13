@@ -1,6 +1,7 @@
 #!/bin/bash
 
 cd $(dirname ${BASH_SOURCE})
+. ./utils.sh
 
 set -e
 
@@ -98,6 +99,9 @@ check_command "k3d" "curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/i
 # check for helm
 check_command "helm" "curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash"
 
+# check for jq
+check_command "jq" "sudo apt-get install jq -y"
+
 # create cluster
 create_cluster
 
@@ -113,7 +117,17 @@ install_deps
 # install traffic guru
 install_traffic_guru
 
+sleep 3
 echo "Traffic Guru is installed and available. Login to GUI as"
 echo "URL: http://${HOST_IP}:${NODE_PORT}/flomesh/"
 echo "USER: admin"
 echo "PASSWORD: flomesh123"
+
+echo "Trying Logging in with demo credentials"
+login
+
+echo "Adding Clickhouse component"
+add_component
+
+echo "Adding Registry"
+add_registry
