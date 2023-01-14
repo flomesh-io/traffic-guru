@@ -648,6 +648,7 @@ export default {
     },
 
     install(savedata, options) {
+      options.osm.meshName = savedata.name
       this.$gql
         .mutation(
           `createMesh(input: $input){mesh{id}}`,

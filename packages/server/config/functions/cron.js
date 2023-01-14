@@ -45,7 +45,7 @@ async function syncOsm() {
         null,
         null,
         'metadata.name=osm-controller',
-        'app.kubernetes.io/instance=osm'
+        'app.kubernetes.io/name=openservicemesh.io'
       );
       for (const item of developments.body.items) {
         const mesh = await strapi.query('mesh').findOne({
