@@ -80,7 +80,8 @@ module.exports = {
 			'ActiveActive': "多活",
       Injector: "注入",
       Bootstrap: "自适应",
-      "Osm Install": "OSM安装",
+      "osm-edge Install": "osm-edge安装",
+      "Enable Multi-cluster Support": "启用Multi-cluster Support",
       Install: "安装",
       Primary: "主要",
       Options: "参数",
@@ -94,14 +95,15 @@ module.exports = {
       "Automatic Installation Tracing": "自动安装追踪",
       "Bring Your Own Tracing (BYO)": "设置自己的追踪",
       "Enable Metrics": "启用指标",
-      "Automatic Installation Metrics": "自动安装指标",
+      "Auto Install Metrics Server": "自动安装指标",
       "Bring Your Own Metrics (BYO)": "设置自己的指标",
       Tracing: "追踪",
-      "Purge Failed Attempts": "清除失败尝试",
+      "Auto Purge Failed Attempts": "清除失败尝试",
       "Enforce Single Mesh": "Mesh独立安装",
       "Enable Pipy Ingress": "启用Pipy进栈",
       Address: "地址",
-      "An 'mesh' name for the new control plane instance (Default: osm)":
+      "Enable Multi-cluster Support": "启用Multi-cluster Support",
+      "Name for the mesh control plane instance (Default: osm)":
         "新控制平面实例的“mesh”名称（默认值：osm）",
       "Time to wait for installation and resources in a ready state, zero means no timeout (Default: 5*time.Minute)":
         "等待安装和资源处于就绪状态的时间，零表示没有超时（默认值：5*Time.Minute）",
@@ -1752,7 +1754,7 @@ module.exports = {
       "You can subscribe to modules of interest on other dashboard pages":
         "他のダッシュボードページで興味のあるモジュールを購読できます",
       "Count of components": "コンポーネント数",
-      "Osm Install": "OSMインストール",
+      "osm-edge Install": "osm-edgeインストール",
       Install: "インストール",
       Primary: "プライマリー",
       Options: "オプション",
@@ -1767,11 +1769,12 @@ module.exports = {
       "Enable Metrics": "メトリックの有効化",
       "Bring Your Own Metrics (BYO)": "独自のメトリックをもたらす",
       Tracing: "トレース",
-      "Purge Failed Attempts": "パージ失敗試行",
+      "Auto Purge Failed Attempts": "パージ失敗試行",
       "Enforce Single Mesh": "シングルメッシュ",
       "Enable Pipy Ingress": "Pipy入り口有効化",
       Address: "アドレス",
-      "An 'mesh' name for the new control plane instance (Default: osm)":
+      "Enable Multi-cluster Support": "Multi-cluster Supportの有効化",
+      "Name for the mesh control plane instance (Default: osm)":
         "新しい制御プレーンインスタンスの'メッシュ'名(デフォルト: OSM )",
       "Time to wait for installation and resources in a ready state, zero means no timeout (Default: 5*time.Minute)":
         "準備ができている状態でインストールとリソースを待つ時間はゼロです（デフォルト値：5*Time.Minute）",

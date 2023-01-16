@@ -22,11 +22,9 @@ module.exports = {
           data.content.domain = "cluster.local";
         }
         const json = YAML.parse(data.config)
-        if (json['current-context']) {
-          data.address = json.clusters.find((e) => e.name == json['current-context']).cluster.server
-        } else {
-          data.address = json.clusters[0].cluster.server
-        }
+        const context = json.contexts.find((e) => e.name == json['current-context']);
+        const cluster = json.clusters.find((e) => e.name == context.context.cluster);
+        data.address = cluster.cluster.server
       } else {
         throw new Error(`Invalid registry type: ${data.type}`);
       }
@@ -66,11 +64,9 @@ module.exports = {
       if (result.type == 'k8s') {
         if (data.config) {
           const json = YAML.parse(data.config)
-          if (json['current-context']) {
-            data.address = json.clusters.find((e) => e.name == json['current-context']).cluster.server
-          } else {
-            data.address = json.clusters[0].cluster.server
-          }
+          const context = json.contexts.find((e) => e.name == json['current-context']);
+          const cluster = json.clusters.find((e) => e.name == context.context.cluster);
+          data.address = cluster.cluster.server
         }
       } else {
         strapi.log.info('fetch xxx namespace');

@@ -149,11 +149,12 @@
 
   <a-modal
     v-model:visible="visible"
-    :title="$t('Osm Install')"
+    :title="$t('osm-edge Install')"
     @ok="valid"
     width="80%"
     :ok-text="$t('Install')"
     :cancel-text="$t('cancel')"
+    :destroy-on-close="true"
   >
     <a-tabs
       type="card"
@@ -190,7 +191,7 @@
                   <blockquote>
                     {{
                       $t(
-                        "An 'mesh' name for the new control plane instance (Default: osm)",
+                        "Name for the mesh control plane instance (Default: osm)",
                       )
                     }}
                   </blockquote>
@@ -210,7 +211,7 @@
                 @change="mcsEnableChange"
                 v-model:checked="payload.mcsEnable"
               >
-                {{ $t("Enable MCS") }}
+                {{ $t("Enable Multi-cluster Support") }}
               </a-checkbox>
             </a-descriptions-item>
             <a-descriptions-item :span="1">
@@ -394,7 +395,7 @@
             </a-descriptions-item>
             <a-descriptions-item :span="3">
               <template #label>
-                {{ $t("Automatic Installation Metrics") }}
+                {{ $t("Auto Install Metrics Server") }}
                 <a-tooltip
                   :title="
                     $t(
@@ -413,7 +414,7 @@
             </a-descriptions-item>
             <a-descriptions-item :span="1">
               <template #label>
-                {{ $t("Purge Failed Attempts") }}
+                {{ $t("Auto Purge Failed Attempts") }}
                 <a-tooltip
                   :title="
                     $t(

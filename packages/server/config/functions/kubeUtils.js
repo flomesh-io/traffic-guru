@@ -121,8 +121,9 @@ module.exports = {
     }
 
     const json = YAML.parse(reg.config)
-    const cluster = json.clusters.find((e) => e.name == json['current-context']);
-    const user = json.users.find((e) => e.name == json['current-context']);
+    const context = json.contexts.find((e) => e.name == json['current-context']);
+    const cluster = json.clusters.find((e) => e.name == context.context.cluster);
+    const user = json.users.find((e) => e.name == context.user);
 
     if (user.user.token) {
       return axios.create({
