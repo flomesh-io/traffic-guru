@@ -36,8 +36,8 @@ function check_command() {
     if ! command -v $1 &> /dev/null
     then
         echo "missing $1"
-        if [ -v $installer ]; then
-        exit 1
+        if [ -z "${installer// }" ]; then
+            exit 1
         fi
         echo "Installing $1"
         eval $installer
@@ -61,7 +61,7 @@ function create_cluster() {
     --servers-memory 4g \
     --k3s-arg "--disable=traefik@server:0" \
     --timeout 120s \
-    --wait 
+    --wait
 }
 
 function install_deps() {
