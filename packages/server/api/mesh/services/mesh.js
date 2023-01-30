@@ -129,7 +129,7 @@ module.exports = {
     });
 
     if (result.mcsEnable) {
-      let helmFsmCmd = `helm repo add fsm https://charts.flomesh.io && helm install --namespace ${result.namespace.name} --kubeconfig ${kubeconfigPath} --set fsm.logLevel=5 --version=0.2.0-beta.3 fsm fsm/fsm --create-namespace`;
+      let helmFsmCmd = `helm repo add fsm https://charts.flomesh.io && helm install --namespace ${result.namespace.name} --kubeconfig ${kubeconfigPath} --set fsm.logLevel=5 --version=0.2.0 fsm fsm/fsm --create-namespace`;
 
       if (result.timeout) {
         helmFsmCmd += ' --timeout ${result.timeout}';
@@ -160,9 +160,6 @@ module.exports = {
             result.namespace.name
           );
           const name = "cluster" + registry.id;
-          const ca = registry.content.certificate;
-          const token = registry.content.credit;
-          const server = registry.address;
           const cluster = {
             apiVersion: 'flomesh.io/v1alpha1',
             kind: 'Cluster',
@@ -172,7 +169,7 @@ module.exports = {
             spec: {
               gatewayHost: res.body.status.loadBalancer.ingress[0].ip,
               gatewayPort: res.body.spec.ports[0].port,
-              kubeconfig: `apiVersion: v1\nclusters:\n- cluster:\n    certificate-authority-data: ${ca}\n    server: ${server}\n  name: fsm-${name}\ncontexts:\n- context:\n    cluster: fsm-${name}\n    user: admin@fsm-${name}\n  name: fsm-${name}\ncurrent-context: fsm-${name}\nkind: Config\npreferences: {}\nusers:\n- name: admin@fsm-${name}\n  user:\n    token: ${token}`,
+              kubeconfig: registry.config,
             },
           };
       
