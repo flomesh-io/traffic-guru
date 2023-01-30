@@ -489,8 +489,18 @@
                   />
                 </a-descriptions-item>
                 <a-descriptions-item
+                  :label="$t('Local DNS Proxy')"
+                  :span="1"
+                >
+                  <a-switch
+                    v-model:checked="
+                      detail.config.spec.sidecar.localDNSProxy.enable
+                    "
+                  />
+                </a-descriptions-item>
+                <a-descriptions-item
                   :label="$t('Resources')"
-                  :span="3"
+                  :span="2"
                 >
                   <TagMap
                     v-model:map="detail.config.spec.sidecar.resources"

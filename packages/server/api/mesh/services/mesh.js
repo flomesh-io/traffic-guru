@@ -67,6 +67,10 @@ module.exports = {
         ch.content.user + ':' + ch.content.password
       ).toString('base64');
       result.options.osm.remoteLogging.authorization = 'Basic ' + base64Str;
+
+      if (result.mcsEnable) {
+        result.options.osm.localDNSProxy.enable=true
+      }
     }
 
     const registry = await strapi
