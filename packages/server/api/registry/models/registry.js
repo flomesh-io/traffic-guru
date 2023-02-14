@@ -7,9 +7,9 @@ module.exports = {
     beforeCreate: async (data) => {
       if (process.env.APP_VERSION && process.env.APP_VERSION == 'free') {
         const registry = await strapi.query('registry').find();
-        if (registry.length > 2) {
+        if (registry.length > 4) {
           throw new Error(
-            `The current free version can only add three registries, please upgrade to pro version`
+            `The current free version can only add five registries, please upgrade to pro version`
           );
         }
       }
