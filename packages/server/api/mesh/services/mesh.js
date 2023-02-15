@@ -49,6 +49,12 @@ module.exports = {
   async osmInstall(result) {
     if (!result.options) return;
 
+    const kc = await strapi.services.kubernetes.getKubeConfig(
+      result.namespace.registry,
+      'k8s'
+    );
+    const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
+    
     if (!result.options.osm.remoteLogging.address) {
       const ch = await strapi
         .query('fleet')
@@ -70,6 +76,13 @@ module.exports = {
 
       if (result.mcsEnable) {
         result.options.osm.localDNSProxy.enable=true
+
+        const res = await k8sApi.listNamespacedService(
+          "kube-system", null, null, null, null, "k8s-app=kube-dns"
+        );
+        if (res.body.items.length) {
+          result.options.osm.localDNSProxy.primaryUpstreamDNSServerIPAddr = res.body.items[0].spec.clusterIP
+        }
       }
     }
 
@@ -141,7 +154,6 @@ module.exports = {
       if (result.atomic) {
         helmFsmCmd += ' --atomic';
       }
-
       exec(helmFsmCmd, function (error, stdout, stderr) {
         strapi.log.info(error, stdout, stderr, __dirname);
         if (error) {
@@ -154,11 +166,6 @@ module.exports = {
         }
 
          const addCluster = async () => {
-          const kc = await strapi.services.kubernetes.getKubeConfig(
-            result.namespace.registry,
-            'k8s'
-          );
-          const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
           const res = await k8sApi.readNamespacedService(
             'fsm-ingress-pipy-controller',
             result.namespace.name
