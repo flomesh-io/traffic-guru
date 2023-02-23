@@ -1,0 +1,27 @@
+{
+  "kind": "collectionType",
+  "collectionName": "verification_codes",
+  "info": {
+    "singularName": "verification-code",
+    "pluralName": "verification-codes",
+    "displayName": "verificationCode"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "username": {
+      "type": "string"
+    },
+    "code": {
+      "type": "string"
+    },
+    "email": {
+      "type": "string"
+    },
+    "isUsed": {
+      "type": "boolean"
+    }
+  }
+}

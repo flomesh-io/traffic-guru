@@ -1,0 +1,69 @@
+{
+  "kind": "collectionType",
+  "collectionName": "trafficlogs",
+  "info": {
+    "singularName": "trafficlog",
+    "pluralName": "trafficlogs",
+    "displayName": "trafficlog",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "reqTime": {
+      "type": "biginteger"
+    },
+    "resTime": {
+      "type": "biginteger"
+    },
+    "reqSize": {
+      "type": "integer",
+      "default": 0
+    },
+    "resSize": {
+      "type": "integer",
+      "default": 0
+    },
+    "endTime": {
+      "type": "biginteger"
+    },
+    "remoteAddr": {
+      "type": "string"
+    },
+    "localAddr": {
+      "type": "string"
+    },
+    "remotePort": {
+      "type": "integer"
+    },
+    "localPort": {
+      "type": "integer"
+    },
+    "resStatus": {
+      "type": "integer"
+    },
+    "serviceName": {
+      "type": "string"
+    },
+    "meshName": {
+      "type": "string"
+    },
+    "clusterName": {
+      "type": "string"
+    },
+    "message": {
+      "type": "json"
+    },
+    "bondType": {
+      "type": "string"
+    },
+    "reqPath": {
+      "type": "string"
+    },
+    "reqMethod": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "kind": "collectionType",
+  "collectionName": "user_organization_roles",
+  "info": {
+    "singularName": "user-organization-role",
+    "pluralName": "user-organization-roles",
+    "displayName": "userOrganizationRole",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "type": {
+      "type": "string"
+    },
+    "organization": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::organization.organization",
+      "inversedBy": "userOrganizationRoles"
+    },
+    "project": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::project.project",
+      "inversedBy": "userOrganizationRoles"
+    },
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "userOrganizationRoles"
+    },
+    "role": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.role",
+      "inversedBy": "userOrganizationRoles"
+    }
+  }
+}

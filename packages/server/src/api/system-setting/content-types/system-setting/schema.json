@@ -1,0 +1,25 @@
+{
+  "kind": "collectionType",
+  "collectionName": "system_settings",
+  "info": {
+    "singularName": "system-setting",
+    "pluralName": "system-settings",
+    "displayName": "systemSetting",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "type": {
+      "type": "string"
+    },
+    "mode": {
+      "type": "string"
+    },
+    "content": {
+      "type": "json"
+    }
+  }
+}

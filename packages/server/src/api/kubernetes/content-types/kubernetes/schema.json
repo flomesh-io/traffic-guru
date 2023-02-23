@@ -1,0 +1,18 @@
+{
+  "kind": "collectionType",
+  "collectionName": "kubernetess",
+  "info": {
+    "singularName": "kubernetes",
+    "pluralName": "kubernetess",
+    "displayName": "kubernetes"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    }
+  }
+}

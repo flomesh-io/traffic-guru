@@ -1,0 +1,28 @@
+{
+  "kind": "collectionType",
+  "collectionName": "sql_escape_rules",
+  "info": {
+    "singularName": "sql-escape-rule",
+    "pluralName": "sql-escape-rules",
+    "displayName": "SQLEscapeRule",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "find": {
+      "type": "string"
+    },
+    "replace": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    },
+    "target_id": {
+      "type": "string"
+    }
+  }
+}

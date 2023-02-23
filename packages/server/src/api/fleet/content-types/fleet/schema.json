@@ -1,0 +1,60 @@
+{
+  "kind": "collectionType",
+  "collectionName": "fleets",
+  "info": {
+    "singularName": "fleet",
+    "pluralName": "fleets",
+    "displayName": "fleet",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "type": {
+      "type": "string",
+      "required": true
+    },
+    "content": {
+      "type": "json",
+      "required": true
+    },
+    "apply": {
+      "type": "boolean",
+      "default": true
+    },
+    "version": {
+      "type": "integer",
+      "default": 1
+    },
+    "status": {
+      "type": "string"
+    },
+    "unhealthy": {
+      "type": "json"
+    },
+    "servicesSidecar": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::service.service",
+      "mappedBy": "sidecar"
+    },
+    "meshes": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::mesh.mesh",
+      "mappedBy": "prometheus"
+    },
+    "services": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::service.service",
+      "mappedBy": "fleet"
+    }
+  }
+}

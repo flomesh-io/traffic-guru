@@ -1,0 +1,37 @@
+{
+  "kind": "collectionType",
+  "collectionName": "certificates",
+  "info": {
+    "singularName": "certificate",
+    "pluralName": "certificates",
+    "displayName": "certificates",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "content": {
+      "type": "json"
+    },
+    "type": {
+      "type": "string"
+    },
+    "services": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::service.service",
+      "mappedBy": "certificates"
+    },
+    "namespace": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::namespace.namespace",
+      "inversedBy": "certificates"
+    }
+  }
+}

@@ -1,12 +1,13 @@
+const cronTasks = require("./cron");
+
 module.exports = ({ env }) => ({
-  host: env('HOST', '::'),
+  host: env('HOST', '0.0.0.0'),
   port: env.int('PORT', 1337),
-  admin: {
-    auth: {
-      secret: env('ADMIN_JWT_SECRET', 'a42132e09461e18dfbf7f46fcd2b9acd'),
-    },
+  app: {
+    keys: env.array('APP_KEYS'),
   },
   cron: {
     enabled: true,
-  },
+    tasks: cronTasks
+  }
 });

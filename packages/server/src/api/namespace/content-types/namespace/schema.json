@@ -1,0 +1,61 @@
+{
+  "kind": "collectionType",
+  "collectionName": "namespaces",
+  "info": {
+    "singularName": "namespace",
+    "pluralName": "namespaces",
+    "displayName": "namespace",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "certificates": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::certificate.certificate",
+      "mappedBy": "namespace"
+    },
+    "ingresses": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::ingress.ingress",
+      "mappedBy": "namespace"
+    },
+    "mesh": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::mesh.mesh",
+      "inversedBy": "namespace"
+    },
+    "bindMesh": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::mesh.mesh",
+      "inversedBy": "bindNamespaces"
+    },
+    "organization": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::organization.organization",
+      "inversedBy": "namespaces"
+    },
+    "registry": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::registry.registry",
+      "inversedBy": "namespaces"
+    },
+    "services": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::service.service",
+      "mappedBy": "ns"
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "kind": "collectionType",
+  "collectionName": "service_imports",
+  "info": {
+    "singularName": "service-import",
+    "pluralName": "service-imports",
+    "displayName": "ServiceImport"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "content": {
+      "type": "json"
+    },
+    "namespace": {
+      "type": "string"
+    },
+    "policySwitch": {
+      "type": "boolean",
+      "default": false
+    },
+    "registry": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::registry.registry",
+      "inversedBy": "serviceImports"
+    },
+    "serviceExports": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::service-export.service-export",
+      "mappedBy": "serviceImports"
+    }
+  }
+}

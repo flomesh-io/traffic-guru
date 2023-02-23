@@ -1,0 +1,18 @@
+{
+  "kind": "collectionType",
+  "collectionName": "fsm_dashboards",
+  "info": {
+    "singularName": "fsm-dashboard",
+    "pluralName": "fsm-dashboards",
+    "displayName": "fsmDashboard"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    }
+  }
+}

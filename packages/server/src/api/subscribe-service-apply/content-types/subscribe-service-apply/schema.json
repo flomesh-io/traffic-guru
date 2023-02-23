@@ -1,0 +1,44 @@
+{
+  "kind": "collectionType",
+  "collectionName": "subscribe_service_applies",
+  "info": {
+    "singularName": "subscribe-service-apply",
+    "pluralName": "subscribe-service-applies",
+    "displayName": "subscribeServiceApply",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "status": {
+      "type": "integer",
+      "default": 0
+    },
+    "msg": {
+      "type": "text"
+    },
+    "service": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::service.service",
+      "inversedBy": "subscribeServiceApplies"
+    },
+    "applyOrganization": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::organization.organization"
+    },
+    "applyUser": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "approveOrganization": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::organization.organization"
+    }
+  }
+}

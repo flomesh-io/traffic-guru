@@ -1,0 +1,64 @@
+{
+  "kind": "collectionType",
+  "collectionName": "meshes",
+  "info": {
+    "singularName": "mesh",
+    "pluralName": "meshes",
+    "displayName": "mesh",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "config": {
+      "type": "json"
+    },
+    "options": {
+      "type": "json"
+    },
+    "status": {
+      "type": "json"
+    },
+    "timeout": {
+      "type": "integer"
+    },
+    "atomic": {
+      "type": "boolean"
+    },
+    "enforceSingleMesh": {
+      "type": "boolean"
+    },
+    "prometheus": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::fleet.fleet",
+      "inversedBy": "meshes"
+    },
+    "namespace": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::namespace.namespace",
+      "mappedBy": "mesh"
+    },
+    "bindNamespaces": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::namespace.namespace",
+      "mappedBy": "bindMesh"
+    },
+    "osmMessage": {
+      "type": "text"
+    },
+    "fsmMessage": {
+      "type": "text"
+    },
+    "mcsEnable": {
+      "type": "boolean"
+    }
+  }
+}

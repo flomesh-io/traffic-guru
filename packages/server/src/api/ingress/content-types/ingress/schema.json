@@ -1,0 +1,39 @@
+{
+  "kind": "collectionType",
+  "collectionName": "ingresses",
+  "info": {
+    "singularName": "ingress",
+    "pluralName": "ingresses",
+    "displayName": "Ingress",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "content": {
+      "type": "json",
+      "required": true
+    },
+    "uid": {
+      "type": "string"
+    },
+    "namespace": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::namespace.namespace",
+      "inversedBy": "ingresses"
+    },
+    "registry": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::registry.registry",
+      "inversedBy": "ingresses"
+    }
+  }
+}

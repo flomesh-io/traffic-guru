@@ -1,0 +1,76 @@
+{
+  "kind": "collectionType",
+  "collectionName": "registries",
+  "info": {
+    "singularName": "registry",
+    "pluralName": "registries",
+    "displayName": "Registry",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "type": {
+      "type": "string",
+      "required": true
+    },
+    "address": {
+      "type": "string",
+      "required": true
+    },
+    "content": {
+      "type": "json"
+    },
+    "kubeconfig": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    },
+    "namespaces": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::namespace.namespace",
+      "mappedBy": "registry"
+    },
+    "organization": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::organization.organization",
+      "inversedBy": "registries"
+    },
+    "services": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::service.service",
+      "mappedBy": "registry"
+    },
+    "config": {
+      "type": "text"
+    },
+    "serviceImports": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::service-import.service-import",
+      "mappedBy": "registry"
+    },
+    "ingresses": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::ingress.ingress",
+      "mappedBy": "registry"
+    }
+  }
+}

@@ -1,6 +1,0 @@
-{
-  "ratelimit": {
-    "interval": 1000,
-    "max": 100
-  }
-}

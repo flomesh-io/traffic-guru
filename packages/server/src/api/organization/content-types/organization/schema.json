@@ -1,0 +1,95 @@
+{
+  "kind": "collectionType",
+  "collectionName": "organizations",
+  "info": {
+    "singularName": "organization",
+    "pluralName": "organizations",
+    "displayName": "organization",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "namespaces": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::namespace.namespace",
+      "mappedBy": "organization"
+    },
+    "users": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "plugin::users-permissions.user",
+      "mappedBy": "userOrganizations"
+    },
+    "projects": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::project.project",
+      "mappedBy": "organization"
+    },
+    "adminUsers": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "plugin::users-permissions.user",
+      "mappedBy": "adminOrganizations"
+    },
+    "userOrganizationRoles": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::user-organization-role.user-organization-role",
+      "mappedBy": "organization"
+    },
+    "services": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::service.service",
+      "mappedBy": "organization"
+    },
+    "parent": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::organization.organization",
+      "inversedBy": "children"
+    },
+    "children": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::organization.organization",
+      "mappedBy": "parent"
+    },
+    "subscribeServices": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::service.service",
+      "mappedBy": "subscribeOrgs"
+    },
+    "registries": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::registry.registry",
+      "mappedBy": "organization"
+    },
+    "whiteOrgs": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::organization.organization",
+      "inversedBy": "whiteOrgsBack"
+    },
+    "whiteOrgsBack": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::organization.organization",
+      "inversedBy": "whiteOrgs"
+    }
+  }
+}

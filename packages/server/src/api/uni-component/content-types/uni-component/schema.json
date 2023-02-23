@@ -1,0 +1,21 @@
+{
+  "kind": "collectionType",
+  "collectionName": "uni_components",
+  "info": {
+    "singularName": "uni-component",
+    "pluralName": "uni-components",
+    "displayName": "uniComponent"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    }
+  }
+}

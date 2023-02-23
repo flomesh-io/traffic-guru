@@ -1,0 +1,27 @@
+{
+  "kind": "collectionType",
+  "collectionName": "widgets",
+  "info": {
+    "singularName": "widget",
+    "pluralName": "widgets",
+    "displayName": "widget"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "shared": {
+      "type": "integer"
+    },
+    "user_id": {
+      "type": "string"
+    },
+    "content": {
+      "type": "json"
+    }
+  }
+}

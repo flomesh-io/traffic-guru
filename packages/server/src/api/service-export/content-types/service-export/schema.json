@@ -1,0 +1,34 @@
+{
+  "kind": "collectionType",
+  "collectionName": "service_exports",
+  "info": {
+    "singularName": "service-export",
+    "pluralName": "service-exports",
+    "displayName": "ServiceExport",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "service": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::service.service",
+      "mappedBy": "serviceExport"
+    },
+    "content": {
+      "type": "json"
+    },
+    "clusterKey": {
+      "type": "string"
+    },
+    "serviceImports": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::service-import.service-import",
+      "inversedBy": "serviceExports"
+    }
+  }
+}

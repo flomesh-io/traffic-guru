@@ -1,0 +1,18 @@
+{
+  "kind": "collectionType",
+  "collectionName": "clickhouses",
+  "info": {
+    "singularName": "clickhouse",
+    "pluralName": "clickhouses",
+    "displayName": "clickhouse"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    }
+  }
+}

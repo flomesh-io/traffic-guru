@@ -1,0 +1,136 @@
+{
+  "kind": "collectionType",
+  "collectionName": "services",
+  "info": {
+    "singularName": "service",
+    "pluralName": "services",
+    "displayName": "Service",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "namespace": {
+      "type": "string"
+    },
+    "content": {
+      "type": "json",
+      "required": true
+    },
+    "deleted": {
+      "type": "boolean",
+      "default": false
+    },
+    "uid": {
+      "type": "string"
+    },
+    "extend": {
+      "type": "json"
+    },
+    "autoCreateUpstream": {
+      "type": "boolean",
+      "default": true
+    },
+    "autoCreateApp": {
+      "type": "boolean",
+      "default": true
+    },
+    "scope": {
+      "default": 1,
+      "type": "integer"
+    },
+    "version": {
+      "type": "biginteger"
+    },
+    "isGateway": {
+      "type": "boolean"
+    },
+    "gatewayPath": {
+      "type": "string"
+    },
+    "certificates": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::certificate.certificate",
+      "inversedBy": "services"
+    },
+    "ns": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::namespace.namespace",
+      "inversedBy": "services"
+    },
+    "organization": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::organization.organization",
+      "inversedBy": "services"
+    },
+    "subscribeOrgs": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::organization.organization",
+      "inversedBy": "subscribeServices"
+    },
+    "registry": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::registry.registry",
+      "inversedBy": "services"
+    },
+    "subscribeServiceApplies": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::subscribe-service-apply.subscribe-service-apply",
+      "mappedBy": "service"
+    },
+    "whitelistServices": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::service.service",
+      "inversedBy": "whitelistServicesBack"
+    },
+    "whitelistServicesBack": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::service.service",
+      "inversedBy": "whitelistServices"
+    },
+    "blacklistServices": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::service.service",
+      "inversedBy": "blacklistServicesback"
+    },
+    "blacklistServicesback": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::service.service",
+      "inversedBy": "blacklistServices"
+    },
+    "serviceExport": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::service-export.service-export",
+      "inversedBy": "service"
+    },
+    "fleet": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::fleet.fleet",
+      "inversedBy": "services"
+    },
+    "pods": {
+      "type": "json"
+    },
+    "selector": {
+      "type": "string"
+    }
+  }
+}

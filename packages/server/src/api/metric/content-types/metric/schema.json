@@ -1,0 +1,30 @@
+{
+  "kind": "collectionType",
+  "collectionName": "metrics",
+  "info": {
+    "singularName": "metric",
+    "pluralName": "metrics",
+    "displayName": "metrics"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "namespace": {
+      "type": "string"
+    },
+    "content": {
+      "type": "json"
+    },
+    "time": {
+      "type": "biginteger"
+    },
+    "registry": {
+      "type": "integer"
+    }
+  }
+}

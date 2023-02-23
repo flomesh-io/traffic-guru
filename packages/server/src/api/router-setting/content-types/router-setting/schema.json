@@ -1,0 +1,57 @@
+{
+  "kind": "collectionType",
+  "collectionName": "router_settings",
+  "info": {
+    "singularName": "router-setting",
+    "pluralName": "router-settings",
+    "displayName": "routerSetting",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "path": {
+      "type": "string"
+    },
+    "authority": {
+      "type": "string"
+    },
+    "disabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "invisible": {
+      "type": "boolean",
+      "default": false
+    },
+    "sort": {
+      "type": "integer"
+    },
+    "level": {
+      "type": "integer"
+    },
+    "fullPath": {
+      "type": "string"
+    },
+    "displayName": {
+      "type": "string"
+    },
+    "parent": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::router-setting.router-setting",
+      "inversedBy": "children"
+    },
+    "children": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::router-setting.router-setting",
+      "mappedBy": "parent"
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "kind": "collectionType",
+  "collectionName": "prometheuses",
+  "info": {
+    "singularName": "prometheus",
+    "pluralName": "prometheuses",
+    "displayName": "prometheus"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    }
+  }
+}

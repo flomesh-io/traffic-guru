@@ -58,7 +58,6 @@ $RECYCLE.BIN/
 *.swm
 *.out
 *.pid
-!scripts.tar.gz
 
 
 ############################
@@ -81,7 +80,6 @@ ssl
 .idea
 nbproject
 public/uploads/*
-public/flomesh-gui/*
 !public/uploads/.gitkeep
 
 ############################
@@ -95,8 +93,6 @@ logs
 results
 node_modules
 .node_history
-package-lock.json
-yarn.lock
 
 ############################
 # Tests
@@ -109,9 +105,9 @@ coverage
 # Strapi
 ############################
 
-.env
 license.txt
 exports
 *.cache
+dist
 build
 .strapi-updater.json
