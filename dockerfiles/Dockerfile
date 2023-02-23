@@ -1,4 +1,4 @@
-FROM alpine:3.14 as builder
+FROM alpine:3.16 as builder
 LABEL maintainer="Kevein Liu<kevein@flomesh.cn>"
 
 ARG RELEASE_VERSION
@@ -35,7 +35,7 @@ RUN cp -r /packages/gui/dist/*  ${pkg_prefix}/flomesh/public/flomesh/
 
 ############## Stage Build End ################
 
-FROM alpine:3.14
+FROM alpine:3.16
 LABEL maintainer="Kevein Liu<kevein@flomesh.cn>"
 
 ARG RELEASE_VERSION
@@ -44,22 +44,18 @@ ENV RELEASE_VERSION=${RELEASE_VERSION:-0.70.0}
 ARG REVISION
 ENV REVISION=${REVISION:-1}
 
-ENV NODE_VERSION 14.20.1-r0
-ENV NPM_VERSION 7.17.0-r0
-
 ENV APP_VERSION=free
 
-COPY --from=builder /etc/flomesh /etc/flomesh
-COPY --from=builder /usr/local/flomesh /usr/local/flomesh
+RUN adduser -Su 1338 flomesh
 
-RUN adduser -Su 1338 flomesh \
-    && apk add --no-cache --virtual .build-deps tar \
-    && apk add --no-cache npm=${NPM_VERSION} openssl su-exec tzdata curl vips-dev \
+COPY --from=builder --chown=flomesh:0 /etc/flomesh /etc/flomesh
+COPY --from=builder --chown=flomesh:0 /usr/local/flomesh /usr/local/flomesh
+
+RUN apk add --no-cache --virtual .build-deps tar \
+    && apk add --no-cache npm openssl su-exec tzdata curl vips-dev \
     && curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | sh \
     && apk del .build-deps tar \
-    && chown -R flomesh:0 /usr/local/flomesh \
-    && ln -s /usr/local/flomesh/public/flomesh /usr/local/flomesh/public/flomesh-gui \
-    && chmod -R g=u /usr/local/flomesh
+    && ln -s /usr/local/flomesh/public/flomesh /usr/local/flomesh/public/flomesh-gui
 
 COPY dockerfiles/docker-entrypoint.sh /docker-entrypoint.sh
 
