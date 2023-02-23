@@ -38,6 +38,12 @@
     "unhealthy": {
       "type": "json"
     },
+    "template": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::template.template",
+      "inversedBy": "fleets"
+    },
     "servicesSidecar": {
       "type": "relation",
       "relation": "oneToMany",

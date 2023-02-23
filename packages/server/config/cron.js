@@ -72,6 +72,7 @@ async function syncOsm () {
             name: item.metadata.labels.meshName,
             config: res.body,
             namespace: ns.id,
+            job: true
           }
         });
       }

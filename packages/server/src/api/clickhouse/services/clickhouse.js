@@ -13,10 +13,12 @@ const fs = require('fs');
 module.exports = createCoreService('api::clickhouse.clickhouse', {
   async proxy (ctx) {
     const log = await strapi.db.query('api::fleet.fleet').findOne({ where: { type: 'log', apply: true } });
+    let fleet = null
     if (log == null) {
-      return;
+      fleet = await strapi.db.query('api::fleet.fleet').findOne({ where: { type: 'clickhouse', apply: true} });
+    } else {
+      fleet = await strapi.db.query('api::fleet.fleet').findOne({ where: { id: log.content.bind.id } });
     }
-    const fleet = await strapi.db.query('api::fleet.fleet').findOne({ where: { id: log.content.bind.id } });
     if (fleet == null) {
       return;
     }
@@ -122,6 +124,7 @@ module.exports = createCoreService('api::clickhouse.clickhouse', {
         });
       }
 
+      console.log(queryTable,urlQueryTable)
       if (response.data == 0) {
         const ddl = fs.readFileSync(`${__dirname}/log.ddl`, 'utf8');
 

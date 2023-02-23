@@ -1,12 +1,14 @@
 "use strict";
 
 module.exports = {
-  async beforeCreate() {
-    const ch = await strapi.db
-      .query('api::fleet.fleet')
-      .findOne({where: { type: 'clickhouse', apply: true }});
-    if (!ch) {
-      throw new Error('Please add clickhouse to the component first');
+  async beforeCreate(event) {
+    if (!event.params.data.job) {
+      const ch = await strapi.db
+        .query('api::fleet.fleet')
+        .findOne({where: { type: 'clickhouse', apply: true }});
+      if (!ch) {
+        throw new Error('Please add clickhouse to the component first');
+      }
     }
   },
   async afterCreate(event) {

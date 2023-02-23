@@ -165,7 +165,7 @@ module.exports = {
 
           fetchIngresses: Boolean
           createIngressSync(data: IngressInput): Ingress
-          updateIngressSync(data: IngressInput): Ingress
+          updateIngressSync(id: ID!, data: IngressInput): IngressEntityResponse
           deleteIngressSync(data: IngressInput): Ingress
 
           createRoleResourcePermission(data: RolePermissionInput): Int
@@ -294,7 +294,11 @@ module.exports = {
             }
           },
           updateIngressSync: {
-            resolver: 'application::Ingress.Ingress.updateIngressSync',
+            async resolve (obj, args, ctx) {
+              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('api::ingress.ingress'))
+              const result = await strapi.controller('api::ingress.ingress').updateIngressSync(transformedArgs, ctx);
+              return entityUtils.toEntityResponse(transformedArgs, 'api::ingress.ingress', result)
+            },
           },
           deleteIngressSync: {
             resolver: 'application::Ingress.Ingress.deleteIngressSync',

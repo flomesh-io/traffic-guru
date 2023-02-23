@@ -110,7 +110,9 @@ module.exports = {
               type: 'clickhouse',
             }
           });
-          strapi.db.query('api::fleet.fleet').update({ where: { id: ch.id }, data: { apply: true } });
+          if (ch) {
+            strapi.db.query('api::fleet.fleet').update({ where: { id: ch.id }, data: { apply: true } });
+          }
         }
       }
       if (result.type === 'log') {

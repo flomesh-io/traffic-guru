@@ -65,13 +65,15 @@ module.exports = createCoreService('api::mesh.mesh',{
     const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 
     if (!result.options.osm.remoteLogging.address) {
-      const log = await strapi.db.query('api::fleet.fleet').findOne({ where: { type: 'log', apply: true } });
-      if (log == null) {
-        throw new Error('Please add log to the component first');
-      }
-      const ch = await strapi.db.query('api::fleet.fleet').findOne({ where: { id: log.content?.bind?.id } });
+       const log = await strapi.db.query('api::fleet.fleet').findOne({ where: { type: 'log', apply: true } });
+       let ch = null
+       if (log == null) {
+        ch = await strapi.db.query('api::fleet.fleet').findOne({ where: { type: 'clickhouse', apply: true} });
+       } else {
+        ch = await strapi.db.query('api::fleet.fleet').findOne({ where: { id: log.content?.bind?.id} });
+       }
       if (ch == null) {
-        throw new Error('Please add clickhouse & log to the component first');
+        throw new Error('Please add clickhouse or log to the component first');
       }
       // -- Toggles Sidecar's remote logging functionality on/off for all sidecar proxies in the mesh
       result.options.osm.remoteLogging.enable = true;
@@ -157,7 +159,7 @@ module.exports = createCoreService('api::mesh.mesh',{
     });
 
     if (result.mcsEnable) {
-      let helmFsmCmd = `helm repo add fsm https://charts.flomesh.io && helm install --namespace ${namespace.name} --kubeconfig ${kubeconfigPath} --set fsm.logLevel=5 --version=0.2.0 fsm fsm/fsm --create-namespace`;
+      let helmFsmCmd = `helm repo add fsm https://charts.flomesh.io && helm install --namespace ${namespace.name} --kubeconfig ${kubeconfigPath} --set fsm.logLevel=5 --version=0.2.1 fsm fsm/fsm --create-namespace`;
 
       if (result.timeout) {
         helmFsmCmd += ' --timeout ${result.timeout}';

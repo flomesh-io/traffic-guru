@@ -1,0 +1,33 @@
+{
+  "kind": "collectionType",
+  "collectionName": "templatefiles",
+  "info": {
+    "singularName": "templatefile",
+    "pluralName": "templatefiles",
+    "displayName": "Templatefile"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    },
+    "path": {
+      "type": "string"
+    },
+    "content": {
+      "type": "richtext"
+    },
+    "template": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::template.template",
+      "inversedBy": "templatefiles"
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "kind": "collectionType",
+  "collectionName": "templates",
+  "info": {
+    "singularName": "template",
+    "pluralName": "templates",
+    "displayName": "template"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "path": {
+      "type": "string"
+    },
+    "content": {
+      "type": "richtext"
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": [
+        "ingress",
+        "sidecars",
+        "checkpoint",
+        "pipy",
+        "pipy4lb",
+        "pipy4lbbgp"
+      ]
+    },
+    "version": {
+      "type": "integer",
+      "default": 1
+    },
+    "templatefiles": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::templatefile.templatefile",
+      "mappedBy": "template"
+    },
+    "fleets": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::fleet.fleet",
+      "mappedBy": "template"
+    }
+  }
+}

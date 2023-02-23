@@ -72,6 +72,12 @@
       "target": "api::organization.organization",
       "inversedBy": "services"
     },
+    "sidecar": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::fleet.fleet",
+      "inversedBy": "servicesSidecar"
+    },
     "subscribeOrgs": {
       "type": "relation",
       "relation": "manyToMany",

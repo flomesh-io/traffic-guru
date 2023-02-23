@@ -54,43 +54,41 @@ module.exports = createCoreService('api::ingress.ingress',{
           id
         );
       },
-      async updateIngressSync(ctx) {
-        const id = ctx.params.id;
-        const data = await strapi.query(type).findOne({ id: id });
-    
+      async updateIngressSync(args) {
+        const id = args.id;
+        const data = await strapi.db.query("api::" + type + "." + type).findOne({where: { id: id }, populate: true});
+        const ns = await strapi.db.query("api::namespace.namespace").findOne({where: { id: data.namespace.id }, populate: true});
         const kc = await await strapi.service('api::kubernetes.kubernetes').getKubeConfig(
-          data.namespace.registry,
+          ns.registry.id,
           'k8s'
         );
         const k8sApi = kc.makeApiClient(k8s.NetworkingV1Api);
     
         try {
-          delete ctx.request.body.content.metadata.creationTimestamp;
-          delete ctx.request.body.content.metadata.managedFields;
+          delete args.data.content.metadata.creationTimestamp;
+          delete args.data.content.metadata.managedFields;
         } catch (error) {}
     
         try {
           await k8sApi.replaceNamespacedIngress(
-            ctx.request.body.content.metadata.name,
-            ctx.request.body.content.metadata.namespace,
-            ctx.request.body.content
+            args.data.content.metadata.name,
+            args.data.content.metadata.namespace,
+            args.data.content
           );
         } catch (error) {
-          strapi.log.info(error.response.body.message);
-          throw new Error(error.response.body.message);
+          strapi.log.info(error);
+          throw new Error(error?.response?.body?.message);
         }
         await k8sApi.readNamespacedIngress(
-          ctx.request.body.content.metadata.name,
-          ctx.request.body.content.metadata.namespace
+          args.data.content.metadata.name,
+          args.data.content.metadata.namespace
         );
     
-        return await strapi.query(type).update(ctx.params, ctx.request.body);
+        return await strapi.db.query("api::" + type + "." + type).update({where: {id: args.id}, data: args.data});
       },
     
-      async createIngressSync(ctx) {
-        const ns = await strapi
-          .query('namespace')
-          .findOne({ id: ctx.request.body.namespace });
+      async createIngressSync(args) {
+        const ns = await strapi.db.query("api::namespace.namespace").findOne({where: { id: args.data.namespace }});
         const k8s_cluster_id = ns.registry.id;
         const k8s_cluster_ns = ns.name;
         const k8s_cluster_type = k8s;
@@ -102,26 +100,26 @@ module.exports = createCoreService('api::ingress.ingress',{
         const k8sApi = kc.makeApiClient(k8s.NetworkingV1Api);
     
         try {
-          delete ctx.request.body.content.metadata.creationTimestamp;
-          delete ctx.request.body.content.metadata.managedFields;
+          delete args.data.content.metadata.creationTimestamp;
+          delete args.data.content.metadata.managedFields;
         } catch (error) {}
     
         try {
           await k8sApi.createNamespacedIngress(
             k8s_cluster_ns,
-            ctx.request.body.content
+            args.data.content
           );
         } catch (error) {
           strapi.log.info(error.response.body.message);
           throw new Error(error.response.body.message);
         }
         const res = await k8sApi.readNamespacedIngress(
-          ctx.request.body.content.metadata.name,
-          ctx.request.body.content.metadata.namespace
+          args.data.content.metadata.name,
+          args.data.content.metadata.namespace
         );
-        ctx.request.body.content = res.body;
-        ctx.request.body.uid = res.body?.metadata?.uid;
-        return await strapi.query(type).create(ctx.request.body);
+        args.data.content = res.body;
+        args.data.uid = res.body?.metadata?.uid;
+        return await strapi.query(type).create(args.data);
       },
     
       async deleteIngressSync(ctx) {

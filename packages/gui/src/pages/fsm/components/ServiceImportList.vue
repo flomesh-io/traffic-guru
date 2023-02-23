@@ -249,7 +249,7 @@ export default {
       let filters = {};
       filters.name = { contains: this.key };
       if(this.embed){
-        filters.serviceExports = { eq: this.serviceExport };
+        filters.serviceExports = {id: { eq: this.serviceExport }};
       }
       this.$gql
         .query(
