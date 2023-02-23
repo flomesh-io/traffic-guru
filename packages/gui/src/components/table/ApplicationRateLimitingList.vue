@@ -235,11 +235,11 @@ export default {
   mounted() {
     
     this.$gql
-      .query(`systemSettings(where:{type:"Identifier"}){id,mode,content}`)
+      .query(`systemSettings(filters:{type:{eq:"Identifier"}}){data{id,attributes{mode,content}}}`)
       .then(() => {
         //.then((res) => {
-        // this.identityTypes = res[0].content;
-        // this.ratelimitingKey = res[0].content[0].value;
+        // this.identityTypes = res.data[0].content;
+        // this.ratelimitingKey = res.data[0].content[0].value;
         this.ratelimitingTypes = [
           {
             "label": "Header",

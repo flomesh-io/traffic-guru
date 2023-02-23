@@ -237,6 +237,7 @@
                                         <p>
                                           <PermissionCard
                                             :resources="resources"
+                                            style="width: 1200px;"
                                             v-if="resources.length > 0"
                                           />
                                         </p>
@@ -706,7 +707,7 @@
                         <a-list-item>
                           <a-list-item-meta
                             :description="
-                              new Date(item.updated_at).toLocaleString()
+                              new Date(item.updatedAt).toLocaleString()
                             "
                           >
                             <template #title>
@@ -856,6 +857,7 @@ import PermissionCard from "@/components/card/PermissionCard";
 import _ from "lodash";
 import { mapGetters } from "vuex";
 import { Empty } from "ant-design-vue";
+import { getPermission } from "@/services/user";
 
 const columns = [
   {
@@ -1075,15 +1077,12 @@ export default {
     changeScope(targetSvc) {
       this.$gql
         .mutation(
-          `updateService(input: $input){service{id}}`,
+          `updateService(id:${targetSvc.id}, data: $data){data{id}}`,
           {
-            input: {
-              where: { id: targetSvc.id },
-              data: { scope: targetSvc.scope },
-            },
+            data: { scope: targetSvc.scope }
           },
           {
-            input: "updateServiceInput",
+            data: "ServiceInput",
           },
         )
         .then(() => {
@@ -1095,9 +1094,9 @@ export default {
       let subscribeOrgs = [];
       let isfind = false;
       this.$gql
-        .query(`getService(id: ${targetSvc.id}){id,subscribeOrgs{id,name}}`)
+        .query(`getService(id: ${targetSvc.id}){data{id,attributes{subscribeOrgs{data{id,attributes{name}}}}}}`)
         .then((res) => {
-          res.subscribeOrgs.forEach((org) => {
+          res.data.subscribeOrgs.forEach((org) => {
             if (item.applyOrganization.id == org.id) {
               isfind = true;
             }
@@ -1108,21 +1107,18 @@ export default {
           }
           this.$gql
             .mutation(
-              `updateService(input: $input){service{id}}`,
+              `updateService(id:${targetSvc.id}, data: $data){data{id}}`,
               {
-                input: {
-                  where: { id: targetSvc.id },
-                  data: { subscribeOrgs },
-                },
+                data: { subscribeOrgs },
               },
               {
-                input: "updateServiceInput",
+                data: "ServiceInput!",
               },
             )
             .then(() => {
               this.$gql
                 .mutation(
-                  `updateSubscribeServiceApply(input:{where:{id: ${item.id}},data:{status: 1}}){subscribeServiceApply{id}}`,
+                  `updateSubscribeServiceApply(id: ${item.id},data:{status: 1}){data{id}}`,
                 )
                 .then(() => {
                   this.loaddata(true);
@@ -1135,7 +1131,7 @@ export default {
     refuseApply(targetSvc, item) {
       this.$gql
         .mutation(
-          `updateSubscribeServiceApply(input:{where:{id: ${item.id}},data:{status: 2}}){subscribeServiceApply{id}}`,
+          `updateSubscribeServiceApply(id: ${item.id},data:{status: 2}){data{id}}`,
         )
         .then(() => {
           this.$message.success(this.$t("Save successfully"), 3);
@@ -1146,24 +1142,21 @@ export default {
     removeSubscribe(targetSvc, item) {
       let subscribeOrgs = [];
       this.$gql
-        .query(`getService(id: ${targetSvc.id}){id,subscribeOrgs{id,name}}`)
+        .query(`getService(id: ${targetSvc.id}){data{id,attributes{subscribeOrgs{data{id,attributes{name}}}}}}`)
         .then((res) => {
-          res.subscribeOrgs.forEach((org) => {
+          res.data.subscribeOrgs.forEach((org) => {
             if (item.id != org.id) {
               subscribeOrgs.push(org.id);
             }
           });
           this.$gql
             .mutation(
-              `updateService(input: $input){service{id}}`,
+              `updateService(id:${targetSvc.id}, data: $data){data{id}}`,
               {
-                input: {
-                  where: { id: targetSvc.id },
-                  data: { subscribeOrgs },
-                },
+                data: { subscribeOrgs },
               },
               {
-                input: "updateServiceInput",
+                data: "ServiceInput!",
               },
             )
             .then(() => {
@@ -1178,24 +1171,21 @@ export default {
       this.settingVisible = false;
       let subscribeOrgs = [];
       this.$gql
-        .query(`getService(id: ${targetSvc.id}){id,subscribeOrgs{id,name}}`)
+        .query(`getService(id: ${targetSvc.id}){data{id,attributes{subscribeOrgs{data{id,attributes{name}}}}}}`)
         .then((res) => {
-          res.subscribeOrgs.forEach((org) => {
+          res.data.subscribeOrgs.forEach((org) => {
             if (item.id != org.id) {
               subscribeOrgs.push(org.id);
             }
           });
           this.$gql
             .mutation(
-              `updateService(input: $input){service{id}}`,
+              `updateService(id:${targetSvc.id}, data: $data){data{id}}`,
               {
-                input: {
-                  where: { id: targetSvc.id },
-                  data: { subscribeOrgs },
-                },
+                data: { subscribeOrgs },
               },
               {
-                input: "updateServiceInput",
+                data: "ServiceInput!",
               },
             )
             .then(() => {
@@ -1222,7 +1212,7 @@ export default {
 
     svcremove(id) {
       this.$gql
-        .mutation(`deleteServiceSync(input:{where:{id:${id}}}){id}`)
+        .mutation(`deleteServiceSync(id:${id}){data{id}}`)
         .then(() => {
           this.$message.success(this.$t("Deleted successfully"), 3);
           this.search();
@@ -1251,13 +1241,11 @@ export default {
       } else {
         savedata.project = project;
         if (
-          this.userOrganizationRolesMap[type + "-" + project + "-" + user]
+          this.userOrganizationRolesMap[`${type}-${project}-${user}`]
         ) {
           _isEdit = true;
           savedata.id =
-            this.userOrganizationRolesMap[
-              type + "-" + project + "-" + user
-            ].id;
+            this.userOrganizationRolesMap[`${type}-${project}-${user}`].id;
         }
       }
       if (_isEdit) {
@@ -1265,12 +1253,12 @@ export default {
         delete savedata.id;
         this.$gql
           .mutation(
-            `updateUserOrganizationRole(input: $input){userOrganizationRole{id}}`,
+            `updateUserOrganizationRole(id:${whereID}, data: $data){data{id}}`,
             {
-              input: { where: { id: whereID }, data: savedata },
+              data: savedata,
             },
             {
-              input: "updateUserOrganizationRoleInput",
+              data: "UserOrganizationRoleInput!",
             },
           )
           .then(() => {
@@ -1285,12 +1273,12 @@ export default {
         delete savedata.id;
         this.$gql
           .mutation(
-            `createUserOrganizationRole(input: $input){userOrganizationRole{id}}`,
+            `createUserOrganizationRole(data: $data){data{id}}`,
             {
-              input: { data: savedata },
+              data: savedata,
             },
             {
-              input: "createUserOrganizationRoleInput",
+              data: "UserOrganizationRoleInput!",
             },
           )
           .then(() => {
@@ -1307,7 +1295,7 @@ export default {
     deleteUserOrganizationRoles(id) {
       this.$gql
         .mutation(
-          `deleteUserOrganizationRole(input:{where:{id:${id}}}){userOrganizationRole{id}}`,
+          `deleteUserOrganizationRole(id:${id}){data{id}}`,
         )
         .then(() => {
           this.$message.success(this.$t("Deleted successfully"), 3);
@@ -1319,14 +1307,11 @@ export default {
       this.org.whiteOrgs = nextTargetKeys;
       this.$gql
         .mutation(
-          `updateOrganization(input: $input){organization{id}}`,
+          `updateOrganization(id:${this.pid}, data: $data){data{id}}`,
           {
-            input: {
-              where: { id: this.pid },
-              data: { whiteOrgs: nextTargetKeys },
-            },
+            data: { whiteOrgs: nextTargetKeys },
           },
-          { input: "updateOrganizationInput" },
+          { data: "OrganizationInput!" },
         )
         .then(() => {});
     },
@@ -1349,14 +1334,23 @@ export default {
       }
       target.loading = true;
 
-      let where = { name_contains: target.key };
+      let filters = {
+        name: { contains: this.key }
+      };
       this.$gql
         .query(
-          `organizationsConnection(start: 0, limit: 999, where: $where){values{id,name,users{id,username}},aggregate{totalCount}}`,
-          { where },
+          `organizations(pagination:{start: 0, limit: 999}, filters: $filters){
+						data{id,attributes{name,users{data{id,attributes{username}}}}},
+						meta{pagination{total}}
+					}`,
+          { 
+            filters
+          },{
+            filters: "OrganizationFiltersInput",
+          }
         )
         .then((res) => {
-          target.list = res.values;
+          target.list = res.data;
           target.list.forEach((n) => {
             if (n.users) {
               n.userLength = n.users.length;
@@ -1365,7 +1359,7 @@ export default {
             }
             n.key = `${n.id}`;
           });
-          target.total = res.aggregate.totalCount;
+          target.total = res.pagination.total;
           target.loading = false;
         });
     },
@@ -1381,12 +1375,10 @@ export default {
         }
       } else {
         if (
-          this.userOrganizationRolesMap[type + "-" + project + "-" + user]
+          this.userOrganizationRolesMap[`${type}-${project}-${user}`]
         ) {
           this.permissionPayload.userOrganizationRole =
-            this.userOrganizationRolesMap[
-              type + "-" + project + "-" + user
-            ].role.id;
+            this.userOrganizationRolesMap[`${type}-${project}-${user}`].role.id;
         }
       }
       this.setDefaultResources();
@@ -1395,12 +1387,9 @@ export default {
     setDefaultResources() {
       if (this.permissionPayload.userOrganizationRole) {
         let roleId = this.permissionPayload.userOrganizationRole;
-        this.$gql
-          .query(
-            `getRoleResourcePermission(roleId:${roleId}){resources{name,actions{name,enabled}}}`,
-          )
-          .then((res) => {
-            this.resources = res.resources;
+        getPermission({id:roleId})
+          .then((resources) => {
+            this.resources = resources.permissions;
           });
       }
     },
@@ -1411,11 +1400,16 @@ export default {
       const pid = this.pid;
       this.$gql
         .query(
-          `userOrganizationRoles(limit:-1,where:{organization:${pid}}){id,type,project{id,name},user{id,username},role{id,name}}`,
+          `userOrganizationRoles(pagination:{limit: ${this.$DFT_LIMIT}},filters:{organization:{id:{eq:${pid}}}}){data{id,attributes{
+						type,
+						project{data{id,attributes{name}}},
+						user{data{id,attributes{username}}},
+						role{data{id,attributes{name}}}
+					}}}`,
         )
         .then((res) => {
-          this.userOrganizationRoles = res;
-          res.forEach((item) => {
+          this.userOrganizationRoles = res.data;
+          res.data.forEach((item) => {
             if (item.type == "organization" && item.user) {
               this.userOrganizationRolesMap[`organization-${item.user.id}`] =
                 item;
@@ -1433,18 +1427,18 @@ export default {
       this.organizationRoles = [];
       this.$gql
         .query(
-          `getRolesConnection(where:{type:"organization"}){values{id,name,type}}`,
+          `usersPermissionsRoles(filters:{type:{eq:"organization"}}){data{id,attributes{name,type}}}`,
         )
         .then((res) => {
-          this.organizationRoles = res.values;
+          this.organizationRoles = res.data;
         });
       this.projectRoles = [];
       this.$gql
         .query(
-          `getRolesConnection(where:{type:"project"}){values{id,name,type}}`,
+          `usersPermissionsRoles(filters:{type:{eq:"project"}}){data{id,attributes{name,type}}}`,
         )
         .then((res) => {
-          this.projectRoles = res.values;
+          this.projectRoles = res.data;
         });
     },
 
@@ -1476,9 +1470,9 @@ export default {
     updateOrgProject(id, projects) {
       this.$gql
         .mutation(
-          `updateOrganization(input: $input){organization{id}}`,
-          { input: { where: { id }, data: { projects } } },
-          { input: "updateOrganizationInput" },
+          `updateOrganization(id:${id}, data: $data){data{id}}`,
+          { data: { projects } },
+          { data: "OrganizationInput!" },
         )
         .then(() => {
           this.loaddata(true);
@@ -1512,9 +1506,9 @@ export default {
     updateOrgUser(id, users) {
       this.$gql
         .mutation(
-          `updateOrganization(input: $input){organization{id}}`,
-          { input: { where: { id }, data: { users } } },
-          { input: "updateOrganizationInput" },
+          `updateOrganization(id:${id}, data: $data){data{id}}`,
+          { data: { users } },
+          { data: "OrganizationInput!" },
         )
         .then(() => {
           this.loaddata(true);
@@ -1559,11 +1553,12 @@ export default {
     },
 
     updateProjectUser(id, users) {
+      let data = { users };
       this.$gql
         .mutation(
-          `updateProject(input: $input){project{id}}`,
-          { input: { where: { id }, data: { users } } },
-          { input: "updateProjectInput" },
+          `updateProject(id:${id}, data: $data){data{id}}`,
+          { data },
+          { data: "ProjectInput!" },
         )
         .then(() => {
           this.loaddata(true);
@@ -1577,12 +1572,12 @@ export default {
         delete savedata.id;
         this.$gql
           .mutation(
-            `updateOrganization(input: $input){organization{id}}`,
+            `updateOrganization(id:${whereID}, data: $data){data{id}}`,
             {
-              input: { where: { id: whereID }, data: savedata },
+              data: savedata
             },
             {
-              input: "updateOrganizationInput",
+              data: "OrganizationInput!",
             },
           )
           .then(() => {
@@ -1594,12 +1589,12 @@ export default {
         delete savedata.id;
         this.$gql
           .mutation(
-            `createOrganization(input: $input){organization{id}}`,
+            `createOrganization(data: $data){data{id}}`,
             {
-              input: { data: savedata },
+              data: savedata
             },
             {
-              input: "createOrganizationInput",
+              data: "OrganizationInput!",
             },
           )
           .then(() => {
@@ -1634,7 +1629,7 @@ export default {
     removeOrg(id) {
       this.$gql
         .mutation(
-          `deleteOrganization(input:{where:{id:${id}}}){organization{id}}`,
+          `deleteOrganization(id:${id}){data{id}}`,
         )
         .then(() => {
           this.$message.success(this.$t("Deleted successfully"), 3);
@@ -1654,13 +1649,63 @@ export default {
       }
       this.$gql
         .query(
-          `organization(id: ${this.pid}){id,name,whiteOrgs{id,name},parent{id,name},description,projects{id,name,users{id,username,type,role{id,name}}},users{id,username,type,role{id,name}},subscribeServices{id,uid,fleet{id,name},organization{id,name},subscribeOrgs{id,name},namespace,name,registry{id,name},content,created_at},services{id,uid,scope,subscribeServiceApplies{id,status,updated_at,applyUser{id,username},applyOrganization{id,name},approveOrganization{id,name}},fleet{id,name},organization{id,name},subscribeOrgs{id,name},namespace,name,registry{id,name},content,created_at}}`,
+          `organization(id: ${this.pid}){data{id,attributes{
+						name,
+						whiteOrgs{data{id,attributes{name}}},
+						parent{data{id,attributes{name}}},
+						description,
+						projects{data{id,attributes{
+							name,
+							users{data{id,attributes{
+								username,
+								type,
+								role{data{id,attributes{name}}}
+							}}}
+						}}},
+						users{data{id,attributes{
+							username,
+							type,
+							role{data{id,attributes{name}}}
+						}}},
+						subscribeServices{data{id,attributes{
+							uid,
+							fleet{data{id,attributes{name}}},
+							organization{data{id,attributes{name}}},
+							subscribeOrgs{data{id,attributes{name}}},
+							namespace,
+							name,
+							registry{data{id,attributes{name}}},
+							content,
+							createdAt
+						}}},
+						services{data{id,attributes{
+							uid,
+							scope,
+							subscribeServiceApplies{data{id,attributes{
+								status,
+								updatedAt,
+								applyUser{data{id,attributes{
+									username
+								}}},
+								applyOrganization{data{id,attributes{name}}},
+								approveOrganization{data{id,attributes{name}}}
+							}}},
+							fleet{data{id,attributes{name}}},
+							organization{data{id,attributes{name}}},
+							subscribeOrgs{data{id,attributes{name}}},
+							namespace,
+							name,
+							registry{data{id,attributes{name}}},
+							content,
+							createdAt
+						}}}
+					}}}`,
         )
         .then((res) => {
-          this.org = res;
-          this.org.whiteOrgs = res.whiteOrgs.map((o) => o.id);
-          this.services = this.reset(res.services, 1);
-          this.subscribeServices = this.reset(res.subscribeServices, 2);
+          this.org = res.data;
+          this.org.whiteOrgs = res.data.whiteOrgs.map((o) => o.id);
+          this.services = this.reset(res.data.services, 1);
+          this.subscribeServices = this.reset(res.data.subscribeServices, 2);
           this.loading = false;
         });
       this.loadprojects();
@@ -1703,19 +1748,19 @@ export default {
 
     loadusers() {
       this.$gql
-        .query(`users{id,username,userOrganizations{id},phone,email,type}`)
+        .query(`usersPermissionsUsers{data{id,attributes{username,userOrganizations{data{id}},phone,email,type}}}`)
         .then((res) => {
-          this.users = res;
+          this.users = res.data;
         });
     },
 
     loadprojects() {
       this.$gql
         .query(
-          `projects(where:{organization_null: true}){id,name,organization{id,name}}`,
+          `projects(filters:{organization:{id: {null: true}}}){data{id,attributes{name,organization{data{id,attributes{name}}}}}}`,
         )
         .then((res) => {
-          this.projects = res;
+          this.projects = res.data;
         });
     },
   },

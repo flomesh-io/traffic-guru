@@ -5,7 +5,10 @@
       v-if="!visible"
       @click="showDrawer"
     >
-      <div class="cube">
+      <div
+        class="cube"
+        :class="theme"
+      >
         <div class="plane-front">
           <MenuOutlined class="cube-icon" />
         </div>
@@ -164,11 +167,13 @@
         >
           <h4 class="pd-20">
             <img
+              class="img-radius"
               v-if="subMenu[contentIndex].path == 'flb'"
               width="50"
               src="@/assets/img/app1.jpg"
             >
             <img
+              class="img-radius"
               v-else-if="subMenu[contentIndex].path == 'fsm'"
               width="50"
               src="@/assets/img/app2.jpg"
@@ -220,7 +225,7 @@
                   >
                     {{ subitem.meta.badge }}
                   </a-typography-text>
-                  <span class="black">{{ subitem.name }}</span>
+                  <span>{{ subitem.name }}</span>
                 </router-link>
               </a-tooltip>
             </a-card-grid>
@@ -392,10 +397,10 @@ export default {
     this.selectedKeys = this.$route.matched.map((item) => item.path);
 
     this.$gql
-      .query(`systemSettings(where:{type:"RouterSetting"}){id,mode,content}`)
+      .query(`systemSettings(filters:{type:{eq:"RouterSetting"}}){data{id,attributes{mode,content}}}`)
       .then((res) => {
-        if (res && res.length > 0) {
-          this.routerSettingMenu = { ...res[0].content, id: res[0].id };
+        if (res.data && res.data.length > 0) {
+          this.routerSettingMenu = { ...res.data[0].content, id: res.data[0].id };
         } else {
           this.routerSettingMenu = { showEnv: true, showZone: true };
         }
@@ -495,7 +500,7 @@ export default {
   @import "index";
   .windowDrawerBody {
     display: flex;
-    background-color: #f5f5f5;
+    background-color: @background-color-base;
     height: 100%;
     overflow: hidden;
   }
@@ -510,14 +515,14 @@ export default {
   }
   .menu-bar {
     flex: 2;
-    background-color: #ffffff;
+    background-color: @body-background;
   }
   .menu-bar h6 {
     display: block;
     width: 100%;
     color: #999;
     padding: 10px;
-    background-color: #fcfcfc;
+    background-color: @background-color-light;
   }
 
   .back-menu {
@@ -552,11 +557,11 @@ export default {
     line-height: 56px;
     cursor: pointer;
     // transition: color 0.3s;
-    color: #232323;
+    color: @text-color;
   }
   .icon-menu:hover {
     color: #00adef;
-    background-color: #fff;
+    background-color: @body-background;
   }
   .grid-menu-item {
     transition: all 0.3s;
@@ -565,11 +570,14 @@ export default {
     border-left: 3px solid #00adef;
     border-right: 3px solid #00adef;
   }
+	.grid-menu-item:nth-child(3n+1){
+		clear: both;
+	}
   .app-icon {
     vertical-align: middle;
     border-radius: 4px;
     font-size: 30px;
-    color: #fff;
+    color: @body-background;
     background-color: #409de0;
     height: 50px;
     padding-top: 4px;
@@ -604,12 +612,15 @@ export default {
     opacity: 0.9;
     position: absolute;
     text-align: center;
-    background: rgba(246, 246, 246, 0.5);
-    color: #fff;
+    background: @window-menu-color-light;
+    color: @body-background;
     box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.05);
     line-height: 200px;
     font-size: 25px;
   }
+	.cube.night > div {
+		background: @window-menu-color-night;
+	}
   .plane-front {
     position: relative;
     transform: translateZ(25px);
@@ -642,28 +653,33 @@ export default {
   }
   .cube:hover .plane-front {
     transform: translateZ(40px);
-    background: rgba(255, 255, 255, 0.9);
+    background: @window-menu-color-hover-light;
   }
   .cube:hover .plane-back {
     transform: rotateY(180deg) translateZ(40px);
-    background: rgba(255, 255, 255, 0.9);
+    background: @window-menu-color-hover-light;
   }
   .cube:hover .plane-left {
     transform: rotateY(270deg) translateZ(40px);
-    background: rgba(255, 255, 255, 0.9);
+    background: @window-menu-color-hover-light;
   }
   .cube:hover .plane-right {
     transform: rotateY(90deg) translateZ(40px);
-    background: rgba(255, 255, 255, 0.9);
+    background: @window-menu-color-hover-light;
   }
   .cube:hover .plane-top {
     transform: rotateX(90deg) translateZ(40px);
-    background: rgba(255, 255, 255, 0.9);
+    background: @window-menu-color-hover-light;
   }
   .cube:hover .plane-bottom {
     transform: rotateX(270deg) translateZ(40px);
-    background: rgba(255, 255, 255, 0.9);
+    background: @window-menu-color-hover-light;
   }
+	.cube.night:hover{
+		.plane-front,.plane-back,.plane-left,.plane-right,.plane-top,.plane-bottom{
+			background: @window-menu-color-hover-night;
+		}
+	}
   .cube-icon {
     color: #999;
     position: absolute;
@@ -710,4 +726,7 @@ export default {
     width: 100%;
     padding: 0 10px;
   }
+	.img-radius{
+		border-radius: 4px;
+	}
 </style>

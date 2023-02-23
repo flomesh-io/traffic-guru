@@ -95,7 +95,7 @@
           </a-list-item-meta>
           <template #actions>
             <span><FieldTimeOutlined />
-              {{ new Date(record.updated_at).toLocaleString() }}</span>
+              {{ new Date(record.updatedAt).toLocaleString() }}</span>
             <span
               v-if="record.namespace"
             >{{ $t("Namespace") }} : {{ record.namespace }}</span>
@@ -196,9 +196,13 @@ export default {
         this.pageNo = pageNo;
         this.pageSize = pageSize;
       }
+      let pagination = {
+        start: this.start, 
+        limit: this.pageSize
+      };
       this.loading = true;
-      this.$gql.query(`uniSearch(where: $where, start: ${this.start}, limit: ${this.pageSize})`,{
-        where: {
+      this.$gql.query(`uniSearch(filters: $filters, pagination: $pagination)`,{
+        filters: {
           type: [
             "service",
             "ingress",
@@ -214,10 +218,13 @@ export default {
             "component.prometheus",
           ],
           name: this.keyword,
-        }
+        },
+        pagination
+      },{
+        pagination: "PaginationArg",
       }).then((res) => {
-        this.data = res.values;
-        this.total = res.aggregate.totalCount;
+        this.data = res.data;
+        this.total = res.pagination.total;
         this.loading = false;
       });
     },

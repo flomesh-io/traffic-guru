@@ -63,6 +63,7 @@
     </span>
     <component
       v-if="n != 'system.common.Space' && data.resData"
+      class="card-content"
       :is="data.tag"
       v-bind="{
         ...data.resData,
@@ -400,11 +401,12 @@ export default {
     filter: drop-shadow(0 5px 5px rgba(0, 0, 0, 0.05));
   }
   .provide {
+		z-index: 1;
     font-size: 8px;
     line-height: 14px;
-    padding: 0 4px 0 2px;
-    background-color: rgba(160, 160, 160, 0.1);
-    color: #999;
+    padding: 1px 4px 1px 2px;
+		background-color: rgba(240, 240, 240, 0.8);
+		color: #aaa;
     position: absolute;
     right: 0;
     bottom: 0;
@@ -420,8 +422,11 @@ export default {
     position: absolute;
     margin-left: -8px;
     margin-top: 0px;
-    border-width: 7px 3px;
-    border-color: transparent rgba(160, 160, 160, 0.1) rgba(160, 160, 160, 0.1)
-      transparent;
+    border-width: 7.5px 3px;
+		border-color: transparent rgba(240, 240, 240, 0.8) rgba(240, 240, 240, 0.8) transparent;
   }
+	.card-content{
+		z-index: 2;
+		background-color: transparent;
+	}
 </style>

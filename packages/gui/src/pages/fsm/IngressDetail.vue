@@ -1042,18 +1042,33 @@ export default {
 
     getServices() {
       this.selectorLoading = true;
-      const where = {
-        namespace: this.detail.namespace.name,
-        registry: this.detail.namespace.registry.id,
+      const filters = {
+        namespace: {id: { eq: this.detail.namespace.name }},
+        registry: {id: { eq: this.detail.namespace.registry.id }},
       };
       this.$gql
         .query(
-          `servicesConnection(start: 0, limit: -1, where: $where){values{id,uid,namespace,name,registry{id,name},content,created_at},aggregate{totalCount}}`,
-          { where },
+          `services(filters: $filters, pagination: {start: 0, limit: ${this.$DFT_LIMIT}} ){
+						data{id,attributes{
+							uid,
+							namespace,
+							name,
+							registry{data{id,attributes{name}}},
+							content,
+							createdAt
+						}},
+						meta{pagination{total}}
+					}`,
+          { 
+            filters,pagination
+          },{
+            filters: "ServiceFiltersInput",
+            pagination: "PaginationArg",
+          }
         )
         .then((res) => {
           this.selectorLoading = false;
-          this.services = res.values;
+          this.services = res.data;
           this.services.forEach((n) => {
             n.name = n.name ? n.name : n.metadata.name;
             if (n.registry) {
@@ -1075,12 +1090,20 @@ export default {
       this.loading = true;
       this.$gql
         .query(
-          `getIngress(id: ${this.pid}){id,content,namespace{id,name,registry{id,name}},name,created_at}`,
+          `getIngress(id: ${this.pid}){data{id,attributes{
+						content,
+						namespace{data{id,attributes{
+							name,
+							registry{data{id,attributes{name}}}
+						}}},
+						name,
+						createdAt
+					}}}`,
         )
         .then((res) => {
           this.loading = false;
-          this.creationTimestamp = new Date(res.created_at).toLocaleString();
-          this.detail = res;
+          this.creationTimestamp = new Date(res.data.createdAt).toLocaleString();
+          this.detail = res.data;
           this.reset();
           this.envChange();
         });
@@ -1103,18 +1126,15 @@ export default {
       if (this.pid != "") {
         this.$gql
           .mutation(
-            `updateIngressSync(input: $input){id}`,
+            `updateIngressSync(id:${this.pid}, data: $data){data{id}}`,
             {
-              input: {
-                where: { id: this.pid },
-                data: {
-                  name: this.detail.name,
-                  namespace: this.detail.namespace.id,
-                  content: savedata,
-                },
+              data: {
+                name: this.detail.name,
+                namespace: this.detail.namespace.id,
+                content: savedata,
               },
             },
-            { input: "updateIngressInput" },
+            { data: "IngressInput!" },
           )
           .then(() => {
             this.$message.success(this.$t("Save successfully"), 3);
@@ -1123,20 +1143,18 @@ export default {
       } else {
         this.$gql
           .mutation(
-            `createIngressSync(input: $input){id}`,
+            `createIngressSync(data: $data){data{id}}`,
             {
-              input: {
-                data: {
-                  name: this.detail.name,
-                  content: savedata,
-                  namespace: this.detail.namespace.id,
-                },
+              data: {
+                name: this.detail.name,
+                content: savedata,
+                namespace: this.detail.namespace.id,
               },
             },
-            { input: "createIngressInput" },
+            { data: "IngressInput" },
           )
           .then((res) => {
-            this.pid = res.id;
+            this.pid = res.data.id;
             this.$message.success(this.$t("Created successfully"), 3);
             this.$closePage(this.$route);
           });
@@ -1170,11 +1188,23 @@ export default {
     getCertificates() {
       this.$gql
         .query(
-          `certificates(start: 0, limit: -1, where: $where){id,name,type,namespace{id,name,registry{id,name}},content}`,
-          { where: { type: "k8s", namespace: this.detail.namespace.id } },
+          `certificates(filters: $filters, pagination: { start: 0, limit: ${this.$DFT_LIMIT}}){data{id,attributes{
+						name,
+						type,
+						namespace{data{id,attributes{
+							name,
+							registry{data{id,attributes{name}}}
+						}}},
+						content
+					}}}`,
+          { filters: { type: {eq: "k8s"}, namespace: {id: {eq: this.detail.namespace.id}} } },
+          {
+            filters: "CertificateFiltersInput",
+            pagination: "PaginationArg",
+          }
         )
         .then((res) => {
-          this.certificates = res;
+          this.certificates = res.data;
           this.certificates.forEach((certificate) => {
             certificate.id = certificate.name;
           });

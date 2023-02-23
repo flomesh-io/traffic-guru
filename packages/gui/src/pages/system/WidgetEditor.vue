@@ -478,7 +478,6 @@ export default {
         this.running = false;
       },600);
       if(d.error){
-        alert(d.data)
         this.response = JSON.stringify({error:d.error});
       }else{
         this.response = JSON.stringify(d.data);

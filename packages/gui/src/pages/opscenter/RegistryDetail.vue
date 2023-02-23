@@ -32,39 +32,7 @@
           >
             <a-col
               class="col-pd"
-              :xl="8"
-              :lg="24"
-              :md="24"
-              :sm="24"
-              :xs="24"
-            >
-              <a-menu
-                v-model:selectedKeys="selectedKeys"
-                class="full"
-                mode="vertical"
-                @click="selectNS"
-              >
-                <a-menu-item
-                  v-for="item in namespaces"
-                  :key="item.id"
-                >
-                  {{ item.name
-                  }}<span
-                    class="ml-10"
-                    v-if="item.organizationId"
-                  >({{ item.organization.name }})</span>
-                  <a-badge
-                    class="ml-10"
-                    :count="item.services.length"
-                    :number-style="{ backgroundColor: '#00adef' }"
-                  />
-                  <RightOutlined class="RightOutlined float-right" />
-                </a-menu-item>
-              </a-menu>
-            </a-col>
-            <a-col
-              class="col-pd"
-              :xl="16"
+              :xl="24"
               :lg="24"
               :md="24"
               :sm="24"
@@ -73,10 +41,59 @@
               <ServiceList
                 mode="registry"
                 :embed-services="selectedNS.services"
+                :tab-list="namespaceTabs"
+                v-model:tabKey="selectedKeys"
                 :embed="true"
                 :metric="false"
                 :has-search="false"
-              />
+                @nsChange="selectNS"
+              >
+                <template
+                  #extra
+                  v-if="$isPro"
+                >
+                  <a-select
+                    :placeholder="$t('unset')"
+                    v-model:value="selectedNS.organizationId"
+                    class="width-180"
+                    ref="select"
+                  >
+                    <a-select-option
+                      :value="org.id"
+                      v-for="(org, index) in orgs"
+                      :key="index"
+                    >
+                      {{ org.name }}
+                    </a-select-option>
+                  </a-select>
+                  <a-button
+                    class="ml-10"
+                    type="primary"
+                    @click="assignOrganization"
+                  >
+                    {{ $t("Assign Organization") }}
+                  </a-button>
+                </template>
+                <template
+                  #organization="{ item }"
+                >
+                  <a-select
+                    :placeholder="$t('unset')"
+                    v-model:value="item.organization.id"
+                    @change="assignOrganizationByItem(item.id,item.organization.id)"
+                    class="width-180"
+                    ref="select"
+                  >
+                    <a-select-option
+                      :value="org.id"
+                      v-for="(org, index) in orgs"
+                      :key="index"
+                    >
+                      {{ org.name }}
+                    </a-select-option>
+                  </a-select>
+                </template>
+              </ServiceList>
             </a-col>
           </a-row>
         </a-tab-pane>
@@ -87,14 +104,12 @@
 
 <script>
 import RegistryBaseDetail from "./common/RegistryBaseDetail";
-import { RightOutlined } from "@ant-design/icons-vue";
 import { mapState } from "vuex";
 import ServiceList from "@/pages/fsm/components/ServiceList";
 export default {
   name: "RegistryDetail",
   i18n: require("@/i18n"),
   components: {
-    RightOutlined,
     ServiceList,
     RegistryBaseDetail,
   },
@@ -127,6 +142,7 @@ export default {
         }
       ],
 
+      orgs: [],
       pjsConfig: "",
       pid: "",
       json: '{ "":"" }',
@@ -137,6 +153,13 @@ export default {
 
   computed: {
     ...mapState("setting", ["isMobile"]),
+    namespaceTabs(){
+      let ret = [];
+      this.namespaces.forEach((ns)=>{
+        ret.push({key:ns.id,tab:ns.name,services:ns.services.length})
+      });
+      return ret;
+    }
   },
 
   created() {
@@ -147,18 +170,19 @@ export default {
     getDetail(d) {
       this.detail = d.detail;
       this.namespaces = d.namespaces;
-      this.selectedKeys = d.selectedKeys || [];
+      this.selectedKeys = d.selectedKeys;
       this.selectedNS = d.selectedNS || [];
     },
 
-    selectNS(e) {
-      this.selectedNS = {services:[]}
+    selectNS(id) {
+      this.selectedNS = {services:[]};
       this.detail.namespaces.forEach((ns) => {
-        if (ns.id == e.key) {
+        if (ns.id == id) {
           this.selectedNS = ns;
         }
       });
     },
+
 
     handleChange() {},
   },
@@ -166,8 +190,4 @@ export default {
 </script>
 
 <style lang="less" scoped>
-  .RightOutlined {
-    position: relative;
-    top: 12px;
-  }
 </style>

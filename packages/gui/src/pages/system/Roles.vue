@@ -5,7 +5,7 @@
     </template>
     <template #extra>
       <HeadInfo
-        v-permission="['userspermissions:create']"
+        v-permission="['role:create']"
         class="split-right"
         :title="$t('Create role')"
       >
@@ -37,20 +37,21 @@
           :loading="loading"
           :hide-action-title="true"
           :data-source="roles"
+          :result-empty="{}"
           type="component"
           :actions="[
             {
               icon: 'EditOutlined',
               text: $t('edit'),
               call: setting,
-              permission: ['userspermissions:update'],
+              permission: ['role:update'],
             },
             {
               icon: 'CloseOutlined',
               hide: true,
               text: $t('delete'),
               call: remove,
-              permission: ['userspermissions:delete'],
+              permission: ['role:delete'],
             },
           ]"
         >
@@ -100,7 +101,7 @@
         <a-button
           v-if="isEdit"
           :loading="saving"
-          v-permission="['userspermissions:update']"
+          v-permission="['role:update']"
           type="primary"
           @click="valid"
         >
@@ -109,7 +110,7 @@
         <a-button
           :loading="saving"
           v-else
-          v-permission="['userspermissions:create']"
+          v-permission="['role:create']"
           type="primary"
           @click="valid"
         >
@@ -168,7 +169,7 @@
           >
             <FormItem
               name="name"
-              :rules="rules.uniqueName('getRoles',{id:payload.id,type:payload.type})"
+              :rules="rules.uniqueName('usersPermissionsRoles',{id:payload.id,type:payload.type})"
             >
               <a-input
                 :maxlength="10"
@@ -184,11 +185,11 @@
           <a-descriptions-item
             :label="$t('Resources')"
             :span="3"
-            v-if="resources && resources.length > 0"
+            v-if="permissions && permissions.length > 0"
           >
             <div
               class="flex"
-              v-for="(resource, index) in resources"
+              v-for="(resource, index) in permissions"
               :key="index"
               v-show="resource"
             >
@@ -201,7 +202,7 @@
                 :key="index3"
               >
                 <a-checkbox
-                  @change="toggleResources(action, resource.actions)"
+                  @change="togglePermissions(action, resource.actions)"
                   v-model:checked="action.enabled"
                 >
                   {{ $t(action.name) }}
@@ -229,6 +230,7 @@ import PageLayout from "@/layouts/PageLayout";
 import HeadInfo from "@/components/tool/HeadInfo";
 import CardList from "@/components/card/CardList";
 import FormItem from "@/components/tool/FormItem";
+import { getPermission, buildPermission } from "@/services/user";
 import _ from "lodash";
 import { mapState } from "vuex";
 export default {
@@ -267,8 +269,8 @@ export default {
         permissions: [],
       },
 
-      defaultResources: {},
-      resources: {},
+      defaultPermissions: {},
+      permissions: {},
       bindTarget: {},
       editorIsCreate: true,
       workload: [],
@@ -300,7 +302,7 @@ export default {
   },
 
   methods: {
-    toggleResources(action, actions) {
+    togglePermissions(action, actions) {
       if (action.name != "find" && action.enabled) {
         actions.forEach((_action) => {
           if (_action.name == "find") {
@@ -321,7 +323,7 @@ export default {
         type: "system",
         permissions: [],
       };
-      this.resources = this.defaultResources[this.payload.type];
+      this.permissions = this.defaultPermissions[this.payload.type];
       this.showModal();
     },
 
@@ -334,11 +336,10 @@ export default {
     },
 
     renderCallback() {
-      this.resources = this.defaultResources[this.payload.type];
+      this.permissions = this.defaultPermissions[this.payload.type];
     },
 
     valid() {
-      this.saving = true;
       this.$refs.form
         .validateFields()
         .then(() => {
@@ -348,15 +349,19 @@ export default {
     },
 
     handleOk() {
-      let resources = _.cloneDeep(this.resources);
+      let permissions = _.cloneDeep(this.permissions);
       const input = {
         name: this.payload.name,
         type: this.payload.type,
-        resources: resources,
+        permissions: buildPermission(permissions),
       };
+      this.saving = true;
       if (this.isEdit) {
         this.$gql
-          .mutation(`updateRoleResourcePermission(roleId: ${this.payload.id}, input: $input)`, { input })
+          .mutation(`updateRoleResourcePermission(id: ${this.payload.id}, data: $data)`, 
+                    { data: input },
+                    { data: "RolePermissionInput"},
+          )
           .then(() => {
             this.saving = false;
             this.visible = false;
@@ -365,7 +370,10 @@ export default {
           });
       } else {
         this.$gql
-          .mutation(`createRoleResourcePermission(input: $input)`, { input })
+          .mutation(`createRoleResourcePermission(data: $data)`, 
+                    { data: input },
+                    { data: "RolePermissionInput"}
+          )
           .then(() => {
             this.saving = false;
             this.visible = false;
@@ -377,7 +385,7 @@ export default {
 
     remove(index, type, item) {
       this.$gql
-        .mutation(`deleteRoleResourcePermission(roleId: ${item.id})`)
+        .mutation(`deleteUsersPermissionsRole(id: ${item.id}){ok}`)
         .then(() => {
           this.$message.success(this.$t("Deleted successfully"), 3);
           this.loaddata();
@@ -386,12 +394,9 @@ export default {
 
     setting(index, type, item) {
       this.payload = item;
-      this.$gql
-        .query(
-          `getRoleResourcePermission(roleId: ${item.id}){resources{name,actions{name,enabled}}}`,
-        )
+      getPermission({id:item.id})
         .then((res) => {
-          this.resources = res.resources;
+          this.permissions = res.permissions;
           this.isEdit = true;
           this.showModal();
         });
@@ -399,12 +404,9 @@ export default {
 
     initResource() {
       this.tabs.forEach((tab) => {
-        this.$gql
-          .query(
-            `getRoleResourcePermission(type:"${tab.type}"){type,resources{name,actions{name,enabled}}}`,
-          )
+        getPermission({type:tab.type})
           .then((res) => {
-            this.defaultResources[tab.type] = res.resources;
+            this.defaultPermissions[tab.type] = res.permissions;
           });
       });
     },
@@ -415,10 +417,17 @@ export default {
       const activeKey = this.activeKey;
       this.$gql
         .query(
-          `getRolesConnection(where:{type:"${activeKey}"}){values{id,name,type,users{id},userOrganizationRoles{id}}}`,
+          `usersPermissionsRoles(filters:{type:{eq:"${activeKey}"}}){
+						data{id,attributes{
+							name,
+							type,
+							users{data{id}},
+							userOrganizationRoles{data{id}}
+						}}
+					}`,
         )
         .then((res) => {
-          this.roles = res.values;
+          this.roles = res.data;
           this.loading = false;
         });
     },

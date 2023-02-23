@@ -228,7 +228,7 @@ export default {
 
     remove(id) {
       this.$gql
-        .mutation(`deleteRegistry(input:{where:{id:${id}}}){registry{id}}`)
+        .mutation(`deleteRegistry(id:${id}){data{id}}`)
         .then(() => {
           this.$message.success(this.$t("Deleted successfully"), 3);
           this.search();
@@ -239,7 +239,7 @@ export default {
       item.sync = true;
       this.$gql
         .mutation(
-          `refreshRegistry(input:{where:{id:${item.id}}}){registry{id}}`,
+          `refreshRegistry(id:${item.id})`,
         )
         .then(() => {
           this.$message.success(this.$t("Sync successfully"), 3);
@@ -254,21 +254,53 @@ export default {
         this.pageNo = pageNo;
         this.pageSize = pageSize;
       }
+      let pagination = {
+        start: this.start, 
+        limit: this.pageSize
+      };
       this.loading = true;
-      const where = { name_contains: this.key };
+      let filters = {
+        name: { contains: this.key }
+      };
       this.$gql
         .query(
-          `registriesConnection(where: $where, start: ${this.start}, limit: ${this.pageSize}){values{id,name,type,address,services{id,name},namespaces{id,name,services{id,uid,fleet{id,name},organization{id,name},namespace,name,registry{id,name},content,created_at}}},aggregate{totalCount}}`,
-          { where },
+          `registries(filters: $filters, pagination: $pagination){
+						data{id,attributes{
+							name,
+							type,
+							address,
+							services{data{id,attributes{name}}},
+							namespaces{data{id,attributes{
+								name,
+								services{data{id,attributes{
+									uid,
+									fleet{data{id,attributes{name}}},
+									organization{data{id,attributes{name}}},
+									namespace,
+									name,
+									registry{data{id,attributes{name}}},
+									content,
+									createdAt
+								}}}
+							}}}
+						}},
+						meta{pagination{total}}
+					}`,
+          { 
+            filters,pagination
+          },{
+            filters: "RegistryFiltersInput",
+            pagination: "PaginationArg",
+          }
         )
         .then((res) => {
-          this.list = res.values;
+          this.list = res.data;
           this.list.forEach((item) => {
             item.namespacesString = item.namespaces
               ? JSON.stringify(item.namespaces)
               : "{}";
           });
-          this.total = res.aggregate.totalCount;
+          this.total = res.pagination.total;
           this.loading = false;
         });
     },

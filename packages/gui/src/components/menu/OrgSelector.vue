@@ -45,12 +45,12 @@ export default {
   methods: {
     loaddata() {
       this.loading = true;
-      this.$gql.query(`organizations{id,name}`).then((res) => {
-        this.orgs = res;
+      this.$gql.query(`organizations{data{id,attributes{name}}}`).then((res) => {
+        this.orgs = res.data;
         if (res.length > 0 && !this.value) {
-          localStorage.setItem("ORG-ID", res[0].id);
-          localStorage.setItem("ORG-NAME", res[0].name);
-          this.$emit("update:value", res[0]);
+          localStorage.setItem("ORG-ID", res.data[0].id);
+          localStorage.setItem("ORG-NAME", res.data[0].name);
+          this.$emit("update:value", res.data[0]);
         }
         this.loading = false;
       });

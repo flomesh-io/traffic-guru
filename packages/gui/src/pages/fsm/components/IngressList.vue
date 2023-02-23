@@ -164,7 +164,7 @@ const columns = [
   },
   {
     key: "Creation Timestamp",
-    dataIndex: "created_at",
+    dataIndex: "createdAt",
     sorter: true,
   },
   {
@@ -235,7 +235,7 @@ export default {
 
     remove(id) {
       this.$gql
-        .mutation(`deleteIngressSync(input:{where:{id:${id}}}){id}`)
+        .mutation(`deleteIngressSync(id:${id}){data{id}}`)
         .then(() => {
           this.$message.success(this.$t("Deleted successfully"), 3);
           this.search();
@@ -265,8 +265,13 @@ export default {
         this.pageNo = pageNo;
         this.pageSize = pageSize;
       }
+      let pagination = {
+        start: this.start, 
+        limit: this.pageSize
+      };
       this.loading = true;
-      const where = { name_contains: this.key };
+      let filters = {};
+      filters.name = { contains: this.key };
       let order = "name:asc";
       if (this.sorter && this.sortOrder) {
         order = this.sortOrder.replace(/end/g, "");
@@ -275,14 +280,28 @@ export default {
       }
       this.$gql
         .query(
-          `getIngresses(where: $where, start: ${this.start}, limit: ${this.pageSize}, sort: "${order}"){values{id,name,namespace{id,name,registry{id,name}},content,created_at},aggregate{totalCount}}`,
+          `getIngresses(filters: $filters, pagination: $pagination, sort: "${order}"){
+						data{id,attributes{
+							name,
+							namespace{data{id,attributes{
+								name,
+								registry{data{id,attributes{name}}}
+							}}},
+							content,
+							createdAt
+						}},
+						meta{pagination{total}}
+					}`,
           { 
-            where
-          },
+            filters,pagination
+          },{
+            filters: "IngressFiltersInput",
+            pagination: "PaginationArg",
+          }
         )
         .then((res) => {
-          this.list = this.reset(res.values);
-          this.total = res.aggregate.totalCount;
+          this.list = this.reset(res.data);
+          this.total = res.pagination.total;
           this.loading = false;
         });
     },
@@ -295,7 +314,7 @@ export default {
           ? _content.metadata.labels
           : {};
         list[i].hosts = _content.hosts;
-        list[i].created_at = new Date(list[i].created_at).toLocaleString();
+        list[i].createdAt = new Date(list[i].createdAt).toLocaleString();
       }
       return list;
     },

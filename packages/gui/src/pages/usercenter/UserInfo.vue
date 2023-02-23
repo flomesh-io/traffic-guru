@@ -141,8 +141,8 @@
               @change="changeRes"
             >
               <a-tab-pane
-                v-for="(tab, i) in tabs"
-                :key="i"
+                v-for="tab in tabs"
+                :key="tab.type"
               >
                 <template #tab>
                   <div class="capitalize">
@@ -263,7 +263,7 @@ export default {
     search() {
       this.loading = true;
       getUserInfo().then((res) => {
-        this.detail = res;
+        this.detail = res.data;
         this.detail.phone = this.detail.phone || "";
         this.oldphone = this.detail.phone || "";
         this.detail.email = this.detail.email || "";
@@ -291,18 +291,18 @@ export default {
 
     changeRes() {
       this.resources = [];
-      const roles = store.getters["account/roles"];
-      roles.forEach((role) => {
+      const role = store.getters["account/roles"];
+      role.permissions.forEach((permission) => {
         if (
           this.activeKey == "system" &&
-          (!role.type || role.type == this.activeKey)
+          (!permission.type || permission.type == this.activeKey)
         ) {
-          this.resources.push(role);
+          this.resources.push(permission);
         } else if (
           this.activeKey != "system" &&
-          role.type == this.activeKey
+          permission.type == this.activeKey
         ) {
-          this.resources.push(role);
+          this.resources.push(permission);
         }
       });
     },

@@ -254,9 +254,18 @@ export default {
         this.pageNo = pageNo;
         this.pageSize = pageSize;
       }
+      let pagination = {
+        start: this.start, 
+        limit: this.pageSize
+      };
       this.loading = true;
       this.$gql
-        .query(`getProxyProfiles(search: ${this.key}, start: ${this.start}, limit: ${this.pageSize}){data{id,content},total}`)
+        .query(`getProxyProfiles(search: ${this.key}, pagination: $pagination){data{id,content},total}`),
+      { 
+        pagination
+      },{
+        pagination: "PaginationArg",
+      }
         .then((res) => {
           this.profiles = this.reset(res.data);
           this.total = res.total;

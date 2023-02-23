@@ -14,7 +14,7 @@
 
       <div :class="['admin-header-right', headerTheme]">
         <div
-          class="header-item transparent"
+          class="header-item"
           v-if="!isMobile"
         >
           <HeaderSearch @active="(val) => (searchActive = val)" />
@@ -34,6 +34,14 @@
         />
         <div class="header-item">
           <WebConsole />
+        </div>
+        <a-divider
+          type="vertical"
+          class="relative"
+          style="top: 25px; margin: 0 3px"
+        />
+        <div class="header-item transparent">
+          <ThemeSetting />
         </div>
         <a-divider
           type="vertical"
@@ -86,11 +94,13 @@ import HeaderNotice from "./HeaderNotice";
 import HeaderAvatar from "./HeaderAvatar";
 import SystemSetting from "./SystemSetting";
 import WebConsole from "./WebConsole";
+import ThemeSetting from '@/components/setting/ThemeSetting'
 import { mapState, mapMutations } from "vuex";
 
 export default {
   name: "AdminHeader",
   components: {
+    ThemeSetting,
     WebConsole,
     SystemSetting,
     HeaderAvatar,

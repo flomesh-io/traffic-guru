@@ -28,7 +28,6 @@ export default {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    background-color: #fefefe;
     overflow: auto;
     .content {
       padding: 32px 0;

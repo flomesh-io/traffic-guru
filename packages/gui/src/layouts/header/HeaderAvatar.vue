@@ -7,7 +7,6 @@
       <a-menu :class="['avatar-menu']">
         <a-menu-item
           class="header-menu-item"
-          style="padding: 0; background-color: #fff !important"
         >
           <h3
             class="header-menu-title"
@@ -194,7 +193,7 @@ export default {
       this.loading = true;
       getUserInfo().then((res) => {
         this.loading = false;
-        this.detail = res;
+        this.detail = res.data;
         this.detail.phone = this.detail.phone || "-";
         this.detail.email = this.detail.email || "-";
       });
@@ -244,10 +243,11 @@ export default {
   :deep(.ant-descriptions-item-label) {
     width: 69px;
   }
-  .header-menu-item {
+  :deep(.header-menu-item) {
     text-align: center;
-    padding: 0;
+    padding: 0 !important;
     pointer-events: none;
+		background-color: @body-background !important;
   }
   .header-menu-title {
     padding: 20px 0 10px 0;

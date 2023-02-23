@@ -199,9 +199,9 @@ export default {
       delete input.id;
       this.$gql
         .mutation(
-          `updateServiceImport(input: $input){serviceImport{id}}`,
-          { input: { where: { id: _pid }, data: input } },
-          { input: "updateServiceImportInput" },
+          `updateServiceImport(id:${_pid}, data: $data){data{id}}`,
+          { data: input },
+          { data: "ServiceImportInput!" },
         )
         .then(() => {
           this.visible = false;
@@ -241,22 +241,49 @@ export default {
         this.pageNo = pageNo;
         this.pageSize = pageSize;
       }
-		
+      let pagination = {
+        start: this.start, 
+        limit: this.pageSize
+      };
       this.loading = true;
-      let where = { name_contains: this.key };
+      let filters = {};
+      filters.name = { contains: this.key };
       if(this.embed){
-        where.serviceExports = [this.serviceExport];
+        filters.serviceExports = { eq: this.serviceExport };
       }
       this.$gql
         .query(
-          `serviceImportsConnection(where: $where, start: ${this.start}, limit: ${this.pageSize}){values{id,name,content,policySwitch,namespace,registry{id,name},serviceExports{id,content,service{id,uid,namespace,name,registry{id,name},content,updated_at}}},aggregate{totalCount}}`,
+          `serviceImports(filters: $filters, pagination: $pagination){
+						data{id,attributes{
+							name,
+							content,
+							policySwitch,
+							namespace,
+							registry{data{id,attributes{name}}},
+							serviceExports{data{id,attributes{
+								content,
+								service{data{id,attributes{
+									uid,
+									namespace,
+									name,
+									registry{data{id,attributes{name}}},
+									content,
+									updatedAt
+								}}}
+							}}}
+						}},
+						meta{pagination{total}}
+					}`,
           { 
-            where 
-          },
+            filters,pagination
+          },{
+            filters: "ServiceImportFiltersInput",
+            pagination: "PaginationArg",
+          }
         )
         .then((res) => {
           this.list = this.reset(res.values);
-          this.total = res.aggregate.totalCount;
+          this.total = res.pagination.total;
           this.loading = false;
         });
     },

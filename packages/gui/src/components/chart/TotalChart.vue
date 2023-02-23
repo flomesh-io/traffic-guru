@@ -5,7 +5,10 @@
         <b class="total-chart-count">{{ config.total }}</b>
         {{ $t(config.unit) }}
       </div>
-      <div class="total-chart-item">
+      <div
+        class="total-chart-item"
+        style="height: 86px;"
+      >
         <a-avatar
           v-if="
             config.icon &&
@@ -40,10 +43,9 @@
 <script>
 import { mapState } from "vuex";
 import { InfoCircleOutlined } from "@ant-design/icons-vue";
-import ChartCard from "@/components/card/ChartCard";
 export default {
   name: "TotalChart",
-  components: { InfoCircleOutlined, ChartCard },
+  components: { InfoCircleOutlined },
   props: ["config"],
   i18n: require("@/i18n"),
   data() {
@@ -72,7 +74,7 @@ export default {
 
 <style lang="less" scoped>
   .total-chart {
-    padding: 10px 0;
+    padding: 30px 0 10px 0;
     position: relative;
     top: -1px;
     background-color: #fff;
@@ -82,13 +84,13 @@ export default {
     line-height: 50px;
   }
   .total-chart-count {
-    font-size: 30px;
+    font-size: 50px;
   }
   .total-chart-item .avatar {
     color: @primary-color;
   }
   .avatar-img {
-    position: relative;
-    top: -3px;
+    width: 50px;
+		height: 50px;
   }
 </style>

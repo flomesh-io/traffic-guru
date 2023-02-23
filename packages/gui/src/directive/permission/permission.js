@@ -10,24 +10,23 @@ import store from "@/store";
 */
 function checkPermission(el, binding) {
   const { value } = binding;
-  const user = store.getters["account/user"];
-  const roles = store.getters["account/roles"];
+  const role = store.getters["account/roles"];
   if (value && value instanceof Array) {
     if (value.length > 0) {
       const permissionRoles = value;
       let hasPermission = false;
       let hasAdmin = false;
-      if (user.role.type == "authenticated") {
+      if (role && role.type == "authenticated") {
         hasAdmin = true;
       }
       if (
         permissionRoles.includes("admin") &&
-        user.role.type == "authenticated"
+        role && role.type == "authenticated"
       ) {
         hasPermission = true;
       } else {
         console.log("checkPermission4");
-        roles.forEach((role) => {
+        role.permissions.forEach((role) => {
           role.actions.forEach((action) => {
             const isIncludeA = permissionRoles.includes(
               `${role.name}:${action.name}`,

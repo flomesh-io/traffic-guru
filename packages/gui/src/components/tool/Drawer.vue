@@ -66,14 +66,17 @@ export default {
   methods: {
     open() {
       this.$emit("change", true);
+      this.$emit("update:visible", true);
     },
 
     close() {
       this.$emit("change", false);
+      this.$emit("update:visible", false);
     },
 
     toggle() {
       this.$emit("change", !this.visible);
+      this.$emit("update:visible", !this.visible);
     },
   },
 };

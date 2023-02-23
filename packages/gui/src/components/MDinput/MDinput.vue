@@ -241,7 +241,7 @@ export default {
   @color-grey-light: #e0e0e0;
   @color-blue: #00adef;
   @color-red: #f44336;
-  @color-black: black;
+  @color-black: @text-color;
   // Mixins:
 
   // Component:

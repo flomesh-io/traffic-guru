@@ -83,9 +83,9 @@ export default {
     search() {
       this.loading = true;
       this.$gql
-        .query(`dashboards{id,name,apply,content,updated_at}`)
+        .query(`dashboards{data{id,attributes{name,apply,content,updatedAt}}}`)
         .then((res) => {
-          this.dashboards = res;
+          this.dashboards = res.data;
           this.dashboards.forEach((item) => {
             item.widgets = [];
             if (item.content.widget) {

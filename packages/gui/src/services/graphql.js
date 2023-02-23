@@ -31,6 +31,43 @@ function messageError(msg, noMsg){
 		location.reload();
 	}
 }
+export function reset(d){
+	if(d.data && typeof(d.data) == 'object'){
+		if(d.data.length>=0){
+			let rtn = [];
+			d.data.forEach((item)=>{
+				if(item.attributes){
+					let keys = Object.keys(item.attributes);
+					keys.forEach((_key)=>{
+						if(item.attributes[_key] && typeof(item.attributes[_key]) == 'object' && item.attributes[_key].data !== undefined){
+							item.attributes[_key] = reset(item.attributes[_key]);
+						}
+					});
+					rtn.push({id:item.id,...item.attributes});
+				} else {
+					rtn.push(item);
+				}
+			})
+			return rtn;
+		} else {
+			let item = d.data;
+			if(item.attributes){
+				let keys = Object.keys(item.attributes);
+				keys.forEach((_key)=>{
+					if(item.attributes[_key] && typeof(item.attributes[_key]) == 'object' && item.attributes[_key].data !== undefined){
+						item.attributes[_key] = reset(item.attributes[_key]);
+					}
+				});
+				item = {id:item.id,...item.attributes}
+			}
+			return item;
+		}
+	} else if (d.data === null) {
+    return null;
+  } else{
+		return d;
+	}
+}
 
 export function query(query, variables, variablesType, fetchPolicy) {
   try {
@@ -44,21 +81,27 @@ export function query(query, variables, variablesType, fetchPolicy) {
       variables: variables ? _.cloneDeep(variables) : null,
       fetchPolicy: fetchPolicy ? fetchPolicy : "network-only",
     };
+		let fun = query.split("{")[0].split("(")[0];
     return new Promise((resolve, reject) => {
       request(REST.GQL, METHOD.POST, options)
         .then((fetchRes) => {
           if (fetchRes.status == 200) {
             const res = fetchRes.data;
-            if (res.errors) {
+						let _d = res.data ? (res.data[fun] || res.data):null;
+            if (res.errors && res.errors.message) {
               messageError(res.errors.message);
               reject(res.errors);
             } else if (res.errors && res.errors[0].message) {
               messageError(res.errors[0].message);
               reject(res.errors);
-            } else if (!res.data || Object.keys(res.data).length == 0) {
+            } else if (!_d || Object.keys(_d).length == 0) {
               resolve(null);
+            } else if(_d && _d.meta) {
+              resolve({data:reset(_d),pagination:_d.meta.pagination});
+            } else if(_d && _d.data) {
+							resolve({data:reset(_d)});
             } else {
-              resolve(res.data[Object.keys(res.data)[0]]);
+              resolve(_d);
             }
           } else {
             if (fetchRes.status) {
@@ -103,21 +146,25 @@ export function mutation(mutation, variables, variablesType, update, noMsg) {
       variables: variables ? _.cloneDeep(variables) : null,
       update: update,
     };
+		let fun = mutation.split("{")[0].split("(")[0];
     return new Promise((resolve, reject) => {
       request(REST.GQL, METHOD.POST, options)
         .then((fetchRes) => {
           if (fetchRes.status == 200) {
             const res = fetchRes.data;
+						let _d = res.data ? (res.data[fun] || res.data):null;
             if (res.errors && res.errors.message) {
 							messageError(res.errors.message, noMsg);
               reject(res.errors);
             } else if (res.errors && res.errors[0].message) {
 							messageError(res.errors[0].message, noMsg);
               reject(res.errors);
-            } else if (!res.data || Object.keys(res.data).length == 0) {
+            } else if (!_d || Object.keys(_d).length == 0) {
               resolve(null);
+            } else if(_d && _d.data) {
+							resolve({data:reset(_d)});
             } else {
-              resolve(res.data[Object.keys(res.data)[0]]);
+              resolve(_d);
             }
           } else {
 						if (fetchRes.status) {

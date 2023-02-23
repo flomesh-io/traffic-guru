@@ -335,11 +335,11 @@ export default {
   mounted() {
     this.isMounted = true;
 
-    this.$gql.query(`organizations{id,name}`).then((res) => {
-      this.orgs = res;
+    this.$gql.query(`organizations{data{id,attributes{name}}}`).then((res) => {
+      this.orgs = res.data;
     });
-    this.$gql.query(`fleets(where:{type:"sidecar"}){id,name}`).then((res) => {
-      this.sidecars = res;
+    this.$gql.query(`fleets(filters:{type:{eq:"sidecar"}}){data{id,attributes{name}}}`).then((res) => {
+      this.sidecars = res.data;
     });
     if (this.pid != "") {
       this.search();
@@ -456,12 +456,84 @@ export default {
       this.$emit("update:loading", true);
       this.$gql
         .query(
-          `getService(id: ${this.pid}){id,serviceExport{id},pods,content,ns{id,name},isGateway,gatewayPath,organization{id,name,whiteOrgs{id,name,services{id,name,content,organization{id,name},registry{id,type,name,content},namespace,blacklistServices{id}}},whiteOrgsBack{id,name,services{id,name,content,organization{id,name},registry{id,type,name,content},namespace,blacklistServices{id}}},services{id,name,content,organization{id,name},registry{id,type,name,content},namespace,blacklistServices{id}},subscribeServices{id,name,content,organization{id,name},registry{id,type,name,content},namespace,blacklistServices{id}}},extend,certificates{id,name,content},uid,name,fleet{id,name},registry{id,type,name,content},created_at, subscribeOrgs{services{id,name,content,organization{id,name},registry{id,type,name,content},namespace}},whitelistServices{id,name,namespace},blacklistServices{id,name,namespace},sidecar{id,name}}`,
+          `getService(id: ${this.pid}){data{id,attributes{
+						serviceExport{data{id}},
+						pods,
+						content,
+						ns{data{id,attributes{name}}},
+						isGateway,
+						gatewayPath,
+						organization{data{id,attributes{
+							name,
+							whiteOrgs{data{id,attributes{
+								name,
+								services{data{id,attributes{
+									name,
+									content,
+									organization{data{id,attributes{name}}},
+									registry{data{id,attributes{type,name,content}}},
+									namespace,
+									blacklistServices{data{id}},
+                  updatedAt
+								}}}
+							}}},
+							whiteOrgsBack{data{id,attributes{
+								name,
+								services{data{id,attributes{
+									name,
+									content,
+									organization{data{id,attributes{name}}},
+									registry{data{id,attributes{type,name,content}}},
+									namespace,
+									blacklistServices{data{id}},
+                  updatedAt
+								}}}
+							}}},
+							services{data{id,attributes{
+								name,
+								content,
+								organization{data{id,attributes{name}}},
+								registry{data{id,attributes{type,name,content}}},
+								namespace,
+								blacklistServices{data{id}},
+                updatedAt
+							}}},
+							subscribeServices{data{id,attributes{
+								name,
+								content,
+								organization{data{id,attributes{name}}},
+								registry{data{id,attributes{type,name,content}}},
+								namespace,
+								blacklistServices{data{id}},
+                updatedAt
+							}}}
+						}}},
+						extend,
+						certificates{data{id,attributes{name,content}}},
+						uid,
+						name,
+						fleet{data{id,attributes{name}}},
+						registry{data{id,attributes{type,name,content}}},
+						createdAt, 
+						subscribeOrgs{data{id,attributes{
+							services{data{id,attributes{
+								name,
+								content,
+								organization{data{id,attributes{name}}},
+								registry{data{id,attributes{type,name,content}}},
+								namespace
+							}}}
+						}}},
+						whitelistServices{data{id,attributes{name,namespace}}},
+						blacklistServices{data{id,attributes{name,namespace}}},
+						sidecar{data{id,attributes{name}}}
+					}}}`,
         )
-        .then((res) => {
+        .then((d) => {
+          let res = d.data;
           let subscribeServices = [];
           let subscribeServicesTo = [];
-          if (res.organization && res.organization.services.length) {
+          if (res.organization && res.organization.services && res.organization.services.length > 0) {
             subscribeServices = subscribeServices.concat(
               res.organization.services.filter((item) => item.id != this.pid),
             );
@@ -553,7 +625,7 @@ export default {
             return !has;
           });
 
-          this.creationTimestamp = new Date(res.created_at).toLocaleString();
+          this.creationTimestamp = new Date(res.createdAt).toLocaleString();
           let extend = res.extend || {};
 
           let detail = res.content;
@@ -565,7 +637,7 @@ export default {
           }
           let registry = res.registry;
           let ns = res.ns;
-          // this.organization = res.organization ? res.organization.id : null;
+          this.organization = res.organization ? res.organization : {};
           this.sidecar = res.sidecar ? res.sidecar.id : null;
           this.isGateway = res.isGateway;
           this.gatewayPath = res.gatewayPath;
@@ -707,9 +779,9 @@ export default {
       if (this.pid != "") {
         this.$gql
           .mutation(
-            `updateServiceSync(input: $input){id}`,
-            { input: { where: { id: this.pid }, data: input } },
-            { input: "updateServiceInput" },
+            `updateServiceSync(id: ${this.pid}, data: $data){data{id}}`,
+            { data: input },
+            { data: "ServiceInput!" },
           )
           .then(() => {
             this.$message.success(this.$t("Save successfully"), 3);
@@ -722,12 +794,12 @@ export default {
         input.registry = this.registry.id;
         this.$gql
           .mutation(
-            `createServiceSync(input: $input){id}`,
-            { input: { data: input } },
-            { content: "createServiceInput" },
+            `createServiceSync(data: $data){data{id}}`,
+            { data: input },
+            { data: "ServiceInput!" },
           )
           .then((res) => {
-            this.$emit("update:pid", res.id);
+            this.$emit("update:pid", res.data.id);
             this.$message.success(this.$t("Created successfully"), 3);
             this.$closePage(this.$route);
           });

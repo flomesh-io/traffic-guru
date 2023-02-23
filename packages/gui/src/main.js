@@ -37,6 +37,7 @@ app.directive("free", free);
 app.config.globalProperties.$isPro = process.env.VUE_APP_VERSION == "pro";
 app.config.globalProperties.$request = request;
 app.config.globalProperties.$METHOD = METHOD;
+app.config.globalProperties.$DFT_LIMIT = 9999;
 app.config.globalProperties.$REST = api;
 app.config.globalProperties.$gql = {
   query,

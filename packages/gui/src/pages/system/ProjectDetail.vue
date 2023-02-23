@@ -14,8 +14,30 @@
         >
           <UsersResults
             :loading="loading"
+            :actions="[
+              {
+                icon: 'EditOutlined',
+                text: $t('Set Project Role'),
+                call: setting,
+                permission: [
+                  detail.organization
+                    ? 'project:update:organization:' + detail.organization
+                    : 'project:update',
+                ],
+              },
+              {
+                icon: 'CloseOutlined',
+                hide: true,
+                text: $t('Remove'),
+                call: remove,
+                permission: [
+                  detail.organization
+                    ? 'project:update:organization:' + detail.organization
+                    : 'project:update',
+                ],
+              },
+            ]"
             :users="detail.users"
-            :no-action="true"
           />
         </a-tab-pane>
       </a-tabs>
@@ -57,6 +79,16 @@ export default {
   },
 
   methods: {
+    remove(index, type, item) {
+      console.log(index, type);
+      this.$refs['projectBase'].delProjectUser(item.id)
+    },
+
+    setting(index, type, item) {
+      console.log(index, type);
+      this.$refs['projectBase'].showProjectRole(item);
+    },
+
     getDetail(d) {
       this.detail = d.detail;
       this.loading = d.loading;

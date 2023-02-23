@@ -1,4 +1,4 @@
-//const client = require('webpack-theme-color-replacer/client')
+const client = require('webpack-theme-color-replacer/client')
 const { theme } = require("../config");
 const {
   getMenuColors,
@@ -25,11 +25,10 @@ function getThemeColors(color, $theme) {
   return themeColors;
 }
 
-function changeThemeColor() {
-	//newColor, $theme
-  //let promise = client.changer.changeColor({newColors: getThemeColors(newColor, $theme)})
-  //return promise
-  return null;
+function changeThemeColor(newColor, $theme) {
+  let promise = client.changer.changeColor({newColors: getThemeColors(newColor, $theme)})
+  return promise
+  // return null;
 }
 
 function modifyVars(color) {
@@ -91,6 +90,15 @@ function getLocalSetting(loadTheme) {
   } catch (e) {
     console.error(e);
   }
+	if(localSetting && localSetting.theme && localSetting.theme.mode == "auto"){
+		if (window.matchMedia && 
+				window.matchMedia('(prefers-color-scheme: dark)').matches ) {
+			localSetting.theme.mode = "night"
+		} else if (window.matchMedia && 
+				window.matchMedia('(prefers-color-scheme: light)').matches ) {
+			localSetting.theme.mode = "light"
+		}
+	}
   if (loadTheme) {
     loadLocalTheme(localSetting);
   }

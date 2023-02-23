@@ -30,11 +30,11 @@ export const DEFAULT_API_DETAIL =
   "fsm.dashboard.QOS,fsm.dashboard.LATENCY,fsm.dashboard.LOAD_STATUS,fsm.dashboard.TPS_ERROR,fsm.dashboard.BPS,openapi.dashboard.API_METRIC_WEEK,openapi.dashboard.API_METRIC_MONTH";
 
 export async function getDashboardById(id) {
-  return query(`dashboard(id:${id}){id,name,content,apply}`);
+  return query(`dashboard(id:${id}){data{id,attributes{name,content,apply}}}`);
 }
 
 export async function getDashboardByApply(apply) {
-  return query(`dashboards(where:{apply:"${apply}"}){id,name,content,apply}`);
+  return query(`dashboards(filters:{apply:{eq:"${apply}"}}){data{id,attributes{name,content,apply}}}`);
 }
 
 export async function setDashboard(id, data) {
@@ -51,14 +51,11 @@ export async function setDashboard(id, data) {
     _p.apply = data.apply;
   }
   return mutation(
-    `updateDashboard(input: $input){dashboard{id}}`,
+    `updateDashboard(id:${id}, data: $data){data{id}}`,
     {
-      input: {
-        where: { id },
-        data: _p,
-      },
+			data: _p,
     },
-    { input: "updateDashboardInput" },
+    { data: "DashboardInput!" },
   );
 }
 
@@ -74,11 +71,11 @@ export async function addDashboard(data) {
     _p.apply = data.apply;
   }
   return mutation(
-    `createDashboard(input: $input){dashboard{id}}`,
+    `createDashboard(data: $data){data{id}}`,
     {
-      input: { data: _p },
+      data: _p
     },
-    { input: "createDashboardInput" },
+    { data: "DashboardInput!" },
   );
 }
 
@@ -89,11 +86,11 @@ export async function addUserWidget(content) {
     shared: 0,
   };
   return mutation(
-    `createWidget(input: $input){widget{id}}`,
+    `createWidget(data: $data){data{id}}`,
     {
-      input: { data },
+      data
     },
-    { input: "createWidgetInput" },
+    { data: "WidgetInput!" }
   );
 }
 
@@ -101,26 +98,23 @@ export async function editUserWidget(id, content) {
   delete content.uid;
   const p = { content: content, name: content.id };
   return mutation(
-    `updateWidget(input: $input){widget{id}}`,
+    `updateWidget(id:${id}, data: $data){data{id}}`,
     {
-      input: {
-        where: { id },
-        data: p,
-      },
+			data: p,
     },
-    { input: "updateWidgetInput" },
+    { data: "WidgetInput!" },
   );
 }
 
 export async function deleteUserWidget(id) {
-  return mutation(`deleteWidget(input:{where:{id:${id}}}){widget{id}}`);
+  return mutation(`deleteWidget(id:${id}){data{id}}`);
 }
 
 export async function getUserWidgets() {
-  return query(`widgets{id,name,shared,user_id,content}`);
+  return query(`widgets{data{id,attributes{name,shared,user_id,content}}}`);
 }
 export async function getUserWidget(id) {
-  return query(`widget(id:${id}){id,name,shared,user_id,content}`);
+  return query(`widget(id:${id}){data{id,attributes{name,shared,user_id,content}}}`);
 }
 
 export const SAMPLE_WIDGET = {

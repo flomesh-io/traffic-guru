@@ -80,7 +80,6 @@ async function parseRoutes(routesConfig, routerMap) {
 }
 
 function loadRoutes(routesConfig) {
-  /*************** version < v0.6.1 *****************/
   if (arguments.length > 0) {
     const arg0 = arguments[0];
     if (arg0.router || arg0.i18n || arg0.store) {
@@ -273,14 +272,25 @@ async function getStrapiRoutes() {
   // get strapi async routes
   let strapiRoutes = [];
   await query(
-    `routerSettings(sort: "sort:asc"){id,name,displayName,path,parent{id,name,displayName,fullPath,path},fullPath,disabled,authority,invisible,sort,level}`
+    `routerSettings(sort: "sort:asc"){data{id,attributes{
+			name,
+			displayName,
+			path,
+			fullPath,
+			disabled,
+			authority,
+			invisible,
+			sort,
+			level,
+			parent{data{id,attributes{name,displayName,path,fullPath,disabled,authority,invisible,sort,level}}},
+		}}}`
   ).then((res) => {
-    strapiRoutes = res;
+    strapiRoutes = res.data || [];
   });
   return strapiRoutes;
 }
 
-function formatAuthority(routes, pAuthorities = [], strapiRoutes) {
+function formatAuthority(routes, pAuthorities = [], strapiRoutes = []) {
   routes.forEach((route) => {
     const meta = route.meta;
     const defaultAuthority = pAuthorities[pAuthorities.length - 1] || {

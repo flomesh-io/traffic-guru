@@ -27,6 +27,7 @@
         {{ $t("Drag to change level") }}
       </template>
       <a-tree
+        v-if="orgTree"
         block-node
         class="full"
         draggable
@@ -97,6 +98,17 @@
           </div>
         </template>
       </a-tree>
+      <a-result
+        v-else
+        :title="$t('No data')"
+      >
+        <template #icon>
+          <img
+            src="../../assets/img/empty.svg"
+            style="width: 300px"
+          >
+        </template>
+      </a-result>
     </a-card>
 
     <a-modal
@@ -237,11 +249,11 @@ export default {
 
   mounted() {
     this.loaddata();
-    this.$gql.query(`projects{id,name,organization{id,name}}`).then((res) => {
-      this.projects = res;
+    this.$gql.query(`projects{data{id,attributes{name,organization{data{id,attributes{name}}}}}}`).then((res) => {
+      this.projects = res.data;
     });
-    this.$gql.query(`users{id,username,phone,email,type}`).then((res) => {
-      this.users = res;
+    this.$gql.query(`usersPermissionsUsers{data{id,attributes{username,phone,email,type}}}`).then((res) => {
+      this.users = res.data;
     });
   },
 
@@ -311,7 +323,7 @@ export default {
       }
       this.$gql
         .mutation(
-          `updateOrganization(input:{where:{id:${dragId}},data:{parent: ${parentId}}}){organization{id}}`,
+          `updateOrganization(id:${dragId},data:{parent: ${parentId}}){data{id}}`,
         )
         .then(() => {});
       this.orgTree = data;
@@ -363,12 +375,12 @@ export default {
         const whereID = savedata.id;
         this.$gql
           .mutation(
-            `updateOrganization(input: $input){organization{id}}`,
+            `updateOrganization(id:${whereID}, data: $data){data{id}}`,
             {
-              input: { where: { id: whereID }, data: _p },
+              data: _p
             },
             {
-              input: "updateOrganizationInput",
+              data: "OrganizationInput!",
             },
           )
           .then(() => {
@@ -379,12 +391,12 @@ export default {
       } else {
         this.$gql
           .mutation(
-            `createOrganization(input: $input){organization{id}}`,
+            `createOrganization(data: $data){data{id}}`,
             {
-              input: { data: _p },
+              data: _p
             },
             {
-              input: "createOrganizationInput",
+              data: "OrganizationInput!",
             },
           )
           .then(() => {
@@ -398,7 +410,7 @@ export default {
     removeOrg(index, type, item) {
       this.$gql
         .mutation(
-          `deleteOrganization(input:{where:{id:${item.id}}}){organization{id}}`,
+          `deleteOrganization(id:${item.id}){data{id}}`,
         )
         .then(() => {
           this.$message.success(this.$t("Deleted successfully"), 3);
@@ -430,12 +442,14 @@ export default {
     },
 
     setTreeKey(tree, level) {
-      tree.forEach((item) => {
-        item.key = `${level}-${item.id}`;
-        if (item.children) {
-          this.setTreeKey(item.children, level + 1);
-        }
-      });
+      if(tree){
+        tree.forEach((item) => {
+          item.key = `${level}-${item.id}`;
+          if (item.children) {
+            this.setTreeKey(item.children, level + 1);
+          }
+        });
+      }
     },
 
     loaddata(merge) {
@@ -443,9 +457,9 @@ export default {
         this.loading = true;
       }
       this.$gql
-        .query(`organizations{id,name,parent{id,name},children{id,name}}`)
+        .query(`organizations{data{id,attributes{name,parent{data{id,attributes{name}}},children{data{id,attributes{name}}}}}}`)
         .then((res) => {
-          this.orgs = res;
+          this.orgs = res.data;
         });
       this.$gql.query(`getOrganizationsTree`).then((res) => {
         this.orgTree = res;

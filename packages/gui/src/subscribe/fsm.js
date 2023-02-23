@@ -43,7 +43,7 @@ const fsm = {
         return {
           config: {
             icon: require("@/assets/img/namespace.svg"),
-            total: res.aggregate.totalCount,
+            total: res.pagination.total,
             unit: "unitge",
           },
         };
@@ -59,7 +59,7 @@ const fsm = {
         return {
           config: {
             icon: require("@/assets/img/service.png"),
-            total: res.aggregate.totalCount,
+            total: res.pagination.total,
             unit: "unitge",
           },
         };
@@ -75,7 +75,7 @@ const fsm = {
         return {
           config: {
             icon: require("@/assets/img/namespace.svg"),
-            total: res.aggregate.totalCount,
+            total: res.pagination.total,
             unit: "unitge",
           },
         };

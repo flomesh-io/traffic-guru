@@ -8,7 +8,7 @@
         class="ant-dropdown-link"
         @click.prevent
       >
-        {{ schemaName }} / {{ k8svalue[1] }}
+        {{ schemaName }} / {{ k8svalue[1] == '_all'? 'all' : k8svalue[1] }}
         <DownOutlined />
       </a>
       <template #overlay>
@@ -81,7 +81,7 @@ export default {
     FormItem
   },
 
-  props: ["isFilter", "noAll", "namespace"],
+  props: ["isFilter", "noAll", "namespace", "type"],
   i18n: require("@/i18n"),
   data() {
     return {
@@ -149,12 +149,12 @@ export default {
       };
       this.$gql
         .mutation(
-          `createNamespace(input: $input){namespace{id}}`,
+          `createNamespace(data: $data){data{id}}`,
           {
-            input: { data: savedata },
+            data: savedata
           },
           {
-            input: "createNamespaceInput",
+            data: "NamespaceInput!",
           },
         )
         .then(() => {
@@ -167,7 +167,9 @@ export default {
               findOps = option;
             }
           });
-          this.getNS(this.k8svalue, findOps);
+          if(this.k8svalue){
+            this.getNS(this.k8svalue, findOps);
+          }
         });
     },
 
@@ -210,8 +212,8 @@ export default {
     },
 
     getK8s() {
-      getRegistries().then((regs) => {
-        this.k8soptions = regs;
+      getRegistries(this.type).then((regs) => {
+        this.k8soptions = regs.data;
         let findId = localStorage.getItem("SCHEMA_ID");
         let rtnId = null;
         let _ns = null;
@@ -242,17 +244,20 @@ export default {
             type = opt.type;
           }
         });
-        this.k8svalue = [`${rtnId},${type}`, _ns, _ns_id];
-        this.getNS(this.k8svalue[0], findIdx, true);
+        if(rtnId){
+          this.k8svalue = [`${rtnId},${type}`, _ns, _ns_id];
+          this.getNS(this.k8svalue[0], findIdx, true);
+        }
       });
     },
 
     getNS(D, index, isInit, noEmit) {
-      getK8sNamespaces(D.split(",")[0]).then((res) => {
-        let _data = res;
+      let nsId = D.split(",")[0];
+      getK8sNamespaces(nsId).then((res) => {
+        let _data = res.data;
         let defaultChild = this.noAll
           ? []
-          : [{ label: "All", value: "_all", id: "", isLeaf: true }];
+          : [{ label: "all", value: "_all", id: "", isLeaf: true }];
         _data.forEach((np, index2) => {
           if (index2 == 0 && this.k8svalue[1] == null && isInit) {
             this.k8svalue[1] = np.name;
@@ -267,12 +272,12 @@ export default {
         });
         if (defaultChild.length <= 1) {
           defaultChild = [
-            { label: "default", value: "default", id: "", isLeaf: true },
+            { label: "all", value: "_all", id: "", isLeaf: true },
           ];
         }
         if (isInit) {
           if (defaultChild.length <= 1) {
-            this.k8svalue[1] = "default";
+            this.k8svalue[1] = "_all";
             this.k8svalue[2] = "";
           }
           if (this.isFilter) {

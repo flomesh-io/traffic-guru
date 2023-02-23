@@ -261,21 +261,37 @@ export default {
         this.pageNo = pageNo;
         this.pageSize = pageSize;
       }
+      let pagination = {
+        start: this.start, 
+        limit: this.pageSize
+      };
       this.loading = true;
-      const where = { title_contains: this.key, type: this.activeKey };
+      const filters = { 
+        title:{contains:this.key} , 
+        type: {eq:this.activeKey} ,
+      };
       this.$gql
         .query(
-          `getMessages(where: $where, start: ${this.start}, limit: ${this.pageSize}){values{id,type,level,title,content,read,cnt,updated_at},aggregate{totalCount}}`,
+          `myMessages(filters: $filters, pagination: $pagination){
+						data{
+							id,
+							attributes{type,level,title,content,read,cnt,updatedAt}
+						},
+						meta{pagination{total}}
+					}`,
           { 
-            where 
+            filters,pagination
+          },{
+            filters: "MessageFiltersInput",
+            pagination: "PaginationArg",
           }
         )
         .then((res) => {
-          this.list = res.values;
+          this.list = res.data;
           this.list.forEach((item) => {
-            item.moment = moment(new Date(item.updated_at)).fromNow();
+            item.moment = moment(new Date(item.updatedAt)).fromNow();
           });
-          this.total = res.aggregate.totalCount;
+          this.total = res.pagination.total;
           this.loading = false;
         });
     },

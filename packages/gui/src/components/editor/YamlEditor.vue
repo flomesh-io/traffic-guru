@@ -1,7 +1,7 @@
 <template>
   <div>
     <monacoeditor
-      id="YamlEditor"
+      :id="id ? id : 'YamlEditor'"
       v-model:content="code"
       :option="cmOptions"
       @change="change"
@@ -19,7 +19,7 @@ import "monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution.js";
 export default {
   name: "YamlEditor",
   components: { monacoeditor },
-  props: ["value", "height", "isReadonly", "theme"],
+  props: ["value", "id",  "height", "isReadonly", "theme"],
   data() {
     return {
       code: "",
@@ -54,6 +54,7 @@ export default {
     change(event) {
       if (typeof event == "string") {
         this.$emit("update:value", event);
+        this.$emit("fetch", event);
       }
     },
 

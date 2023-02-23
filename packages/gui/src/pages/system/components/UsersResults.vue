@@ -8,7 +8,7 @@
       :actions="
         noAction
           ? null
-          : [
+          : (actions?actions:[
             {
               icon: 'EditOutlined',
               text: $t('edit'),
@@ -22,7 +22,7 @@
               call: remove,
               permission: ['user:delete'],
             },
-          ]
+          ])
       "
     >
       <template #default="{ item }">
@@ -30,6 +30,13 @@
           <template #title>
             <div class="mb-3">
               {{ item.username }}
+              <a-tag
+                v-if="item.role"
+                color="blue"
+                class="ml-10"
+              >
+                {{ item.role.name }}
+              </a-tag>
             </div>
           </template>
           <template #avatar>
@@ -86,7 +93,7 @@ export default {
   },
 
   i18n: require("@/i18n"),
-  props: ["users", "total", "pageNo", "pageSize", "loading", "noAction"],
+  props: ["users", "total", "pageNo", "pageSize", "loading", "actions", "noAction"],
   data() {
     return {
       pageNoVal: 0,
@@ -120,6 +127,7 @@ export default {
     setting(index, type, item) {
       this.$emit("setting", index, type, item);
     },
+		
   },
 };
 </script>

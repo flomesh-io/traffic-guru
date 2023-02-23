@@ -194,7 +194,7 @@ export default {
     remove(id) {
       this.$gql
         .mutation(
-          `deleteHealthcheck(input:{where:{id:${id}}}){healthcheck{id}}`,
+          `deleteHealthcheck(id:${id}){data{id}}`,
         )
         .then(() => {
           this.$message.success(this.$t("Deleted successfully"), 3);
@@ -207,26 +207,43 @@ export default {
         this.pageNo = pageNo;
         this.pageSize = pageSize;
       }
+      let pagination = {
+        start: this.start, 
+        limit: this.pageSize
+      };
       this.loading = true;
       this.list = [];
-      const where = { name_contains: this.key };
+      let filters = {};
+      filters.name = { contains: this.key };
 
       if (this.modeId) {
-        where.dialTestings = [];
+        filters.dialTestings = { or: [] };
         this.dialTestings.forEach((dialTesting) => {
-          where.dialTestings.push(dialTesting.id);
+          filters.dialTestings.or.push({id:{eq:dialTesting.id}});
         });
       }
 
       this.$gql
         .query(
-          `healthchecksConnection(where: $where, start: ${this.start}, limit: ${this.pageSize}){values{id,name,content,created_at, dialTestings{name,content}},aggregate{totalCount}}`,
+          `healthchecks(filters: $filters, pagination: $pagination){
+						data{
+							id,
+							attributes{
+								name,content,createdAt, 
+								dialTestings{data{id,attributes{name,content}}}
+							}
+						},
+						meta{pagination{total}}
+					}`,
           { 
-            where 
-          },
+            filters,pagination
+          },{
+            filters: "HealthcheckFiltersInput",
+            pagination: "PaginationArg",
+          }
         )
         .then((res) => {
-          for (let value of res.values) {
+          for (let value of res.data) {
             value.dialTestingName = "";
             value.dialTestings.some((item) => {
               for (let i2 = 0; i2 < item.content.targets.length; i2++) {
@@ -241,17 +258,16 @@ export default {
               }
             });
           }
-          this.list = res.values;
+          this.list = res.data;
           this.list.forEach((item) => {
             if (item.content && item.content.length > 1) {
-              //item.protocol = item.content[0].data[0][0].value;
 
               item.status = item.content[0].data[0][0].value.concat(
                 item.content[1].data[0][0].value,
               );
             }
           });
-          this.total = res.aggregate.totalCount;
+          this.total = res.pagination.total;
           this.loading = false;
         });
     },

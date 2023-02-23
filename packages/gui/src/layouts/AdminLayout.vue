@@ -278,16 +278,6 @@ export default {
       /*overflow-x: hidden;*/
       /*min-height: calc(100vh - 64px - 122px);*/
     }
-    .setting {
-      background-color: @primary-color;
-      color: @base-bg-color;
-      border-radius: 5px 0 0 5px;
-      line-height: 40px;
-      font-size: 22px;
-      width: 40px;
-      height: 40px;
-      box-shadow: -2px 0 8px @shadow-color;
-    }
   }
   .layout-content {
     position: relative;
@@ -296,4 +286,18 @@ export default {
   .header-fullscreen {
     z-index: 10;
   }
+	.setting {
+		background-color: @primary-color;
+		color: @base-bg-color;
+		border-radius: 5px 0 0 5px;
+		line-height: 40px;
+		font-size: 22px;
+		width: 40px;
+		height: 40px;
+		box-shadow: -2px 0 8px @shadow-color;
+		position: absolute;
+		right: 0px;
+		top: 50px;
+		z-index: 1000;
+	}
 </style>

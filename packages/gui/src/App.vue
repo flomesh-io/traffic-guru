@@ -40,17 +40,11 @@ export default {
     },
 
     "theme.mode": function (val) {
-      let closeMessage = this.$message.loading(
-        `You have selected the theme mode ${val}, switching...`,
-      );
-      themeUtil.changeThemeColor(this.theme.color, val).then(closeMessage);
+      themeUtil.changeThemeColor(this.theme.color, this.getThemeMode(val));
     },
 
     "theme.color": function (val) {
-      let closeMessage = this.$message.loading(
-        `You have selected the theme mode ${val}, switching...`,
-      );
-      themeUtil.changeThemeColor(val, this.theme.mode).then(closeMessage);
+      themeUtil.changeThemeColor(val, this.theme.mode);
     },
 
     layout: function () {
@@ -70,6 +64,21 @@ export default {
 
   methods: {
     ...mapMutations("setting", ["setDevice"]),
+		
+    getThemeMode(d) {
+      if(d == 'light' || d == 'night'){
+        return d;
+      }else {
+        if (window.matchMedia && 
+          window.matchMedia('(prefers-color-scheme: dark)').matches ) {
+          return "night";
+        }  else if (window.matchMedia && 
+          window.matchMedia('(prefers-color-scheme: light)').matches ) {
+          return "light";
+        }
+      }
+    },
+		
     setWeekModeTheme(weekMode) {
       if (weekMode) {
         document.body.classList.add("week-mode");

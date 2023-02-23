@@ -4,7 +4,7 @@
       <template #renderEmpty>
         <a-result
           v-if="dataSource.length == 0 && !!resultEmpty"
-          :title="resultEmpty.title"
+          :title="resultEmpty.title || $t('No data')"
           :sub-title="resultEmpty.subTitle"
         >
           <template #icon>

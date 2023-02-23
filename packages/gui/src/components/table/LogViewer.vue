@@ -516,8 +516,8 @@ export default {
           console.log(err);
         });
 
-      this.$gql.query(`fleets(where:{type:"pipy"}){id,name}`).then((res) => {
-        this.pipys = res;
+      this.$gql.query(`fleets(filters:{type:{eq:"pipy"}}){data{id,attributes{name}}}`).then((res) => {
+        this.pipys = res.data;
       });
       if (!this.hideChart) {
         getLatencyByWhere(

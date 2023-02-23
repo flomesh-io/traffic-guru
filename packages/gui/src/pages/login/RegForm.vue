@@ -88,7 +88,7 @@
 </template>
 
 <script>
-import { register, verificationCode } from "@/services/user";
+import { register, verificationCode, getPermission } from "@/services/user";
 import { setAuthorization } from "@/utils/request";
 import { mapMutations } from "vuex";
 import MdInput from "@/components/MDinput/MDinput";
@@ -208,45 +208,50 @@ export default {
           placement: "bottomRight",
           description: this.formState.name + "，" + this.$t("Welcome back"),
         });
-        const roleId = loginRes.user.role ? loginRes.user.role.id : "";
-        let _resources = [];
-        this.$gql
-          .query(
-            `getRoleResourcePermission(roleId:${roleId}){resources{name,actions{name,enabled}}}`,
-          )
-          .then((res2) => {
-            _resources = res2.resources;
-            this.setRoles(_resources);
-            this.$router.push("/workplace");
-          });
-        this.$gql
-          .query(
-            `userOrganizationRoles(limit:-1,where:{user:${loginRes.user.id}}){id,type,project{id,name},organization{id,name},role{id,name}}`,
-          )
-          .then((res3) => {
-            this.setPermissions(res3);
-            res3.forEach((uor) => {
-              if (uor.role && uor.role.id) {
+        let _role = null;
+        getUserInfo().then((userinfo) => {
+          if(userinfo.data.role?.id){
+            getPermission({id:userinfo.data.role.id})
+              .then((role) => {
+                _role = role;
+                this.setRoles(role);
+                setTimeout(()=>{
+                  this.$router.push("/workplace");
+                },300);
+								
                 this.$gql
                   .query(
-                    `getRoleResourcePermission(roleId:${uor.role.id}){resources{name,actions{name,enabled}}}`,
+                    `userOrganizationRoles(pagination:{limit: ${this.$DFT_LIMIT}},filters:{user:{eq:${loginRes.user.id}}}){data{id,attributes{
+											type,
+											project{data{id,attributes{name}}},
+											organization{data{id,attributes{name}}},
+											role{data{id,attributes{name}}}
+										}}}`,
                   )
-                  .then((res4) => {
-                    let _temp = [];
-                    res4.resources.forEach((_resource) => {
-                      _temp.push({
-                        ..._resource,
-                        type: uor.type,
-                        project: uor.project,
-                        organization: uor.organization,
-                      });
+                  .then((res3) => {
+                    this.setPermissions(res3.data);
+                    res3.data.forEach((uor) => {
+                      if (uor.role && uor.role.id) {
+                        getPermission({id:uor.role.id})
+                          .then((role) => {
+                            let _temp = [];
+                            role.permissions.forEach((_resource) => {
+                              _temp.push({
+                                ..._resource,
+                                type: uor.type,
+                                project: uor.project,
+                                organization: uor.organization,
+                              });
+                            });
+                            _role.permissions = _role.permissions.concat(_temp);
+                            this.setRoles(_role);
+                          });
+                      }
                     });
-                    _resources = _resources.concat(_temp);
-                    this.setRoles(_resources);
                   });
-              }
-            });
-          });
+              });
+          }
+        });
       } else {
         this.error = loginRes.message;
       }

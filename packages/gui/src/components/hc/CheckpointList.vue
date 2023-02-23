@@ -229,7 +229,7 @@ export default {
     remove(id) {
       this.$gql
         .mutation(
-          `deleteDialTesting(input:{where:{id:${id}}}){dialTesting{id}}`,
+          `deleteDialTesting(id:${id}){data{id}}`,
         )
         .then(() => {
           this.$message.success(this.$t("Deleted successfully"), 3);
@@ -259,11 +259,10 @@ export default {
       if (this.modeId) {
         this.$gql
           .query(
-            `dialTestings(where: $where){id,name,content, services{id}}`,
-            { where: {} },
+            `dialTestings{data{id,attributes{name,content, services{data{id}}}}}`
           )
           .then((res) => {
-            this.dialTestings = res.filter((item) => {
+            this.dialTestings = res.data.filter((item) => {
               const find = item.services.find(
                 (item) => this.modeId == item.id,
               );
@@ -278,22 +277,42 @@ export default {
       }
       this.loading = true;
 
-      const where = { name_contains: this.key };
+      let pagination = {
+        start: this.start, 
+        limit: this.pageSize
+      };
+      let filters = {};
+      filters.name = { contains: this.key };
 
       if (this.modeId) {
-        where.services = this.modeId;
+        filters.services = { id: { eq: this.modeId} };
       }
       this.$gql
         .query(
-          `dialTestingsConnection(where: $where, start: ${this.start}, limit: ${this.pageSize}){values{id,name,healthcheck{id,name},fleet{id,name},content,created_at},aggregate{totalCount}}`,
+          `dialTestings(filters: $filters, pagination: $pagination){
+						data{
+							id,
+							attributes{
+								name,
+								healthcheck{data{id,attributes{name}}},
+								fleet{data{id,attributes{name}}},
+								content,
+								createdAt
+							}
+						},
+						meta{pagination{total}}
+					}`,
           { 
-            where 
-          },
+            filters,pagination
+          },{
+            filters: "DialTestingFiltersInput",
+            pagination: "PaginationArg",
+          }
         )
         .then((res) => {
-          this.list = res.values;
-          this.$emit("getDialTestings", res.values);
-          this.total = res.aggregate.totalCount;
+          this.list = res.data;
+          this.$emit("getDialTestings", res.data);
+          this.total = res.pagination.total;
           this.loading = false;
         });
     },
@@ -317,18 +336,15 @@ export default {
       for (let dialTesting of this.addBindVal) {
         this.$gql
           .mutation(
-            `updateDialTesting(input: $input){dialTesting{id}}`,
+            `updateDialTesting(id:${dialTesting.id}, data: $data){data{id}}`,
             {
-              input: {
-                where: { id: dialTesting.id },
-                data: {
-                  content: dialTesting.content,
-                  services: services,
-                },
+              data: {
+                content: dialTesting.content,
+                services: services,
               },
             },
             {
-              input: "updateDialTestingInput",
+              data: "DialTestingInput!",
             },
           )
           .then(() => {
@@ -353,18 +369,15 @@ export default {
       });
       this.$gql
         .mutation(
-          `updateDialTesting(input: $input){dialTesting{id}}`,
+          `updateDialTesting(id:${dialTesting.id}, data: $data){data{id}}`,
           {
-            input: {
-              where: { id: dialTesting.id },
-              data: {
-                content: dialTesting.content,
-                services: services,
-              },
+            data: {
+              content: dialTesting.content,
+              services: services,
             },
           },
           {
-            input: "updateDialTestingInput",
+            data: "DialTestingInput",
           },
         )
         .then(() => {

@@ -121,6 +121,12 @@ export default {
     ...mapState("setting", ["layout", "showPageTitle", "pageWidth"]),
   },
 
+  watch: {
+    title() {
+      this.titleVal = this.title;
+    },
+  },
+	
   created() {
     this.titleVal = this.title;
   },

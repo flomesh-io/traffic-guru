@@ -28,17 +28,19 @@ export default {
       },
     );
     onMounted(() => {
-      inst = monaco.editor.create(document.getElementById(props.id), {
-        value: props.content,
-        theme: props.theme || "vs-dark",
-        language: props.option.mode,
-        readOnly: props.isReadonly,
-      });
-      inst.onDidChangeModelContent(() => {
-        const newValue = inst.getValue();
-        code.val = newValue;
-        ctx.emit("change", newValue);
-      });
+      setTimeout(()=>{
+        inst = monaco.editor.create(document.getElementById(props.id), {
+          value: props.content,
+          theme: props.theme || "vs-dark",
+          language: props.option.mode,
+          readOnly: props.isReadonly,
+        });
+        inst.onDidChangeModelContent(() => {
+          const newValue = inst.getValue();
+          code.val = newValue;
+          ctx.emit("change", newValue);
+        });
+      },10)
     });
   },
 };

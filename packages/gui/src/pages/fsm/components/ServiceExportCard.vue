@@ -149,19 +149,28 @@ export default {
   methods: {
     loadData(){
       this.loading = true;
-      const where = { service: this.sid };
+      let filters = {
+        service: {id: { eq: this.sid }}
+      };
       this.$gql
         .query(
-          `serviceExports(where: $where, start: 0, limit: -1){id,service{id,name},content}`,
+          `serviceExports(filters: $filters, pagination:{ start: 0, limit: ${this.$DFT_LIMIT} }){
+						data{id,attributes{
+						  service{data{id,attributes{name}}},
+							content
+						}}
+					}`,
           { 
-            where
-          },
+            filters
+          },{
+            filters: "ServiceExportFiltersInput",
+          }
         )
         .then((res) => {
           this.loading = false;
-          if(res && res.length>0){
-            this.payload = res[0];
-            this.pid = res[0].id;
+          if(res.data && res.data.length>0){
+            this.payload = res.data[0];
+            this.pid = res.data[0].id;
             this.$emit("update:isEdit",true);
           }else{
             if(this.ports.length>0){
@@ -192,7 +201,7 @@ export default {
 
     remove(){
       this.$gql
-        .mutation(`deleteServiceExport(input:{where:{id:${this.pid}}}){serviceExport{id}}`)
+        .mutation(`deleteServiceExport(id:${this.pid}){data{id}}`)
         .then(() => {
           this.$message.success(this.$t("Deleted successfully"), 3);
           this.$emit("update:isEdit",false);
@@ -212,9 +221,9 @@ export default {
       if (this.pid) {
         this.$gql
           .mutation(
-            `updateServiceExport(input: $input){serviceExport{id}}`,
-            { input: { where: { id: this.pid }, data: input } },
-            { input: "updateServiceExportInput" },
+            `updateServiceExport(id:${this.pid}, data: $data){data{id}}`,
+            { data: input },
+            { data: "ServiceExportInput!" },
           )
           .then(() => {
             this.$emit("save");
@@ -224,9 +233,9 @@ export default {
       } else {
         this.$gql
           .mutation(
-            `createServiceExport(input: $input){serviceExport{id}}`,
-            { input: { data: input } },
-            { input: "createServiceExportInput" },
+            `createServiceExport(data: $data){data{id}}`,
+            { data: input },
+            { data: "ServiceExportInput!" },
           )
           .then(() => {
             this.$emit("save");

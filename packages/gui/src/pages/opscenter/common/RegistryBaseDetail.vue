@@ -90,7 +90,7 @@
             </DetailListItem>
             <DetailListItem
               :term="$t('Auto Create')"
-              v-if="$isPro"
+              v-if="$isPro && false"
             >
               <a-checkbox v-model:checked="detail.content.autoApplication">
                 {{ $t("Application") }}
@@ -126,18 +126,35 @@
             </DetailListItem>
 						
             <DetailListItem
-              :term="$t('Config')"
+              :term="detail.type == 'k8s'?'K8S Config':$t('Config')"
               :rules="rules.required"
               :name="['config']"
               v-if="detail.type == 'k8s'"
             >
+              <a-popover
+                trigger="click"
+                :destroy-tooltip-on-hide="true"
+                title="K8S Config"
+              >
+                <template #content>
+                  <YamlEditor
+                    @fetch="getYaml"
+                    class="width-500"
+                    v-model:value="yamlConfig"
+                  />
+                </template>
+                <a-button class="mr-10">
+                  <SnippetsOutlined />
+                  {{ $t('Paste') }}
+                </a-button>
+              </a-popover>
               <a-upload
                 v-model:file-list="fileList"
                 :before-upload="beforeUpload"
               >
                 <a-button>
                   <UploadOutlined />
-                  {{ $t('select') }} k8s config
+                  {{ $t('Upload') }}
                 </a-button>
               </a-upload>
               <div
@@ -165,8 +182,6 @@
               </div>
             </DetailListItem>
             <DetailListItem
-              :rules="rules.required"
-              :name="['content', 'credit']"
               v-if="detail.type != 'k8s'"
               :term="$t('Credit')"
             >
@@ -239,11 +254,14 @@ import PageLayout from "@/layouts/PageLayout";
 import Status from "@/components/tag/Status";
 import DetailList from "@/components/tool/DetailList";
 import DetailListItem from "@/components/tool/DetailListItem";
+import YamlEditor from "@/components/editor/YamlEditor";
 import { mapState } from "vuex";
 import {
-  UploadOutlined
+  UploadOutlined,
+  SnippetsOutlined
 } from "@ant-design/icons-vue";
 let YAML = require("js-yaml");
+let YAMLTool = require("json2yaml");
 export default {
   name: "RegistryBaseDetail",
   i18n: require("@/i18n"),
@@ -252,7 +270,9 @@ export default {
     DetailList,
     Status,
     UploadOutlined,
+    SnippetsOutlined,
     PageLayout,
+    YamlEditor,
   },
 
   props: ["pid", "types"],
@@ -266,6 +286,7 @@ export default {
 		}`,
 
       configJson: null,
+      yamlConfig: '',
       detail: {
         organization: null,
         type: "k8s",
@@ -306,13 +327,14 @@ export default {
 	
   created() {
     if (this.pid != "") {
-      this.loaddata(true);
+      this.loaddata();
     } else {
       this.detail = {
         organization: null,
         type: "k8s",
         name: "",
         config: null,
+        yamlConfig: '',
         content: {
           credit: "",
           autoUpstream: false,
@@ -334,6 +356,21 @@ export default {
       this.detail.config = null;
       this.configJson = null;
     },
+		
+    getYaml(){
+      this.configJson = YAML.load(this.yamlConfig);
+    },
+
+    convertToYaml(json) {
+      if (json == "") {
+        return "";
+      }
+      let _json = JSON.parse(json);
+      let _yaml = null;
+      //YAML.dump
+      _yaml = YAMLTool.stringify(_json);
+      return _yaml;
+    },
 
     beforeUpload(file) {
       return new Promise(() => {
@@ -344,7 +381,7 @@ export default {
             let configText = atob(reader.result.split("base64,")[1]);
             this.detail.config = configText;
             this.configJson = YAML.load(configText);
-            console.log(this.configJson)
+            this.yamlConfig = this.convertToYaml(JSON.stringify(this.configJson));
           }
         };
       });
@@ -400,15 +437,16 @@ export default {
       delete savedata.id;
       delete savedata.namespaces;
       delete savedata.L7Lbs;
+      delete savedata.yamlConfig;
       this.connectLoading = true;
       this.$gql
         .mutation(
-          `pingRegistry(input: $input)`,
+          `pingRegistry(data: $data)`,
           {
-            input: savedata,
+            data: savedata,
           },
           {
-            input: "RegistryInput",
+            data: "RegistryInput",
           },
         )
         .then((res) => {
@@ -430,16 +468,17 @@ export default {
       delete savedata.L4LBs;
       delete savedata.namespaces;
       delete savedata.L7Lbs;
+      delete savedata.yamlConfig;
       if (this.pid != "") {
         delete savedata.id;
         this.$gql
           .mutation(
-            `updateRegistry(input: $input){registry{id}}`,
+            `updateRegistry(id:${this.pid}, data: $data){data{id}}`,
             {
-              input: { where: { id: this.pid }, data: savedata },
+              data: savedata
             },
             {
-              input: "updateRegistryInput",
+              data: "RegistryInput!",
             },
           )
           .then(() => {
@@ -448,16 +487,16 @@ export default {
       } else {
         this.$gql
           .mutation(
-            `createRegistry(input: $input){registry{id}}`,
+            `createRegistry(data: $data){data{id}}`,
             {
-              input: { data: savedata },
+              data: savedata
             },
             {
-              input: "createRegistryInput",
+              data: "RegistryInput!",
             },
           )
           .then((res) => {
-            this.saved(res.registry.id);
+            this.saved(res.data.id);
           });
       }
     },
@@ -468,14 +507,35 @@ export default {
       this.save();
     },
 
-    loaddata(assignIndex) {
+    loaddata() {
       this.loading = true;
       this.$gql
         .query(
-          `registry(id: ${this.pid}){id,name,type,address,config,content,namespaces{id,name,organization{id,name},services{id,uid,gatewayPath,fleet{id,name},organization{id,name},namespace,name,registry{id,name},content,created_at}}}`,
+          `registry(id: ${this.pid}){data{id,attributes{
+						name,
+						type,
+						address,
+						config,
+						content,
+						namespaces{data{id,attributes{
+							name,
+							organization{data{id,attributes{name}}},
+							services{data{id,attributes{
+								uid,
+								gatewayPath,
+								fleet{data{id,attributes{name}}},
+								organization{data{id,attributes{name}}},
+								namespace,
+								name,
+								registry{data{id,attributes{name}}},
+								content,
+								createdAt
+							}}}
+						}}}
+					}}}`,
         )
         .then((res) => {
-          this.detail = res;
+          this.detail = res.data;
           if (!this.detail.content) {
             this.detail.content = {};
           }
@@ -484,8 +544,10 @@ export default {
           }
           if (!!this.detail.config) {
             this.configJson = YAML.load(this.detail.config);
+            this.yamlConfig = this.convertToYaml(JSON.stringify(this.configJson));
           }else{
             this.configJson = null;
+            this.yamlConfig = this.convertToYaml("{}");
           }
           if (this.detail.content.autoUpstream == null) {
             this.detail.content.autoUpstream = false;
@@ -497,15 +559,18 @@ export default {
             let _find = false;
             this.detail.namespaces.forEach((ns) => {
               ns.organizationId = ns.organization ? ns.organization.id : null;
-              if (ns.services.length > 0 && !_find && assignIndex) {
+              if (ns.services.length > 0 && !_find) {
                 _find = true;
                 this.selectedNS = ns;
-                this.selectedKeys = [ns.id];
+                ns.services.forEach((s) => {
+                  s.organization = s.organization ? s.organization : {id: null}
+                })
+                this.selectedKeys = ns.id;
               }
             });
           }
           this.loading = false;
-          this.namespaces = res.namespaces;
+          this.namespaces = res.data.namespaces;
           this.$emit("getDetail", {
             detail: this.detail,
             namespaces: this.namespaces,

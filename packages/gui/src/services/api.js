@@ -5,7 +5,7 @@ const DEFAULT_BASE_URL =
       ? process.env.VUE_APP_API_BASE_URL
       : window.location.origin
     : API_PROXY_PREFIX;
-const BASE_URL = DEFAULT_BASE_URL;
+const BASE_URL = DEFAULT_BASE_URL + '/api';
 const FLB_BASE = `${BASE_URL}/flb`;
 const K8S_BASE = `${BASE_URL}/k8s`;
 const CLICKHOUSE_BASE = `${BASE_URL}/clickhouse`;
@@ -13,7 +13,8 @@ const PROMETHEUS_BASE = `${BASE_URL}/prometheus`;
 
 module.exports = {
   BASE_URL,
-  GQL: `${BASE_URL}/graphql`,
+  DEFAULT_BASE_URL,
+  GQL: `${DEFAULT_BASE_URL}/graphql`,
   UPLOAD: `${BASE_URL}/upload`,
   LOGIN: `${BASE_URL}/login`,
   ROUTES: `${BASE_URL}/routes`,

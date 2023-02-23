@@ -8,26 +8,26 @@ export async function ERROR_RATE() {
 }
 
 export async function getAddressPoolUsage() {
-  return query(`getFlbDashboardPageInfo(where: $where){
+  return query(`getFlbDashboardPageInfo(filters: $filters){
 		address_pool_usage{pool_usages{pool_id,pool_name,used_amount,amount},total_used_amount,total_amount}
-	}`,{where:DefaultChartDate});
+	}`,{filters:DefaultChartDate});
 }
 
 export async function getSummary() {
-  return query(`getFlbDashboardPageInfo(where: $where){
+  return query(`getFlbDashboardPageInfo(filters: $filters){
 		loadbalancer_summary{loadbalancer_amount,layer4_loadbalancer_amount,layer7_loadbalancer_amount,active_clients,active_targets}
-	}`,{where:DefaultChartDate});
+	}`,{filters:DefaultChartDate});
 }
 
 export async function getRanking() {
-  return query(`getFlbDashboardPageInfo(where: $where){
+  return query(`getFlbDashboardPageInfo(filters: $filters){
 		layer7_loadbalancer_connections_top{value,iid,name},
 		layer4_loadbalancer_connections_top{value,iid,name},
 		layer7_loadbalancer_tps_top{value,iid,name},
 		layer4_loadbalancer_tps_top{value,iid,name},
 		layer7_loadbalancer_bps_top{value,iid,name},
 		layer4_loadbalancer_bps_top{value,iid,name}
-	}`,{where:DefaultChartDate});
+	}`,{filters:DefaultChartDate});
 }
 
 export default {

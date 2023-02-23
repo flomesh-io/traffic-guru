@@ -9,7 +9,7 @@
       :ref="id"
       class="chart-content full"
       :id="id + id2"
-      :style="{ height: height ? '' + height + 'px' : '140px' }"
+      :style="{ height: height ? '' + height + 'px' : '100px' }"
     />
   </div>
 </template>

@@ -11,7 +11,7 @@
         class="permission-card-body"
         v-if="
           resource.type == 'project' &&
-            (index == 0 || resources[index - 1].project.id != resource.project.id)
+            (index == 0 || resources[index - 1].project?.id != resource.project.id)
         "
       >
         {{ $t("Project") }}:{{ resource.project.name }}
@@ -21,7 +21,7 @@
         v-if="
           resource.type == 'organization' &&
             (index == 0 ||
-              resources[index - 1].organization.id != resource.organization.id)
+              resources[index - 1].organization?.id != resource.organization.id)
         "
       >
         {{ $t("Organization") }}:{{ resource.organization.name }}

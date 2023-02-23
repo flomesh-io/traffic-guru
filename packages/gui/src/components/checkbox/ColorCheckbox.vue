@@ -9,6 +9,7 @@
 </template>
 
 <script>
+import { h } from "vue";
 import { CheckOutlined } from "@ant-design/icons-vue";
 const Group = {
   name: "ColorCheckboxGroup",
@@ -71,7 +72,7 @@ const Group = {
       }
     },
   },
-  render(h) {
+  render() {
     const clear = h("div", { attrs: { style: "clear: both" } });
     return h("div", {}, [this.$slots.default, clear]);
   },

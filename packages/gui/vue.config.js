@@ -1,10 +1,11 @@
 let path = require('path')
 const webpack = require('webpack')
+const ThemeColorReplacer = require('webpack-theme-color-replacer')
 const {
-	// getThemeColors,
+	getThemeColors,
 	modifyVars
 } = require('./src/utils/themeUtil')
-// const {resolveCss} = require('./src/utils/theme-color-replacer-extend')
+const {resolveCss} = require('./src/utils/theme-color-replacer-extend')
 const CompressionWebpackPlugin = require('compression-webpack-plugin')
 
 const productionGzipExtensions = ['js', 'css']
@@ -45,6 +46,14 @@ module.exports = {
   			hints: false
   		}
   
+      config.plugins.push(
+        new ThemeColorReplacer({
+          fileName: 'css/theme-colors-[contenthash:8].css',
+          matchColors: getThemeColors(),
+          injectCss: true,
+          resolveCss
+        })
+      )
   		// Ignore all locale files of moment.js
   		config.plugins.push(new webpack.IgnorePlugin({
   		  resourceRegExp: /^\.\/locale$/,

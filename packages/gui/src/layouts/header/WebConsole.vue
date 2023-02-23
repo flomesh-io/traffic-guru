@@ -59,9 +59,9 @@ export default {
   methods: {
     search() {
       this.$gql
-        .query(`fleets(where:{type:"webConsole"}){id,name,content}`)
+        .query(`fleets(filters:{type:{eq:"webConsole"}}){data{id,attributes{name,content}}}`)
         .then((res) => {
-          this.webConsoles = res;
+          this.webConsoles = res.data;
         });
     },
 

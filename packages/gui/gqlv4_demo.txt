@@ -1,0 +1,101 @@
+
+import { getPermission } from "@/services/user";
+getPermission({id:uor.role.id})
+    remove(id) {
+      this.$gql
+        .mutation(
+          `deleteDialTesting(id:${id}){data{id,attributes{name}}}`,
+        )
+        .then(() => {
+          this.$message.success(this.$t("Deleted successfully"), 3);
+          this.search();
+        });
+    },
+    search(pageNo) {
+      if (pageNo) {
+        this.pageNo = pageNo;
+      } else {
+        this.pageNo = 1;
+      }
+      this.loading = true;
+			let pagination = {
+				start: this.start, 
+				limit: this.pageSize
+			};
+			let filters = {
+				name: { contains: this.key }
+			};
+      if (this.apply) {
+        filters.apply = { contains: this.apply };
+      }
+      if (this.viewtypeproject) {
+        filters.type = { eq: this.viewtypeproject.id };
+      }
+      this.$gql
+        .query(
+          `plugins(filters: $filters, pagination: $pagination){
+						data{id,attributes{
+							name,
+							icon{data{id,attributes{url,previewUrl}}},
+							apply,
+							type{data{id,attributes{name}}},
+							desc,
+							content
+						}},
+						meta{pagination{total}}
+					}`,
+          { 
+            filters,pagination
+          },{
+						filters: "PluginFiltersInput",
+						pagination: "PaginationArg",
+					}
+        )
+        .then((res) => {
+          this.plugins = res.data;
+          this.total = res.pagination.total;
+          this.loading = false;
+        });
+    },
+    handleOk() {
+      if (!this.validForm()) {
+        return;
+      }
+      let savedata = _.cloneDeep(this.payload);
+      if (this.isEdit) {
+        const whereID = savedata.id;
+        delete savedata.id;
+        this.$gql
+          .mutation(
+            `updatePlugin(id:${whereID}, data: $data){data{id}}`,
+            {
+              data: savedata,
+            },
+            {
+              data: "PluginInput!",
+            },
+          )
+          .then(() => {
+            this.visible = false;
+            this.$message.success(this.$t("Modified successfully"), 3);
+            this.search();
+          });
+      } else {
+        delete savedata.id;
+        this.$gql
+          .mutation(
+            `createPlugin(data: $data){data{id}}`,
+            {
+              data: savedata,
+            },
+            {
+              data: "PluginInput!",
+            },
+          )
+          .then(() => {
+            this.visible = false;
+            this.$message.success(this.$t("Created successfully"), 3);
+            this.search();
+          });
+      }
+    },

@@ -111,7 +111,7 @@
           >
             <FormItem
               name="username"
-              :rules="rules.uniqueUserName('users',{id:payload.id})"
+              :rules="rules.uniqueUserName('usersPermissionsUsers',{id:payload.id})"
             >
               <a-input
                 :placeholder="$t('unset')"
@@ -204,7 +204,7 @@
         </a-descriptions>
       </a-form>
     </a-modal>
-    <TeamOutlined v-if="TeamOutlined" />
+    <TeamOutlined v-if="false" />
   </PageLayout>
 </template>
 
@@ -222,7 +222,7 @@ import UsersResults from "./components/UsersResults";
 import PermissionCard from "@/components/card/PermissionCard";
 import FormItem from "@/components/tool/FormItem";
 import { mapState } from "vuex";
-import { DEFAULT_PREFERENCE } from "@/services/user";
+import { DEFAULT_PREFERENCE, getPermission } from "@/services/user";
 import _ from "lodash";
 
 export default {
@@ -294,12 +294,9 @@ export default {
   methods: {
     setDefaultResources() {
       const roleId = this.payload.role.id;
-      this.$gql
-        .query(
-          `getRoleResourcePermission(roleId:${roleId}){resources{name,actions{name,enabled}}}`,
-        )
-        .then((res) => {
-          this.resources = res.resources;
+      getPermission({id:roleId})
+        .then((resources) => {
+          this.resources = resources.permissions;
         });
     },
 
@@ -316,8 +313,7 @@ export default {
         phone: "",
         role: {
           id: role_id,
-          type: "system",
-          permissions: this.roleMap[`role-${role_id}`].permissions,
+          type: "system"
         },
 
         password: "123456",
@@ -355,11 +351,14 @@ export default {
       let firstRole = false;
       this.$gql
         .query(
-          `roles(where:{type:"system"}){id,name,type,permissions{id,type,controller,action,enabled}}`,
+          `usersPermissionsRoles(filters:{type:{eq:"system"}}){data{id,attributes{
+						name,
+						type
+					}}}`,
         )
         .then((res) => {
-          this.roles = res;
-          res.forEach((role) => {
+          this.roles = res.data;
+          res.data.forEach((role) => {
             if (role.type == "system" && !firstRole) {
               this.defaultRoleId = role.id;
               firstRole = true;
@@ -368,12 +367,9 @@ export default {
           });
         });
 
-      this.$gql
-        .query(
-          `getRoleResourcePermission{resources{name,actions{name,enabled}}}`,
-        )
-        .then((res) => {
-          this.defaultResources = res.resources;
+      getPermission()
+        .then((resources) => {
+          this.defaultResources = resources.permissions;
         });
     },
 
@@ -389,9 +385,9 @@ export default {
         delete savedata.id;
         this.$gql
           .mutation(
-            `updateUser(input: $input){user{id}}`,
-            { input: { where: { id: whereID }, data: savedata } },
-            { input: "updateUserInput" },
+            `updateUsersPermissionsUser(id:${whereID}, data: $data){data{id}}`,
+            { data: savedata },
+            { data: "UsersPermissionsUserInput!" },
           )
           .then(() => {
             this.visible = false;
@@ -402,9 +398,9 @@ export default {
         delete savedata.id;
         this.$gql
           .mutation(
-            `createUser(input: $input){user{id}}`,
-            { input: { data: savedata } },
-            { input: "createUserInput" },
+            `createUsersPermissionsUser(data: $data){data{id}}`,
+            { data: savedata },
+            { data: "UsersPermissionsUserInput!" },
           )
           .then(() => {
             this.visible = false;
@@ -416,7 +412,7 @@ export default {
 
     remove(index, type, item) {
       this.$gql
-        .mutation(`deleteUser(input:{where:{id:${item.id}}}){user{id}}`)
+        .mutation(`deleteUsersPermissionsUser(id:${item.id}){data{id}}`)
         .then(() => {
           this.$message.success(this.$t("Deleted successfully"), 3);
           this.loaddata();
@@ -452,15 +448,33 @@ export default {
 
     loaddata() {
       this.loading = true;
-      const where = { username_contains: this.key };
+      let filters = {
+        username: { contains: this.key }
+      };
       this.$gql
         .query(
-          `usersConnection(where: $where, start: ${this.start}, limit: ${this.pageSize}){values{id,username,phone,email,type,role{id,name,type,permissions{id,type,controller,action,enabled}}},aggregate{totalCount}}`,
-          { where }
+          `usersPermissionsUsers(filters: $filters, pagination: {start: ${this.start}, limit: ${this.pageSize}}){
+						data{id,attributes{
+							username,
+							phone,
+							email,
+							type,
+							role{data{id,attributes{
+								name,
+								type
+							}}}
+						}},
+						meta{pagination{total}}
+					}`,
+          { 
+            filters
+          },{
+            filters: "UsersPermissionsUserFiltersInput",
+          }
         )
         .then((res) => {
-          this.users = res.values;
-          this.total = res.aggregate.totalCount;
+          this.users = res.data;
+          this.total = res.pagination.total;
           this.loading = false;
         });
     },

@@ -7387,6 +7387,11 @@ webpack-sources@^3.2.3:
   resolved "https://registry.yarnpkg.com/webpack-sources/-/webpack-sources-3.2.3.tgz#2d4daab8451fd4b240cc27055ff6a0c2ccea0cde"
   integrity sha512-/DyMEOrDgLKKIG0fmvtz+4dUX/3Ghozwgm6iPp8KRhvn+eQf9+Q7GWxVNMk3+uCPWfdXYC4ExGBckIXdFEfH1w==
 
+webpack-theme-color-replacer@^1.3.12:
+  version "1.4.5"
+  resolved "https://registry.yarnpkg.com/webpack-theme-color-replacer/-/webpack-theme-color-replacer-1.4.5.tgz#f3315d389721121c0a738e6b45b3760cdac0667e"
+  integrity sha512-nPRTFR1jIwc98WtRigYC6WBpB3bff48mAKQ10VgTXDLiQdXdKO/DKY1mXEZjuCwvq3onyItHCNHN8eCOyCHO4w==
+
 webpack-virtual-modules@^0.4.2:
   version "0.4.6"
   resolved "https://registry.yarnpkg.com/webpack-virtual-modules/-/webpack-virtual-modules-0.4.6.tgz#3e4008230731f1db078d9cb6f68baf8571182b45"

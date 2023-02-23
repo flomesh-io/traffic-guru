@@ -472,9 +472,9 @@ export default {
         };
         this.$gql
           .mutation(
-            `updateCertificate(input: $input){certificate{id}}`,
-            { input: { where: { id: whereID }, data: p } },
-            { input: "updateCertificateInput" },
+            `updateCertificate(id:${whereID}, data: $data){data{id}}`,
+            { data: p },
+            { data: "CertificateInput!" },
           )
           .then(() => {
             this.$message.success(this.$t("Save successfully"), 3);
@@ -492,9 +492,9 @@ export default {
 
         this.$gql
           .mutation(
-            `createCertificate(input: $input){certificate{id}}`,
-            { input: { data: p } },
-            { input: "createCertificateInput" },
+            `createCertificate(data: $data){data{id}}`,
+            { data: p },
+            { data: "CertificateInput!" },
           )
           .then(() => {
             this.$message.success(this.$t("Created successfully"), 3);
@@ -508,12 +508,20 @@ export default {
       this.payload.namespace = item.namespace;
       this.$gql
         .query(
-          `certificate(id: ${item.id}){id,name,type,namespace{id,name,registry{id,name}},content}`,
+          `certificate(id: ${item.id}){data{id,attributes{
+						name,
+						type,
+						namespace{data{id,attributes{
+							name,
+							registry{data{id,attributes{name}}}
+						}}},
+						content
+					}}}`,
         )
         .then((res) => {
-          this.payload = res;
+          this.payload = res.data;
           this.payload.content = JSON.stringify(item.content);
-          this.payload.namespaceId = res.namespace?.id;
+          this.payload.namespaceId = res.data.namespace?.id;
         });
       this.isEdit = true;
       this.showModal();
@@ -522,10 +530,7 @@ export default {
     remove(index, type, item) {
       this.$gql
         .mutation(
-          `deleteCertificate(input: $input){certificate{id}}`,
-          { input: { where: { id: item.id } } },
-          { input: "deleteCertificateInput" },
-        )
+          `deleteCertificate(id: ${item.id}){data{id}}`)
         .then(() => {
           this.$message.success(this.$t("Deleted successfully"), 3);
           this.loaddata();
@@ -588,11 +593,22 @@ export default {
       this.loading = true;
       this.$gql
         .query(
-          `certificatesConnection(sort:"name:asc",start: ${this.start}, limit: ${this.pageSize}){values{id,name,type,namespace{id,name,registry{id,name}},content},aggregate{totalCount}}`
+          `certificates(sort:"name:asc",pagination: {start: ${this.start}, limit: ${this.pageSize}}){
+						data{id,attributes{
+							name,
+							type,
+							namespace{data{id,attributes{
+								name,
+								registry{data{id,attributes{name}}}
+							}}},
+							content
+						}},
+						meta{pagination{total}}
+					}`
         )
         .then((res) => {
-          this.certificates = res.values;
-          this.total = res.aggregate.totalCount;
+          this.certificates = res.data;
+          this.total = res.pagination.total;
           this.loading = false;
         });
     },

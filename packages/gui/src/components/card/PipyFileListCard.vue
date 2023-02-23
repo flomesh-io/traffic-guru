@@ -74,12 +74,12 @@ export default {
   created() {},
   mounted() {
     this.loading = true;
-    this.$gql.mutation(`getSideCarFiles(input: $input)`,{input:{
+    this.$gql.mutation(`getSideCarFiles(data: $data)`,{data:{
       registry: this.registry,
       namespace: this.namespace,
       serviceName: this.serviceName,
     }},{
-      input: "getSideCarFilesInput"
+      data: "SideCarFilesInput"
     }).then((res) => {
       if (res.baseFiles) {
         this.files = res.baseFiles;
@@ -106,15 +106,15 @@ export default {
 
     getDefaultPjsConfig(fileName) {
       this.$gql
-        .mutation(`getSideCarFileContent(input: $input)`,{
-          input: {
+        .mutation(`getSideCarFileContent(data: $data)`,{
+          data: {
             registry: this.registry,
             namespace: this.namespace,
             serviceName: this.serviceName,
             fileName,
           }
         }, {
-          input: "getSideCarFileContentInput"
+          data: "SideCarFileContentInput"
         })
         .then((res) => {
           if (this.content[fileName].type == "json") {

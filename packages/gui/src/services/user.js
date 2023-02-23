@@ -54,7 +54,7 @@ export async function forget(email, newPassword, verificationCode) {
     verificationCode,
   };
   return mutation(
-    `changePasswordByCode(input: $input)`,
+    `changePasswordByCode(data: $input)`,
     { input }
   );
 }
@@ -89,67 +89,140 @@ export function logout() {
 
 export async function getUserInfo() {
   return query(
-    `getUser{id,login_at,username,type,email,phone,role{id,name,type,permissions{id,type,controller,action,enabled}},userProjects{id,name},userOrganizations{id,name}}`,
+    `getUser{data{id,attributes{
+			login_at,
+			username,
+			type,
+			email,
+			phone,
+			role{data{id,attributes{
+				name,
+				type
+			}}},
+			userProjects{data{id,attributes{name}}},
+			userOrganizations{data{id,attributes{name}}}
+		}}}`,
   );
 }
-
+export function resetPermission(d) {
+	let resources = [];
+	Object.keys(d.permissions).forEach((_key)=>{
+		if(_key.split("::")[0] == "api"){
+			let mode = _key.split("::")[1];
+			let map = {};
+			if(mode){
+				let actions = d.permissions[_key].controllers[mode];
+				map.actions = [];
+				Object.keys(actions).forEach((action_key)=>{
+					map.actions.push({
+						name: action_key,
+						enabled: actions[action_key].enabled
+					})
+				})
+				map.name = mode;
+				resources.push(map);
+			}
+		}
+	});
+	d.permissions = resources;
+	return d;
+}
+export function buildPermission(resources) {
+	let pers = {};
+	resources.forEach((resource)=>{
+		if(resource.actions){
+			let _key = `api::${resource.name}`;
+			pers[_key] = { controllers:{} };
+			pers[_key].controllers[resource.name] = {};
+			resource.actions.forEach((action)=>{
+				pers[_key].controllers[resource.name][action.name] = { enabled: action.enabled };
+			})
+		}
+	});
+	return pers;
+}
+export function getPermission(options) {
+	if(options && options.id){
+		return new Promise((resolve, reject) => {
+			query(`getRoleResourcePermission(id:${options.id}){name,description,type,content,permissions}`).then((res) => {
+				resolve(resetPermission(res));
+			}).catch((e) => {
+				reject(e);
+			});
+		});
+	} else if(options && options.type){
+		return new Promise((resolve, reject) => {
+			query(`getRoleResourcePermission(type:"${options.type}"){name,description,type,content,permissions}`).then((res) => {
+				resolve(resetPermission(res));
+			}).catch((e) => {
+				reject(e);
+			});
+		});
+	} else {
+		return new Promise((resolve, reject) => {
+			query(`getRoleResourcePermission{name,description,type,content,permissions}`).then((res) => {
+				resolve(resetPermission(res));
+			}).catch((e) => {
+				reject(e);
+			});
+		});
+	}
+}
 export const DEFAULT_PREFERENCE =
   "workload.dashboard.DEPLOYMENT,workload.dashboard.STATEFULSET,workload.dashboard.JOB,workload.dashboard.POD,flb.dashboard.SANKEY,flb.dashboard.RANKING";
 
 export async function getUserPreference() {
-  return query(`getUser{id,widget}`);
+  return query(`getUser{data{id,attributes{widget}}}`);
 }
 
 export async function setUserPreference(widget) {
   const user = JSON.parse(localStorage.getItem(process.env.VUE_APP_USER_KEY));
   return mutation(
-    `updateUser(input:{where:{id:${user.id}},data:{ widget: "${widget}" }}){user{id}}`,
+    `updateUsersPermissionsUser(id:${user.id},data:{ widget: "${widget}" }){data{id}}`,
   );
 }
 
 export async function getUserWidgets() {
-  return query(`widgets{id,name,shared,user_id,content}`);
+  return query(`widgets{data{id,attributes{name,shared,user_id,content}}}`);
 }
 
 export async function editUserInfo(savedata) {
   const id = savedata.id;
   delete savedata.id;
   return mutation(
-    `updateUser(input: $input){user{id}}`,
-    { input: { where: { id }, data: savedata } },
-    { input: "updateUserInput" },
+    `updateUsersPermissionsUser(id:${id}, data: $data){data{id}}`,
+    { data: savedata },
+    { data: "UsersPermissionsUserInput!" },
   );
 }
 
 export async function addUserWidget(content) {
   return mutation(
-    `createWidget(input: $input){widget{id}}`,
+    `createWidget(data: $data){data{id}}`,
     {
-      input: {
-        data: {
-          content,
-          name: content.id,
-          shared: 0,
-        },
-      },
+			data: {
+				content,
+				name: content.id,
+				shared: 0,
+			},
     },
-    { input: "createWidgetInput" },
+    { data: "WidgetInput!" },
   );
 }
 
 export async function editUserWidget(id, content) {
   delete content.uid;
   return mutation(
-    `updateWidget(input: $input){widget{id}}`,
+    `updateWidget(id:${id}, data: $data){data{id}}`,
     {
-      input: { where: { id }, data: { content, name: content.id } },
+      data: { content, name: content.id }
     },
-    { input: "updateWidgetInput" },
+    { data: "WidgetInput!" },
   );
 }
 
 export async function deleteUserWidget(id) {
-  return mutation(`deleteWidget(input:{where:{id:${id}}}){widget{id}}`);
+  return mutation(`deleteWidget(id:${id}){data{id}}`);
 }
 
 export const SAMPLE_WIDGET = {

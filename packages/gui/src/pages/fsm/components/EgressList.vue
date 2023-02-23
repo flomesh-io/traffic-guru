@@ -208,7 +208,7 @@ export default {
 
     remove(id) {
       this.$gql
-        .mutation(`deleteEgressSync(input:{where:{id:${id}}}){id}`)
+        .mutation(`deleteEgressSync(id:${id}){data{id}}`)
         .then(() => {
           this.$message.success(this.$t("Deleted successfully"), 3);
           this.search();
@@ -226,16 +226,30 @@ export default {
         this.pageNo = pageNo;
         this.pageSize = pageSize;
       }
+      let pagination = {
+        start: this.start, 
+        limit: this.pageSize
+      };
       this.loading = true;
-      const where = { name_contains: this.key };
+      let filters = {
+        name: { contains: this.key }
+      };
       this.$gql
         .query(
-          `getEgresses(where: $where, start: ${this.start}, limit: ${this.pageSize}){values{id,name,content,created_at},aggregate{totalCount}}`,
-          { where },
+          `getEgresses(filters: $filters, pagination: $pagination){
+						data{id,attributes{name,content,createdAt}},
+						meta{pagination{total}}
+					}`,
+          { 
+            filters,pagination
+          },{
+            filters: "EgressFiltersInput",
+            pagination: "PaginationArg",
+          }
         )
         .then((res) => {
-          this.list = this.reset(res.values);
-          this.total = res.aggregate.totalCount;
+          this.list = this.reset(res.data);
+          this.total = res.pagination.total;
           this.loading = false;
         });
     },
@@ -251,7 +265,7 @@ export default {
           : {};
         list[i].hosts = _content.hosts;
         list[i].creationTimestamp = new Date(
-          list[i].created_at,
+          list[i].createdAt,
         ).toLocaleString();
       }
       return list;

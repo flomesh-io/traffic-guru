@@ -105,7 +105,7 @@
 
             <div class="list-content-item">
               <span>{{ $t("updTime") }}</span>
-              <p>{{ new Date(item.updated_at).toLocaleString() }}</p>
+              <p>{{ new Date(item.updatedAt).toLocaleString() }}</p>
             </div>
           </div>
         </a-list-item>
@@ -161,7 +161,7 @@ export default {
       let _reqs = [];
       for (let namespace of this.addBindVal) {
         const _req = this.$gql.mutation(
-          `updateNamespace(input:{where:{id:${namespace}}, data:{bindMesh: ${this.bindMesh}}}){namespace{id}}`,
+          `updateNamespace(id:${namespace}, data:{bindMesh: ${this.bindMesh}}){data{id}}`,
         );
         _reqs.push(_req);
       }
@@ -179,7 +179,7 @@ export default {
     remove(id) {
       this.$gql
         .mutation(
-          `updateNamespace(input:{where:{id:${id}},data:{bindMesh:null}}){namespace{id}}`,
+          `updateNamespace(id:${id},data:{bindMesh:null}){data{id}}`,
         )
         .then(() => {
           this.$message.success(this.$t("Unbind successfully"), 3);
@@ -206,36 +206,67 @@ export default {
         this.pageNo = pageNo;
         this.pageSize = pageSize;
       }
+      let pagination = {
+        start: this.start, 
+        limit: this.pageSize
+      };
       this.loading = true;
-      const where = {
-        name_contains: this.key,
-        bindMesh: this.bindMesh,
-        registry: this.registry,
+      const filters = {
+        name: {contains:this.key},
+        bindMesh: {id: {eq:this.bindMesh}},
+        registry: {id: {eq:this.registry}},
       };
       this.$gql
         .query(
-          `namespacesConnection(where: $where, start: ${this.start}, limit: ${this.pageSize}){values{id,name,registry{id,name},organization{id,name},updated_at, mesh{id,name}, bindMesh{id,name}},aggregate{totalCount}}`,
+          `namespaces(filters: $filters, pagination: $pagination){
+						data{id,attributes{
+							name,
+							registry{data{id,attributes{name}}},
+							organization{data{id,attributes{name}}},
+							updatedAt, 
+							mesh{data{id,attributes{name}}}, 
+							bindMesh{data{id,attributes{name}}}
+						}},
+						meta{pagination{total}}
+					}`,
           { 
-            where 
-          },
+            filters,pagination
+          },{
+            filters: "NamespaceFiltersInput",
+            pagination: "PaginationArg",
+          }
         )
         .then((res) => {
-          this.list = res.values;
-          this.total = res.aggregate.totalCount;
+          this.list = res.data;
+          this.total = res.pagination.total;
           this.loading = false;
         });
     },
 
     loadAll() {
       this.loading = true;
-      const where = { bindMesh_null: true, registry: this.registry };
+      const filters = { bindMesh: {id: {null:true}}, registry: {id: {eq:this.registry}} };
       this.$gql
         .query(
-          `namespacesConnection( where: $where, start: 0, limit: -1 ){values{id,name,registry{id,name},organization{id,name},updated_at, mesh{id,name}, bindMesh{id,name}},aggregate{totalCount}}`,
-          { where },
+          `namespaces( filters: $filters, pagination: {start: 0, limit: ${this.$DFT_LIMIT}} ){
+						data{id,attributes{
+							name,
+							registry{data{id,attributes{name}}},
+							organization{data{id,attributes{name}}},
+							updatedAt, 
+							mesh{data{id,attributes{name}}}, 
+							bindMesh{data{id,attributes{name}}}
+						}},
+						meta{pagination{total}}
+					}`,
+          { 
+            filters
+          },{
+            filters: "NamespaceFiltersInput",
+          }
         )
         .then((res) => {
-          this.allNamespaces = res.values;
+          this.allNamespaces = res.data;
         });
     },
   },

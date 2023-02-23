@@ -2,73 +2,73 @@ import { query } from "@/services/graphql";
 import { DefaultChartDate } from "./tools";
 
 export async function getApiSummary(params) {
-  let where = DefaultChartDate;
+  let filters = DefaultChartDate;
   if (params.pid) {
     if (params.apply == "openapi") {
-      where.apiId = params.pid;
+      filters.apiId = params.pid;
     } else if (params.apply == "project") {
-      where.projectId = params.pid;
+      filters.projectId = params.pid;
     }
   }
-  return query(`getApiDashboardPageInfo(where: $where){
+  return query(`getApiDashboardPageInfo(filters: $filters){
 		apis{total,run,error}
-	}`,{where});
+	}`,{filters});
 }
 
 export async function getApplicationSummary(params) {
-  let where = DefaultChartDate;
-  if (where.pid) {
+  let filters = DefaultChartDate;
+  if (filters.pid) {
     if (params.apply == "openapi") {
-      where.apiId = params.pid;
+      filters.apiId = params.pid;
     } else if (params.apply == "project") {
-      where.projectId = params.pid;
+      filters.projectId = params.pid;
     }
   }
-  return query(`getApiDashboardPageInfo(where: $where){
+  return query(`getApiDashboardPageInfo(filters: $filters){
 		applications{total,run,error}
-	}`,{where});
+	}`,{filters});
 }
 
 export async function getApiStatus(params) {
-  let where = DefaultChartDate;
+  let filters = DefaultChartDate;
   if (params.pid) {
     if (params.apply == "openapi") {
-      where.apiId = params.pid;
+      filters.apiId = params.pid;
     } else if (params.apply == "project") {
-      where.projectId = params.pid;
+      filters.projectId = params.pid;
     }
   }
-  return query(`getApiDashboardPageInfo(where: $where){
+  return query(`getApiDashboardPageInfo(filters: $filters){
 		api_status{run,error}
-	}`,{where});
+	}`,{filters});
 }
 
 export async function getApiChartWeek(params) {
-  let where = DefaultChartDate;
+  let filters = DefaultChartDate;
   if (params.pid) {
     if (params.apply == "openapi") {
-      where.apiId = params.pid;
+      filters.apiId = params.pid;
     } else if (params.apply == "project") {
-      where.projectId = params.pid;
+      filters.projectId = params.pid;
     }
   }
-  return query(`getApiDashboardPageInfo(where: $where){
+  return query(`getApiDashboardPageInfo(filters: $filters){
 		api_week
-	}`,{where});
+	}`,{filters});
 }
 
 export async function getApiChartMonth(params) {
-  let where = DefaultChartDate;
+  let filters = DefaultChartDate;
   if (params.pid) {
     if (params.apply == "openapi") {
-      where.apiId = params.pid;
+      filters.apiId = params.pid;
     } else if (params.apply == "project") {
-      where.projectId = params.pid;
+      filters.projectId = params.pid;
     }
   }
-  return query(`getApiDashboardPageInfo(where: $where){
+  return query(`getApiDashboardPageInfo(filters: $filters){
 		api_month
-	}`,{where});
+	}`,{filters});
 }
 
 export default {

@@ -3,7 +3,7 @@ import { loginIgnore } from "@/router/index";
 import { checkAuthorization } from "@/utils/request";
 import NProgress from "nprogress";
 import "nprogress/nprogress.css";
-import { getRegistries, getK8sNamespaces } from "@/services/common";
+import { getRegistries } from "@/services/common";
 
 NProgress.configure({ showSpinner: true });
 
@@ -35,7 +35,7 @@ const k8sGuard = (to, from, next) => {
       !localStorage.getItem("NAMESPACE")
     ) {
       getRegistries().then((regs) => {
-        let k8soptions = regs;
+        let k8soptions = regs?.data;
         if (k8soptions.length == 0) {
           next();
         }
@@ -43,15 +43,17 @@ const k8sGuard = (to, from, next) => {
           if (index == 0) {
             localStorage.setItem("SCHEMA_ID", opt.id);
             localStorage.setItem("SCHEMA_TYPE", opt.type);
-            getK8sNamespaces(opt.id).then((res2) => {
-              let _data = res2.data || [];
-              _data.forEach((np, index) => {
-                if (index == 0) {
-                  localStorage.setItem("NAMESPACE", np);
-                }
-              });
-              next();
-            });
+						localStorage.setItem("NAMESPACE_ID", "");
+						localStorage.setItem("NAMESPACE", "_all");
+            next();
+						// Before use 'default' namespace
+            // getK8sNamespaces(opt.id).then((res2) => {
+            //   let _data = res2.data || [];
+            //   _data.forEach((np, index) => {
+            //     if (index == 0) {
+            //     }
+            //   });
+            // });
           }
         });
       });
@@ -90,8 +92,8 @@ const loginGuard = (to, from, next, options) => {
 const authorityGuard = (to, from, next, options) => {
   const { store, message } = options;
   const permissions = store.getters["account/permissions"];
-  const roles = store.getters["account/roles"];
-  if (!hasAuthority(to, permissions, roles)) {
+  const role = store.getters["account/roles"];
+  if (!hasAuthority(to, permissions, role)) {
     message.warning(
       `Sorry, you have no right to access the page: ${to.fullPath},  please contact the administrator`,
     );

@@ -5,27 +5,29 @@ const uniqueNameValidate = (n, mode, _where)=>{
 		if(!value){
 			return Promise.resolve();
 		}else{
-			let where = {};
-			where[`${n}`] = value;
+			let filters = ``;
+			filters += `${n}: { eq:"${value}" }`;
 			if(_where){
 				Object.keys(_where).forEach((_key)=>{
 					if(_key == "id"){
 						if(!!_where[_key]){
-							where[`id_ne`] = _where[_key];
+							filters += `, id: { ne:${_where[_key]} }`;
 						}
 					}else if(_where[_key] == null){
-						where[`${_key}_null`] = true;
+						filters += `, ${_key}: { id:{null:true} }`;
+					}else if(!isNaN(_where[_key]*1)){
+						filters += `, ${_key}: { id:{eq:"${_where[_key]}"} }`;
 					}else{
-						where[_key] = _where[_key];
+						filters += `, ${_key}: { eq:"${_where[_key]}" }`;
 					}
 				});
 			}
 			return new Promise((resolve, reject) => {
-				query(`${mode}(where: $where, start: 0, limit: 1){
-					id
-				}`,{where})
+				query(`${mode}(filters: {${filters}}, pagination:{start: 0, limit: 1}){
+					data{id}
+				}`)
 				.then((res) => {
-					if(res && res.length>0){
+					if(res.data && res.data.length>0){
 						return reject('Name already exists');
 					}else{
 						return resolve();

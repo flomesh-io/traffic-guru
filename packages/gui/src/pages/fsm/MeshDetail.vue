@@ -615,10 +615,22 @@ export default {
       this.loading = true;
       this.$gql
         .query(
-          `mesh(id:${this.pid}){id,config,fsmMessage,prometheus{id,name},namespace{id,name,registry{id,name}},status,name,bindNamespaces{id,name},created_at}`,
+          `mesh(id:${this.pid}){data{id,attributes{
+						config,
+						fsmMessage,
+						prometheus{data{id,attributes{name}}},
+						namespace{data{id,attributes{
+							name,
+							registry{data{id,attributes{name}}}
+						}}},
+						status,
+						name,
+						bindNamespaces{data{id,attributes{name}}},
+						createdAt
+					}}}`,
         )
         .then((res) => {
-          this.detail = res;
+          this.detail = res.data;
           this.detail.prometheus = this.detail.prometheus || {id:null}
           this.loading = false;
         });
@@ -628,14 +640,11 @@ export default {
       if (this.pid != "") {
         this.$gql
           .mutation(
-            `updateMesh(input: $input){mesh{id}}`,
+            `updateMesh(id:${this.pid}, data: $data){data{id}}`,
             {
-              input: {
-                where: { id: this.pid },
-                data: { prometheus: this.detail.prometheus?.id },
-              },
+              data: { prometheus: this.detail.prometheus?.id },
             },
-            { input: "updateMeshInput" },
+            { data: "MeshInput!" },
           )
           .then(() => {
             this.$message.success(this.$t("Save successfully"), 3);
@@ -648,14 +657,11 @@ export default {
       if (this.pid != "") {
         this.$gql
           .mutation(
-            `updateMesh(input: $input){mesh{id}}`,
+            `updateMesh(id:${this.pid}, data: $data){data{id}}`,
             {
-              input: {
-                where: { id: this.pid },
-                data: { config: savedata.config },
-              },
+              data: { config: savedata.config },
             },
-            { input: "updateMeshInput" },
+            { data: "MeshInput!" },
           )
           .then(() => {
             this.$message.success(this.$t("Save successfully"), 3);

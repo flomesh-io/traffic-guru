@@ -1,44 +1,42 @@
-import store from "@/store";
 import _ from "lodash";
 
-function hasRole(authority, roles) {
-  return hasAnyRole(authority, roles);
+function hasRole(authority, role) {
+  return hasAnyRole(authority, role);
 }
 
-function hasAnyRole(required, roles) {
-  const user = store.getters["account/user"];
+function hasAnyRole(required, role) {
   if (
     !required ||
     required.permission === "*" ||
-    (user.role && user.role.type == "authenticated")
+    (role && role.type == "authenticated")
   ) {
     return true;
   } else if (
     required.permission === "admin" &&
-    user.role &&
-    user.role.type == "authenticated"
+    role &&
+    role.type == "authenticated"
   ) {
     return true;
-  } else {
+  } else if (role && role.permissions){
     let hasPermission = false;
-    roles.forEach((role) => {
-      role.actions.forEach((action) => {
+    role.permissions.forEach((permission) => {
+      permission.actions.forEach((action) => {
         let permissionRoles = Array.isArray(required.permission)
           ? required.permission
           : [required.permission];
         const isIncludeA = permissionRoles.includes(
-          `${role.name}:${action.name}`,
+          `${permission.name}:${action.name}`,
         );
         const isIncludeB =
-          role.type == "project" && role.project.id
+          permission.type == "project" && permission.project.id
             ? permissionRoles.includes(
-                `${role.name}:${action.name}:project:${role.project.id}`,
+                `${permission.name}:${action.name}:project:${permission.project.id}`,
               )
             : false;
         const isIncludeC =
-          role.type == "organization" && role.organization.id
+          permission.type == "organization" && permission.organization.id
             ? permissionRoles.includes(
-                `${role.name}:${action.name}:organization:${role.organization.id}`,
+                `${permission.name}:${action.name}:organization:${permission.organization.id}`,
               )
             : false;
         if (action.enabled && (isIncludeA || isIncludeB || isIncludeC)) {
@@ -47,32 +45,34 @@ function hasAnyRole(required, roles) {
       });
     });
     return hasPermission;
-  }
+  } else {
+		return false;
+	}
 }
 
-function hasAuthority(route, permissions, roles) {
+function hasAuthority(route, permissions, role) {
   const authorities = [
     ...(route.meta.pAuthorities || []),
     route.meta.authority || "",
   ];
   for (let authority of authorities) {
-    if (!hasRole(authority, roles)) {
+    if (!hasRole(authority, role)) {
       return false;
     }
   }
   return true;
 }
 
-function filterMenu(menuData, permissions, roles) {
+function filterMenu(menuData, permissions, role) {
   if (menuData) {
     return _.cloneDeep(menuData).filter((menu) => {
       if (menu.meta && !menu.meta.invisible) {
-        if (!hasAuthority(menu, permissions, roles)) {
+        if (!hasAuthority(menu, permissions, role)) {
           return false;
         }
       }
       if (menu.children && menu.children.length > 0) {
-        menu.children = filterMenu(menu.children, permissions, roles);
+        menu.children = filterMenu(menu.children, permissions, role);
       }
       return true;
     });

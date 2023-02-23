@@ -19,6 +19,7 @@
 </template>
 
 <script>
+import { h } from "vue";
 import { CheckOutlined } from "@ant-design/icons-vue";
 const Group = {
   name: "ImgCheckboxGroup",
@@ -70,7 +71,7 @@ const Group = {
       }
     },
   },
-  render(h) {
+  render() {
     return h(
       "div",
       {

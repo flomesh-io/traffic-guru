@@ -24,7 +24,7 @@
               <span>{{ $t("Projects") }}</span>
             </a-card-grid>
             <a-card-grid
-              v-permission="['userspermissions:find']"
+              v-permission="['role:find']"
               class="card-grid"
               @click="roles"
             >

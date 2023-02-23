@@ -5,37 +5,32 @@ import { DefaultChartDate } from "./tools";
 
 export function getCount(type, kind) {
   return async function (parmas) {
-    let where = {};
+    let filters = ``;
     if (type == "mesh") {
       if (kind == "namespaces") {
-        where = { bindMesh: parmas.mesh, registry: parmas.registry };
-      }
-      if (kind == "services") {
-        where = {};
-        let namespacesName = [];
+        filters = ` bindMesh: {id:{eq:${parmas.mesh}}}, registry: {id:{eq:${parmas.registry}}} `;
+      } else if (kind == "services") {
         if (parmas.namespaces) {
+					filters = `namespace: { in: [`;
           parmas.namespaces.forEach((namespace) => {
-            namespacesName.push(namespace.name);
+						filters += `"${namespace.name}"`;
           });
-          where.namespace_in = namespacesName;
+					filters += `]}`;
         }
       }
     }
     return query(
-      `${kind}Connection(where: $where, start: 0, limit: -1){aggregate{totalCount}}`,
-      {
-        where,
-      },
+      `${kind}(filters: {${filters}}, pagination:{start: 0, limit: 9999}){meta{pagination{total}}}`,
     );
   };
 }
 
 export async function getK8sFacilities() {
-  return query(`fleets(where:{ type: "kubernetes" }){id,name,type}`);
+  return query(`fleets(filters:{ type: {eq:"kubernetes"} }){data{id,attributes{name,type}}}`);
 }
 
-export async function getRegistries() {
-  return query(`registries{id,name,type}`);
+export async function getRegistries(type) {
+  return type?query(`registries(filters:{ type: {eq:"${type}"} }){data{id,attributes{name,type}}}`):query(`registries{data{id,attributes{name,type}}}`);
 }
 
 export async function getSchemas() {
@@ -43,33 +38,37 @@ export async function getSchemas() {
 }
 
 export async function watchHealthcheck(type, id) {
-  let where = { ...DefaultChartDate, type };
+  let filters = { ...DefaultChartDate, type };
   if (id) {
-    where.id = id;
+    filters.id = id;
   }
-  return query(`getHealthcheckDashboardPageInfo(where: $where){
+  return query(`getHealthcheckDashboardPageInfo(filters: $filters){
 		healthchecks_timer,healthchecks{health,unhealthy}
-  }`,{where});
+  }`,{filters});
 }
 
 export async function getK8sNamespaces(id) {
   return query(
-    `namespaces( limit: -1, start: 0, where: $where ){id,name,registry{id,name}}`,
+    `namespaces( pagination:{limit: 9999, start: 0}, filters: $filters ){data{id,attributes{name,registry{data{id,attributes{name}}}}}}`,
     {
-      where: { registry: id },
-    },
+      filters: { registry: {id: {eq: id}} },
+    },{
+			filters: "NamespaceFiltersInput",
+		}
   );
 }
 
 export async function getOrgTotal() {
-  return query(`organizationsConnection( start: 0, limit: 1 ){
-		values{id},aggregate{totalCount}
+  return query(`organizations( pagination:{start: 0, limit: 1} ){
+		data{id},
+		meta{pagination{total}}
 	}`);
 }
 
 export async function getProjectTotal() {
-  return query(`projectsConnection( start: 0, limit: 1 ){
-		values{id},aggregate{totalCount}
+  return query(`projects( pagination:{start: 0, limit: 1} ){
+		data{id},
+		meta{pagination{total}}
 	}`);
 }
 

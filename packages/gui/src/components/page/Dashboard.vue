@@ -593,9 +593,9 @@ export default {
   methods: {
     getPrometheus() {
       this.$gql
-        .query(`fleets(where:{type:"prometheus"}){id,name,apply,content}`)
+        .query(`fleets(filters:{type:{eq:"prometheus"}}){data{id,attributes{name,apply,content}}}`)
         .then((res) => {
-          this.prometheusList = res;
+          this.prometheusList = res.data;
         });
     },
 		
@@ -682,7 +682,7 @@ export default {
         let subscribes = _.cloneDeep(this.subscribes) || [];
         subscribes.push(key);
         this.save({ subscribes }, true);
-        this.$message.success("已添加组件", 3);
+        this.$message.success(this.$t("Added successfully"), 3);
       }
     },
 
@@ -696,7 +696,7 @@ export default {
           }
         });
         this.save({ subscribes }, true);
-        this.$message.success("组件已移除", 3);
+        this.$message.success(this.$t("Removed successfully"), 3);
       }
     },
 
@@ -755,10 +755,10 @@ export default {
     getDashboards(call) {
       this.loading = true;
       this.$gql
-        .query(`dashboards{id,name,apply,content,updated_at}`)
+        .query(`dashboards{data{id,attributes{name,apply,content,updatedAt}}}`)
         .then((res) => {
           this.loading = false;
-          this.dashboards = res;
+          this.dashboards = res.data;
           this.dashboards.forEach((item) => {
             item.widgets = [];
             if (item.content.widget) {
@@ -776,7 +776,7 @@ export default {
     setUserWidgets(call) {
       getUserWidgets().then((res) => {
         this.userWidgets = {};
-        res.forEach((widget) => {
+        res.data.forEach((widget) => {
           if (widget.content) {
             this.userWidgets[widget.content.id] = {
               ...widget.content,
@@ -912,7 +912,7 @@ export default {
         apply: this.apply,
       }).then(() => {
         getDashboardByApply(this.apply).then((resAry2) => {
-          if (resAry2.length == 0) {
+          if (resAry2.data.length == 0) {
             this.$message.warn(
               this.$t("Please click the right menu to bind a dashboard"),
               3,
@@ -921,7 +921,7 @@ export default {
           } else {
             this.$message.success(this.$t("Init dashboard successful"), 3);
           }
-          const res = resAry2[0];
+          const res = resAry2.data[0];
           this.did = res.id;
           this.oid = res.id;
           this.name = res.name;
@@ -943,13 +943,13 @@ export default {
           if (call != true) {
             this.loading = false;
           }
-          if (resAry.length == 0 && this.defaultWidget) {
+          if (resAry.data.length == 0 && this.defaultWidget) {
             if (!this.embed) {
               this.initDashboard();
             }
             return;
           }
-          const res = resAry[0];
+          const res = resAry.data[0];
           this.did = res.id;
           this.oid = res.id;
           this.name = res.name;
@@ -963,8 +963,8 @@ export default {
           if (call != true) {
             this.loading = false;
           }
-          this.name = res.name;
-          const _subscribes = res.content.widget;
+          this.name = res.data.name;
+          const _subscribes = res.data.content.widget;
           this.subscribes = _subscribes
             ? _subscribes.replace(/^,/g, "").split(",")
             : [];
@@ -1017,14 +1017,14 @@ export default {
   }
   .header-fullscreen.normal {
     top: -30px;
-    right: 35px;
+    right: 70px;
     z-index: 11;
     background-color: #fff;
     opacity: 0.9;
     color: #00adef;
   }
   .header-fullscreen.normal.filter {
-    right: 70px;
+    right: 35px;
   }
   .header-fullscreen.embed {
     top: 11px;

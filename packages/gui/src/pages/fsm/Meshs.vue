@@ -149,12 +149,11 @@
 
   <a-modal
     v-model:visible="visible"
-    :title="$t('osm-edge Install')"
+    :title="$t('Flomesh Install')"
     @ok="valid"
     width="80%"
     :ok-text="$t('Install')"
     :cancel-text="$t('cancel')"
-    :destroy-on-close="true"
   >
     <a-tabs
       type="card"
@@ -191,7 +190,7 @@
                   <blockquote>
                     {{
                       $t(
-                        "Name for the mesh control plane instance (Default: osm)",
+                        "Name for the mesh control plane instance (Default: flomesh)",
                       )
                     }}
                   </blockquote>
@@ -203,6 +202,7 @@
               :span="2"
             >
               <EnvSelector
+                type="k8s"
                 :is-filter="true"
                 :no-all="true"
                 @envChange="envChange"
@@ -552,7 +552,7 @@ export default {
       metricsEnable: true,
       visible: false,
       payload: {
-        name: "osm",
+        name: "flomesh",
         timeout: 300,
         mcsEnable:true,
         namespace: null,
@@ -615,7 +615,7 @@ export default {
 
     add() {
       this.payload = {
-        name: "osm",
+        name: "flomesh",
         timeout: 300,
         namespace: "",
         mcsEnable:true,
@@ -652,21 +652,19 @@ export default {
       options.osm.meshName = savedata.name
       this.$gql
         .mutation(
-          `createMesh(input: $input){mesh{id}}`,
+          `createMesh(data: $data){data{id}}`,
           {
-            input: {
-              data: {
-                name: savedata.name,
-                namespace: savedata.namespace,
-                atomic: savedata.atomic,
-                mcsEnable: savedata.mcsEnable,
-                enforceSingleMesh: savedata.enforceSingleMesh,
-                options,
-              },
+            data: {
+              name: savedata.name,
+              namespace: savedata.namespace,
+              atomic: savedata.atomic,
+              mcsEnable: savedata.mcsEnable,
+              enforceSingleMesh: savedata.enforceSingleMesh,
+              options,
             },
           },
           {
-            input: "createMeshInput",
+            data: "MeshInput!",
           },
         )
         .then(() => {
@@ -678,7 +676,7 @@ export default {
 
     remove(id) {
       this.$gql
-        .mutation(`deleteMesh(input:{where:{id:${id}}}){mesh{id}}`)
+        .mutation(`deleteMesh(id:${id}){data{id}}`)
         .then(() => {
           this.$message.success(this.$t("Deleted successfully"), 3);
           this.search();
@@ -696,17 +694,43 @@ export default {
         this.pageNo = pageNo;
         this.pageSize = pageSize;
       }
+      let pagination = {
+        start: this.start, 
+        limit: this.pageSize
+      };
       this.loading = true;
 
-      const where = { name_contains: this.key };
+      let filters = {
+        name: { contains: this.key }
+      };
       this.$gql
         .query(
-          `meshesConnection(where: $where, start: ${this.start}, limit: ${this.pageSize}){values{id,config,osmMessage,fsmMessage,namespace{id,registry{id,name},name},status,name,bindNamespaces{id,name},created_at},aggregate{totalCount}}`,
-          { where },
+          `meshes(filters: $filters, pagination: $pagination){
+						data{id,attributes{
+							config,
+							osmMessage,
+							fsmMessage,
+							namespace{data{id,attributes{
+								registry{data{id,attributes{name}}},
+								name
+							}}},
+							status,
+							name,
+							bindNamespaces{data{id,attributes{name}}},
+							createdAt
+						}},
+						meta{pagination{total}}
+					}`,
+          { 
+            filters,pagination
+          },{
+            filters: "MeshFiltersInput",
+            pagination: "PaginationArg",
+          }
         )
         .then((res) => {
-          this.list = this.reset(res.values);
-          this.total = res.aggregate.totalCount;
+          this.list = this.reset(res.data);
+          this.total = res.pagination.total;
           this.loading = false;
         });
     },
@@ -719,7 +743,7 @@ export default {
         list[i].configName = list[i].config?.metadata.name;
         list[i].namespaceName = list[i].namespace?(list[i].namespace?.registry?.name+'/' +list[i].namespace?.name):"";
         list[i].creationTimestamp = new Date(
-          list[i].created_at,
+          list[i].createdAt,
         ).toLocaleString();
         list[i].t = list[i].status;
       }

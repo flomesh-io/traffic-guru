@@ -2,6 +2,8 @@ module.exports = {
   messages: {
     CN: {
       "Welcome Flomesh": "欢迎使用 Flomesh",
+      "Sticky Timeout": "会话保持超时时间",
+      "Max Fails": "最大失败次数",
       "Dashboard Port": "仪表板端口号",
       "Failures": "失败次数",
       "Global Max Connections": "全局最大连接数",
@@ -19,6 +21,7 @@ module.exports = {
       "Readonly": "只读",
       "Samples": "示例",
       "Query": "查询",
+      "Remove Role": "移除角色",
       "No Widget": "没有组件",
       "Try change the config and click run button": "尝试修改配置并运行",
       "Response": "响应",
@@ -81,7 +84,7 @@ module.exports = {
 			'ActiveActive': "多活",
       Injector: "注入",
       Bootstrap: "自适应",
-      "osm-edge Install": "osm-edge安装",
+      "Flomesh Install": "Flomesh安装",
       "Enable Multi-cluster Support": "启用Multi-cluster Support",
       Install: "安装",
       Primary: "主要",
@@ -103,9 +106,8 @@ module.exports = {
       "Enforce Single Mesh": "Mesh独立安装",
       "Enable Pipy Ingress": "启用Pipy进栈",
       Address: "地址",
-      "Enable Multi-cluster Support": "启用Multi-cluster Support",
-      "Name for the mesh control plane instance (Default: osm)":
-        "新控制平面实例的“mesh”名称（默认值：osm）",
+      "Name for the mesh control plane instance (Default: flomesh)":
+        "新控制平面实例的“mesh”名称（默认值：flomesh）",
       "Time to wait for installation and resources in a ready state, zero means no timeout (Default: 5*time.Minute)":
         "等待安装和资源处于就绪状态的时间，零表示没有超时（默认值：5*Time.Minute）",
       "OSM allows optional deployment of Jaegar for tracing and configured via BYO scenario":
@@ -911,13 +913,15 @@ module.exports = {
       healthcheck: "健康检查",
       policy: "策略",
       upstream: "服务提供商",
-      userspermissions: "角色",
+      role: "角色",
       "System Role": "系统角色",
       "Organization Role": "组织角色",
       "Project Role": "项目角色",
     },
     JP: {
       "Excluded path": "除外パス",
+      "Sticky Timeout": "セッション保持タイムアウト時間",
+      "Max Fails": "最大失敗回数",
       "Global Max Connections": "グローバル最大接続数",
       "Failures": "失敗回数",
       "Default Max Connections": "デフォルト接続の最大数",
@@ -944,6 +948,7 @@ module.exports = {
       "User Center": "ユーザーセンター",
       System: "システム設定",
       RouterSetting: "ダイナミックルータ",
+      "Remove Role": "ロールの削除",
       "Edit Page": "改訂ページ",
       "Healthcheck Path": "健康診断パス",
       "TTL(Seconds)": "有効期限（秒）",
@@ -1756,7 +1761,7 @@ module.exports = {
       "You can subscribe to modules of interest on other dashboard pages":
         "他のダッシュボードページで興味のあるモジュールを購読できます",
       "Count of components": "コンポーネント数",
-      "osm-edge Install": "osm-edgeインストール",
+      "Flomesh Install": "Flomeshインストール",
       Install: "インストール",
       Primary: "プライマリー",
       Options: "オプション",
@@ -1776,8 +1781,8 @@ module.exports = {
       "Enable Pipy Ingress": "Pipy入り口有効化",
       Address: "アドレス",
       "Enable Multi-cluster Support": "Multi-cluster Supportの有効化",
-      "Name for the mesh control plane instance (Default: osm)":
-        "新しい制御プレーンインスタンスの'メッシュ'名(デフォルト: OSM )",
+      "Name for the mesh control plane instance (Default: flomesh)":
+        "新しい制御プレーンインスタンスの'メッシュ'名(デフォルト: flomesh )",
       "Time to wait for installation and resources in a ready state, zero means no timeout (Default: 5*time.Minute)":
         "準備ができている状態でインストールとリソースを待つ時間はゼロです（デフォルト値：5*Time.Minute）",
       "OSM allows optional deployment of Jaegar for tracing and configured via BYO scenario":
@@ -1810,7 +1815,7 @@ module.exports = {
       upstream: "サービスプロバイダ",
       Upstream: "サービスプロバイダ",
       "Create Upstream": "新規プロバイダ",
-      userspermissions: "ロール",
+      role: "ロール",
       "System Role": "システムロール",
       "Organization Role": "組織ロール",
       "Project Role": "プロジェクトロール",
@@ -1923,7 +1928,7 @@ module.exports = {
       certificate: "Certificate",
       dialTesting: "DialTesting",
       healthcheck: "Healthcheck",
-      userspermissions: "Role",
+      role: "Role",
       policy: "Policy",
       application: "Serving Consumers",
       upstream: "Upstream",

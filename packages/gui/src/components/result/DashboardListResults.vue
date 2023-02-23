@@ -91,7 +91,7 @@ export default {
     remove(index, type, item) {
       this.$gql
         .mutation(
-          `deleteDashboard(input:{where:{id:${item.id}}}){dashboard{id}}`,
+          `deleteDashboard(id:${item.id}){data{id}}`,
         )
         .then(() => {
           this.$message.success(this.$t("Deleted successfully"), 3);

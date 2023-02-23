@@ -20,7 +20,7 @@
     </div>
     <div
       class="chart-card-content"
-      :style="{ height: height ? height : '46px' }"
+      :style="{ height: height ? height : '66px' }"
       :class="hideTotal ? 'hideTotal' : ''"
     >
       <div class="content-fix">
@@ -76,11 +76,11 @@ export default {
   }
   .chart-card-footer {
     border-top: 1px solid @border-color-base;
-    padding-top: 9px;
-    margin-top: 8px;
+    padding-top: 1px;
+    margin-top: 0px;
   }
   .chart-card-content {
-    margin-bottom: 12px;
+    margin-bottom: 0px;
     position: relative;
     width: 100%;
   }

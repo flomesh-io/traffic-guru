@@ -94,7 +94,7 @@ const system = {
       name: "Roles",
       meta: {
         icon: CustomerServiceOutlined,
-        authority: "userspermissions:find",
+        authority: "role:find",
       },
       component: () => import("@/pages/system/Roles"),
     },

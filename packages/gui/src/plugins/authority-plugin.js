@@ -130,9 +130,9 @@ const AuthorityPlugin = {
       methods: {
         $auth(check, type) {
           const permissions = this.$store.getters["account/permissions"];
-          const roles = this.$store.getters["account/roles"];
+          const accountRole = this.$store.getters["account/roles"];
           const permission = getRoutePermission(permissions, this.$route);
-          const role = getRouteRole(roles, this.$route);
+          const role = getRouteRole(accountRole.permissions, this.$route);
           return auth.apply(this, [
             { check, type },
             permission,

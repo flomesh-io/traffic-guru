@@ -42,9 +42,9 @@
                 <b>{{ record.action }}</b>
               </div>
             </template>
-            <template v-else-if="column.dataIndex === 'created_at'">
+            <template v-else-if="column.dataIndex === 'createdAt'">
               <div>
-                {{ new Date(record.created_at).toLocaleString() }}
+                {{ new Date(record.createdAt).toLocaleString() }}
               </div>
             </template>
           </template>
@@ -69,9 +69,9 @@ const columns = [
     dataIndex: "action",
   },
   {
-    key: "updated_at",
+    key: "updatedAt",
     sorter: true,
-    dataIndex: "updated_at",
+    dataIndex: "updatedAt",
   },
 ];
 export default {
@@ -86,7 +86,7 @@ export default {
       total: 0,
       loading: true,
       advanced: true,
-      sorter: "updated_at",
+      sorter: "updatedAt",
       sortOrder: "end$desc",
       columns,
       events: [],
@@ -125,9 +125,15 @@ export default {
         this.pageNo = pageNo;
         this.pageSize = pageSize;
       }
+      let pagination = {
+        start: this.start, 
+        limit: this.pageSize
+      };
       this.loading = true;
-      const where = { loginIp_contains: this.key };
-      let order = "updated_at:desc";
+      let filters = {
+        loginIp: { contains: this.key }
+      };
+      let order = "updatedAt:desc";
       if (this.sorter && this.sortOrder) {
         order = this.sortOrder.replace(/\$/g, "");
         order = order.replace(/end/g, "");
@@ -135,12 +141,25 @@ export default {
       }
       this.$gql
         .query(
-          `eventsConnection(where: $where, start: ${this.start}, limit: ${this.pageSize}, sort: "${order}"){values{id,updated_at,action,loginIp,user{username}},aggregate{totalCount}}`,
-          { where },
+          `events(filters: $filters, pagination: $pagination, sort: "${order}"){
+						data{id,attributes{
+							updatedAt,
+							action,
+							loginIp,
+							user{data{id,attributes{username}}}
+						}},
+						meta{pagination{total}}
+					}`,
+          { 
+            filters,pagination
+          },{
+            filters: "EventFiltersInput",
+            pagination: "PaginationArg",
+          }
         )
         .then((res) => {
-          this.events = res.values;
-          this.total = res.aggregate.totalCount;
+          this.events = res.data;
+          this.total = res.pagination.total;
           this.loading = false;
         });
     },

@@ -2,71 +2,66 @@ import { query } from "@/services/graphql";
 import { DefaultChartDate } from "./tools";
 
 export async function getServicesSummary() {
-  return query(`getFsmDashboardPageInfo(where: $where){
+  return query(`getFsmDashboardPageInfo(filters: $filters){
 		services{total,include,exclude}
-	}`,{where:DefaultChartDate});
+	}`,{filters:DefaultChartDate});
 }
 
 export async function getNamespacesSummary() {
-  return query(`namespacesConnection{
-		aggregate{totalCount}
+  return query(`namespaces{
+		meta{pagination{total}}
 	}`);
 }
 
 export async function getRegistriesSummary() {
-  return query(`getFsmDashboardPageInfo(where: $where){
+  return query(`getFsmDashboardPageInfo(filters: $filters){
 		registries{total,valid,invalid}
-	}`,{where:DefaultChartDate});
+	}`,{filters:DefaultChartDate});
 }
 
 export async function getHealthchecksChart() {
-	let where = DefaultChartDate;
-	where.type = "service";
-  return query(`getHealthcheckDashboardPageInfo(where: $where){
+	let filters = DefaultChartDate;
+	filters.type = "service";
+  return query(`getHealthcheckDashboardPageInfo(filters: $filters){
 		healthchecks_timer
-	}`,{where});
+	}`,{filters});
 }
 
 export async function getServicesHealthSummary() {
-	let where = DefaultChartDate;
-	where.type = "service";
-  return query(`getHealthcheckDashboardPageInfo(where: $where){
+	let filters = DefaultChartDate;
+	filters.type = "service";
+  return query(`getHealthcheckDashboardPageInfo(filters: $filters){
 		healthchecks{health,unhealthy}
-	}`,{where});
+	}`,{filters});
 }
 
 export async function getIngressHealthSummary() {
-	let where = DefaultChartDate;
-	where.type = "ingress";
-  return query(`getHealthcheckDashboardPageInfo(where: $where){
+	let filters = DefaultChartDate;
+	filters.type = "ingress";
+  return query(`getHealthcheckDashboardPageInfo(filters: $filters){
 		healthchecks{health,unhealthy}
-	}`,{where});
+	}`,{filters});
 }
 
 export async function getTopoSvc() {
-  return query(`registries(start: 0,limit: -1){
-		id,
+  return query(`registries(pagination:{start: 0,limit: 9999}){data{id,attributes{
 		name,
 		type,
-		namespaces{
-			id,
+		namespaces{data{id,attributes{
 			name,
-			services{
-				id,
+			services{data{id,attributes{
 				name,
-				registry{id,name},
-				serviceExport{
-					id,
-					serviceImports{
-						id,
-						registry{id,name},
+				registry{data{id,attributes{name}}},
+				serviceExport{data{id,attributes{
+					serviceImports{data{id,attributes{
+						registry{data{id,attributes{name}}},
 						content
-					}
-				}
-			},
-			bindMesh{id,name}
-		}
-	}`);
+					}}}
+				}}}
+			}}},
+			bindMesh{data{id,attributes{name}}}
+		}}}
+	}}}`);
 }
 function createTopoNode(config){
 	return {
@@ -106,7 +101,7 @@ function createTopoLink(config){
 	}
 }
 export function setTopoSvcData(d){
-	let _d = d;
+	let _d = d.data;
 	let nodes = [];
 	let links = [];
   let categories = [];

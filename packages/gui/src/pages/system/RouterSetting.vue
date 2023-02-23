@@ -99,6 +99,7 @@
         :xs="24"
       >
         <a-card
+          class="nopd"
           :title="$t('Other Settings')"
           :loading="loading"
         >
@@ -310,9 +311,9 @@ export default {
       }
       this.$gql
         .mutation(
-          `batchCreateRouterSetting(input:$input)`,
-          { input },
-          { input: "[RouterSettingBatchInput]" },
+          `batchCreateRouterSetting(data: $data)`,
+          { data: input },
+          { data: "JSON" },
         )
         .then(() => {
           this.visible = false;
@@ -333,30 +334,30 @@ export default {
         delete content.id;
         this.$gql
           .mutation(
-            `updateSystemSetting(input: $input){systemSetting{id}}`,
+            `updateSystemSetting(id:${this.routerSettingMenu.id}, data: $data){data{id}}`,
             {
-              input: {
-                where: { id: this.routerSettingMenu.id },
-                data: { type: "RouterSetting", content },
-              },
+              data: { type: "RouterSetting", content },
             },
-            { input: "updateSystemSettingInput" },
+            { data: "SystemSettingInput!" },
           )
           .then(() => {});
       } else {
         this.$gql
           .mutation(
-            `createSystemSetting(input: $input){systemSetting{id}}`,
+            `createSystemSetting(data: $data){data{id}}`,
             {
-              input: { data: { type: "RouterSetting", content } },
+              data: { type: "RouterSetting", content },
             },
-            { input: "createSystemSettingInput" },
+            { data: "SystemSettingInput!" },
           )
           .then(() => {});
       }
     },
 
     setTreeKey(tree) {
+      if(!tree){
+        return [];
+      }
       tree.forEach((item) => {
         item.key = `${item.level}-${item.id}`;
         item.enabled = !item.disabled;
@@ -385,19 +386,32 @@ export default {
       this.loading = true;
       this.$gql
         .query(
-          `routerSettings(sort: "sort:asc", where: { level: 1 }){id,name,displayName,path,fullPath,disabled,authority,invisible,sort,level,parent{id,name,displayName,path,fullPath,disabled,authority,invisible,sort,level},children{id,name,displayName,path,fullPath,disabled,authority,invisible,sort,level}}`,
+          `routerSettings(sort: "sort:asc", filters: { level: { eq: 1 } }){data{id,attributes{
+						name,
+						displayName,
+						path,
+						fullPath,
+						disabled,
+						authority,
+						invisible,
+						sort,
+						level,
+						parent{data{id,attributes{name,displayName,path,fullPath,disabled,authority,invisible,sort,level}}},
+						children{data{id,attributes{name,displayName,path,fullPath,disabled,authority,invisible,sort,level}}}
+					}}}`,
         )
         .then((res) => {
-          this.menuTree = this.setTreeKey(JSON.parse(JSON.stringify(res)));
+          this.menuTree = this.setTreeKey(JSON.parse(JSON.stringify(res.data)));
           this.loading = false;
           res = [];
         });
 
       this.$gql
         .query(
-          `systemSettings(where:{type:"RouterSetting"}){id,mode,content}`,
+          `systemSettings(filters:{type:{eq:"RouterSetting"}}){data{id,attributes{mode,content}}}`,
         )
-        .then((res) => {
+        .then((d) => {
+          let res = d.data;
           this.hasRouterSettingMenu = res && res.length > 0;
           if (this.hasRouterSettingMenu) {
             this.routerSettingMenu = { ...res[0].content, id: res[0].id };

@@ -178,7 +178,7 @@
                 class="template-div-icon"
               >
                 <img
-                  :src="BASE_URL + item.icon.url"
+                  :src="DEFAULT_BASE_URL + item.icon.url"
                   alt="avatar"
                   class="square-70"
                 >
@@ -270,7 +270,7 @@
             >
               <img
                 v-if="payload.icon"
-                :src="BASE_URL + payload.icon.url"
+                :src="DEFAULT_BASE_URL + payload.icon.url"
                 alt="avatar"
                 class="square-150"
               >
@@ -474,7 +474,7 @@ import { mapState } from "vuex";
 import CardList from "@/components/card/CardList";
 import PageLayout from "@/layouts/PageLayout";
 import { Empty } from "ant-design-vue";
-import { UPLOAD, BASE_URL } from "@/services/api";
+import { UPLOAD, BASE_URL, DEFAULT_BASE_URL } from "@/services/api";
 import { getHeaders } from "@/utils/request";
 import FormItem from "@/components/tool/FormItem";
 
@@ -497,6 +497,7 @@ export default {
     return {
       UPLOAD,
       BASE_URL,
+      DEFAULT_BASE_URL,
       fileList: [],
       upLoading: false,
       upHeaders: {},
@@ -695,12 +696,12 @@ export default {
         delete savedata.id;
         this.$gql
           .mutation(
-            `updatePlugin(input: $input){plugin{id}}`,
+            `updatePlugin(id:${whereID}, data: $data){data{id}}`,
             {
-              input: { where: { id: whereID }, data: savedata },
+              data: savedata,
             },
             {
-              input: "updatePluginInput",
+              data: "PluginInput!",
             },
           )
           .then(() => {
@@ -712,12 +713,12 @@ export default {
         delete savedata.id;
         this.$gql
           .mutation(
-            `createPlugin(input: $input){plugin{id}}`,
+            `createPlugin(data: $data){data{id}}`,
             {
-              input: { data: savedata },
+              data: savedata,
             },
             {
-              input: "createPluginInput",
+              data: "PluginInput!",
             },
           )
           .then(() => {
@@ -815,7 +816,7 @@ export default {
 		
     remove(index, type, item) {
       this.$gql
-        .mutation(`deletePlugin(input:{where:{id:${item.id}}}){plugin{id}}`)
+        .mutation(`deletePlugin(id:${item.id}){data{id}}`)
         .then(() => {
           this.$message.success(this.$t("Deleted successfully"), 3);
           this.search();
@@ -852,24 +853,41 @@ export default {
         this.pageNo = 1;
       }
       this.loading = true;
-
-      let where = { name_contains: this.key };
+      let pagination = {
+        start: this.start, 
+        limit: this.pageSize
+      };
+      let filters = {};
+      filters.name = { contains: this.key };
       if (this.apply) {
-        where.apply_contains = this.apply;
+        filters.apply = { contains: this.apply };
       }
       if (this.viewtypeproject) {
-        where.type = this.viewtypeproject.id;
+        filters.type = { eq: this.viewtypeproject.id };
       }
       this.$gql
         .query(
-          `pluginsConnection(where: $where, start: ${this.start}, limit: ${this.pageSize}){values{id,name,icon{id,url,previewUrl},apply,type{id,name},desc,content},aggregate{totalCount}}`,
+          `plugins(filters: $filters, pagination: $pagination){
+						data{id,attributes{
+							name,
+							icon{data{id,attributes{url,previewUrl}}},
+							apply,
+							type{data{id,attributes{name}}},
+							desc,
+							content
+						}},
+						meta{pagination{total}}
+					}`,
           { 
-            where 
-          },
+            filters, pagination
+          },{
+            filters: "PluginFiltersInput",
+            pagination: "PaginationArg",
+          }
         )
         .then((res) => {
-          this.plugins = res.values;
-          this.total = res.aggregate.totalCount;
+          this.plugins = res.data;
+          this.total = res.pagination.total;
           this.loading = false;
         });
     },
@@ -880,13 +898,22 @@ export default {
       } else {
         this.pageNo = 1;
       }
+      let pagination = {
+        start: this.start, 
+        limit: this.pageSize
+      };
       this.loading = true;
       this.$gql
         .query(
-          `pluginTypesConnection(start: ${this.start}, limit: ${this.pageSize}){values{id,name,plugins{id,name}}}`
+          `pluginTypes(pagination: $pagination){data{id,attributes{name,plugins{data{id,attributes{name}}}}}}`,
+          {
+            pagination 
+          },{
+            pagination: "PaginationArg",
+          }
         )
         .then((res) => {
-          this.pluginTypes = res.values;
+          this.pluginTypes = res.data;
           this.loading = false;
         });
     },

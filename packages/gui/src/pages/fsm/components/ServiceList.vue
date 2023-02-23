@@ -1,15 +1,33 @@
 <template>
   <a-card
     class="card nopd"
+    :tab-list="tabList"
+    :active-tab-key="tabKey"
+    @tabChange="onTabChange"
     :loading="loading"
   >
-    <template #title>
+    <template #customTab="item">
+      {{ item.tab }}
+      <a-badge
+        v-if="item.services > 0"
+        class="ml-10"
+        :count="item.services"
+        :number-style="{ backgroundColor: '#00adef' }"
+      />
+    </template>
+    <template
+      v-if="mode!='registry'"
+      #title
+    >
       {{ title ? title : $t("Services") }}
     </template>
+    <template
+      v-if="embed"
+      #tabBarExtraContent
+    >
+      <slot name="extra" />
+    </template>
     <template #extra>
-      <div v-if="embed">
-        <slot name="extra" />
-      </div>
       <div v-if="hasSearch">
         <a-input-search
           v-model:value="key"
@@ -100,6 +118,16 @@
               >{{ record.name }}</a>
             </div>
           </template>
+          <template v-else-if="column.dataIndex === 'organizationName'">
+            <slot
+              v-if="mode == 'registry'"
+              name="organization"
+              :item="record"
+            />
+            <a-tag v-else>
+              {{ record.organizationName }}
+            </a-tag>
+          </template>
           <template v-else-if="column.dataIndex === 'labels'">
             <div v-if="record.labels">
               <a-tag
@@ -113,7 +141,7 @@
           </template>
 
           <template v-else-if="column.dataIndex === 'serviceExport'">
-            <a-tag v-if="record.serviceExport">
+            <a-tag v-if="record.serviceExport && record.serviceExport.content">
               {{ record.serviceExport.content.path }} | {{ record.serviceExport.content.portNumber }}
             </a-tag><span v-else>-</span>
           </template>
@@ -164,7 +192,7 @@
                         @click="detail(record.id, record.namespace)"
                       >{{ $t("edit") }}</a>
                     </a-menu-item>
-                    <a-menu-item>
+                    <a-menu-item v-if="record?.registry?.type != 'eureka'">
                       <a-popconfirm
                         placement="topLeft"
                         :ok-text="$t('Yes')"
@@ -203,15 +231,10 @@ import {
 import EnvSelector from "@/components/menu/EnvSelector";
 import SyncBar from "@/components/tool/SyncBar";
 import Status from "@/components/tag/Status";
-const shortcolumns = [
+const regcolumns = [
   {
-    key: "as",
+    key: "Service",
     dataIndex: "name",
-  },
-  {
-    key: "Organization",
-    width: 130,
-    dataIndex: "organizationName",
   },
   {
     key: "Namespace",
@@ -222,9 +245,9 @@ const shortcolumns = [
     dataIndex: "gatewayPath",
   },
   {
-    key: "Action",
+    key: "Organization",
     width: 130,
-    dataIndex: "action",
+    dataIndex: "organizationName",
   },
 ];
 const short2columns = [
@@ -321,6 +344,8 @@ export default {
     "embed",
     "whitelistServices",
     "blacklistServices",
+    "tabList",
+    "tabKey",
   ],
 
   i18n: require("@/i18n"),
@@ -332,7 +357,7 @@ export default {
       pageSize: 10,
       total: 0,
       columns,
-      shortcolumns,
+      regcolumns,
       short2columns,
       short3columns,
       loading: true,
@@ -364,9 +389,22 @@ export default {
             column.title = this.$t(column.key);
             return column;
           });
-      } else if (this.mode) {
-        return this.shortcolumns
+      } else if (this.mode == "registry") {
+        return this.regcolumns
           .filter((column) => (column.key != "Organization" && column.key != "Gateway path" && column.key != "Action") || this.$isPro)
+          .map((column) => {
+            column.title = this.$t(column.key);
+            return column;
+          });
+      }  else if (this.mode == "ACL") {
+        console.log(this.columns
+          .filter((column) => column.key != "Organization")
+          .map((column) => {
+            column.title = this.$t(column.key);
+            return column;
+          }))
+        return this.columns
+          .filter((column) => column.key != "Labels" && column.key != "Export" && column.key != "Imports")
           .map((column) => {
             column.title = this.$t(column.key);
             return column;
@@ -409,9 +447,14 @@ export default {
   },
 
   methods: {
+    onTabChange(d){
+      this.$emit("update:tabKey",d);
+      this.$emit("nsChange",d);
+    },
+		
     remove(id) {
       this.$gql
-        .mutation(`deleteServiceSync(input:{where:{id:${id}}}){id}`)
+        .mutation(`deleteServiceSync(id:${id}){data{id}}`)
         .then(() => {
           this.$message.success(this.$t("Deleted successfully"), 3);
           this.search();
@@ -454,19 +497,24 @@ export default {
         this.pageNo = pageNo;
         this.pageSize = pageSize;
       }
-
       this.loading = true;
       if (this.embed && this.embedServices) {
         this.list = this.reset(this.embedServices);
         this.loading = false;
       } else {
-        let where = { name_contains: this.key };
+        let pagination = {
+          start: this.start, 
+          limit: this.pageSize
+        };
+        let filters = {
+          name: { contains: this.key }
+        };
         let namespacesName = [];
         if (this.namespaces && this.namespaces.length > 0) {
           this.namespaces.forEach((namespace) => {
             namespacesName.push(namespace.id);
           });
-          where.ns_in = namespacesName;
+          filters.ns = {id: {in:namespacesName}};
         } else if (this.namespaces && this.namespaces.length == 0) {
           this.list = [];
           this.total = 0;
@@ -474,25 +522,47 @@ export default {
           return;
         }
         if (this.namespace){
-          where.namespace = this.namespace;
+          filters.namespace = { eq: this.namespace };
         }
         if (this.selector){
-          where.selector = this.selector;
+          filters.selector = { eq: this.selector };
         }
         let searchName = "getServices";
         if (this.mode == "mesh") {
-          searchName = "servicesConnection";
+          searchName = "services";
         }
         this.$gql
           .query(
-            `${searchName}(where: $where, start: ${this.start}, limit: ${this.pageSize}){values{id,uid,serviceExport{id,content,serviceImports{id,registry{id,name},namespace}},fleet{id,name},organization{id,name},namespace,name,registry{id,name},content,updated_at},aggregate{totalCount}}`,
+            `${searchName}(filters: $filters, pagination: $pagination){
+							data{id,attributes{
+								uid,
+								serviceExport{data{id,attributes{
+									content,
+									serviceImports{data{id,attributes{
+										registry{data{id,attributes{name}}},
+										namespace
+									}}}
+								}}},
+								fleet{data{id,attributes{name}}},
+								organization{data{id,attributes{name}}},
+								namespace,
+								name,
+								registry{data{id,attributes{name, type}}},
+								content,
+								updatedAt
+							}},
+							meta{pagination{total}}
+						}`,
             { 
-              where 
-            },
+              filters,pagination
+            },{
+              filters: "ServiceFiltersInput",
+              pagination: "PaginationArg",
+            }
           )
           .then((res) => {
-            this.list = this.reset(res.values);
-            this.total = res.aggregate.totalCount;
+            this.list = this.reset(res.data);
+            this.total = res.pagination.total;
             this.loading = false;
           });
       }
@@ -521,7 +591,7 @@ export default {
           _content.externalEndpoints ? _content.externalEndpoints : [],
         );
         list[i].creationTimestamp = new Date(
-          list[i].updated_at,
+          list[i].updatedAt,
         ).toLocaleString();
         list[i].t = "Success";
       }
@@ -607,14 +677,11 @@ export default {
     updateGatewayPath(record) {
       this.$gql
         .mutation(
-          `updateService(input: $input){service{id}}`,
+          `updateService(id:${record.id}, data: $data){data{id}}`,
           {
-            input: {
-              where: { id: record.id },
-              data: { gatewayPath: record.gatewayPath },
-            },
+            data: { gatewayPath: record.gatewayPath },
           },
-          { input: "updateServiceInput" },
+          { data: "ServiceInput!" },
         )
         .then(() => {});
     },

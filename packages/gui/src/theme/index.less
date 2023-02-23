@@ -455,8 +455,14 @@ blockquote {
 }
 .ant-input-search .ant-input-search-button{
 	border-radius: 50% !important;
-	background-color: #fafafa;
 	border: none;
+}
+.ant-input-search .ant-input-search-button:hover{
+	border: 5px solid rgba(0,173,239,0.2);
+}
+.ant-input-search .ant-btn-icon-only.ant-btn-lg{
+	width: auto;
+	height: auto;
 }
 .ant-select:hover .ant-select-selector,
 .ant-select-focused .ant-select-selector {
@@ -575,13 +581,16 @@ blockquote {
       margin: 0 !important;
     }
     .ant-card-grid {
-      background: #fcfcfc;
+      background: @background-color-light;
       border-width: 0;
       width: 30%;
       text-align: center;
       margin-bottom: 15px;
       box-shadow: none;
       position: relative;
+			a{
+				color: @text-color !important;
+			}
     }
   }
   .grid-menu {
@@ -629,7 +638,7 @@ blockquote {
   position: absolute;
   z-index: 1;
   text-align: right;
-  background-color: #ffffff;
+  background-color: @body-background;
   color: #00adef;
   display: block;
   transition: 0.3s all;

@@ -459,10 +459,11 @@ export default {
     search() {
       this.loading = true;
       this.$gql
-        .query(`getEgress(id: ${this.pid}){id,content,created_at}`)
-        .then((res) => {
+        .query(`getEgress(id: ${this.pid}){data{id,attributes{content,createdAt}}}`)
+        .then((d) => {
+          let res = d.data;
           this.loading = false;
-          this.creationTimestamp = new Date(res.created_at).toLocaleString();
+          this.creationTimestamp = new Date(res.createdAt).toLocaleString();
           this.detail = res.content;
           if (this.detail.metadata.protocol == "Socks") {
             this.port = this.detail.socks.port;
@@ -511,17 +512,14 @@ export default {
       if (this.pid != "") {
         this.$gql
           .mutation(
-            `updateEgressSync(input: $input){id}`,
+            `updateEgressSync(id:${this.pid}, data: $data){data{id}}`,
             {
-              input: {
-                where: { id: this.pid },
-                data: {
-                  name: this.detail.metadata.name,
-                  content: savedata,
-                },
+              data: {
+                name: this.detail.metadata.name,
+                content: savedata,
               },
             },
-            { input: "updateEgressInput" },
+            { data: "EgressInput!" },
           )
           .then(() => {
             this.$message.success(this.$t("Save successfully"), 3);
@@ -530,19 +528,17 @@ export default {
       } else {
         this.$gql
           .mutation(
-            `createEgressSync(input $input){id}`,
+            `createEgressSync(data: $data){data{id}}`,
             {
-              input: {
-                data: {
-                  name: this.detail.metadata.name,
-                  content: savedata,
-                },
+              data: {
+                name: this.detail.metadata.name,
+                content: savedata,
               },
             },
-            { input: "createEgressInput" },
+            { data: "EgressInput!" },
           )
           .then((res) => {
-            this.pid = res.id;
+            this.pid = res.data.id;
             this.$message.success(this.$t("Created successfully"), 3);
             this.$closePage(this.$route);
           });

@@ -283,7 +283,7 @@ export default {
   }
   .sankey .indicators .indicator .title {
     font-size: 12px;
-    color: #000000;
+    color: @text-color;
     opacity: 0.65;
   }
   .sankey .indicators .indicator .measure {
@@ -296,7 +296,7 @@ export default {
     opacity: 0.85;
     font-family: Helvetica;
     font-size: 24px;
-    color: #000000;
+    color: @text-color;
   }
   .indicators .indicator .measure .unit {
     font-size: 12px;

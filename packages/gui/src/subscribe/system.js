@@ -342,7 +342,7 @@ const system = {
         return {
           config: {
             icon: PartitionOutlined,
-            total: res.aggregate.totalCount,
+            total: res.pagination.total,
             unit: "unitge",
             body: null,
             foot: [{ type: "Total" }],
@@ -360,7 +360,7 @@ const system = {
         return {
           config: {
             icon: FolderTwoTone,
-            total: res.aggregate.totalCount,
+            total: res.pagination.total,
             unit: "unitge",
             body: null,
             foot: [{ type: "Total" }],

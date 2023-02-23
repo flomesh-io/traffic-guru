@@ -88,6 +88,7 @@
                   call: setting,
                   permission: ['fleet:update'],
                 },
+                /**
                 {
                   icon: 'MedicineBoxOutlined',
                   text: $t('Healthcheck'),
@@ -99,10 +100,9 @@
                   text: $t('Force Push'),
                   call: forcepush,
                   permission: ['fleet:update'],
-                },
+                },*/
                 {
                   icon: 'CloseOutlined',
-                  hide: true,
                   text: $t('delete'),
                   call: remove,
                   permission: ['fleet:delete'],
@@ -129,7 +129,7 @@
             <a-card-meta>
               <template #title>
                 <span
-                  v-if="(item?.type || '').toLowerCase() == 'clickhouse'"
+                  v-if="(item?.type || '').toLowerCase() == 'clickhouse' || (item?.type || '').toLowerCase() == 'log'"
                   class="card-span toggle-card-item"
                 >
                   <a-divider type="vertical" />
@@ -341,7 +341,8 @@
           >
             <Json2YamlCard
               v-if="
-                payload.type.toLowerCase() != 'host' &&
+                payload.type.toLowerCase() != 'log' &&
+                  payload.type.toLowerCase() != 'host' &&
                   payload.type.toLowerCase() != 'pipy' &&
                   payload.type.toLowerCase() != 'pipy4lb' &&
                   payload.type.toLowerCase() != 'sidecar'
@@ -380,14 +381,7 @@
                 </div>
               </div>
             </div>
-            <div
-              v-if="
-                (payload.type.toLowerCase() == 'pipy' ||
-                  payload.type.toLowerCase() == 'pipy4lb' ||
-                  payload.type.toLowerCase() == 'sidecar') &&
-                  payload.json
-              "
-            >
+            <div v-if="payload.type.toLowerCase() == 'log' && payload.json ">
               <div class="flex">
                 <div class="flex-item">
                   <div>
@@ -395,7 +389,7 @@
                     <a-select
                       :placeholder="$t('unallocated')"
                       class="width-160"
-                      v-model:value="payload.json.log.type"
+                      v-model:value="payload.json.type"
                     >
                       <a-select-option value="clickhouse">
                         <span>Clickhouse</span>
@@ -407,7 +401,7 @@
                     <a-select
                       :placeholder="$t('unallocated')"
                       class="width-220"
-                      v-model:value="payload.json.log.bind.id"
+                      v-model:value="payload.json.bind.id"
                     >
                       <a-select-option
                         v-for="(item, index) in clickhouses"
@@ -424,6 +418,60 @@
                             v-for="(key, index2) in Object.keys(
                               item.content || [],
                             )"
+                            :key="index2"
+                          >
+                            {{ key }}:{{ item.content[key] }}
+                          </div>
+                        </div>
+                      </a-select-option>
+                    </a-select>
+                  </div>
+                </div>
+                <div class="flex-item">
+                  <div>
+                    <label>{{ $t("Log Table") }} : </label>
+                    <a-input
+                      :placeholder="$t('unset')"
+                      v-model:value="payload.json.table"
+                      class="width-220"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              v-else-if="
+                (payload.type.toLowerCase() == 'pipy' ||
+                  payload.type.toLowerCase() == 'pipy4lb' ||
+                  payload.type.toLowerCase() == 'sidecar') &&
+                  payload.json
+              "
+            >
+              <div class="flex">
+                <div class="flex-item">
+                  <div class="mt-10">
+                    <label>{{ $t("Log") }} : </label>
+                    <a-select
+                      :placeholder="$t('unallocated')"
+                      class="width-220"
+                      v-model:value="payload.json.log.bind.id"
+                    >
+                      <a-select-option
+                        v-for="(item, index) in logs"
+                        :key="index"
+                        :value="item.id"
+                      >
+                        <b v-if="item.id">{{ item.name }}</b>
+                        <i
+                          v-if="!item.id"
+                          class="gray"
+                        >{{ item.name }} </i>
+                        <div>
+                          <div
+                            v-for="(key, index2) in Object.keys(
+                              item.content || [],
+                            )"
+                            v-show="key != 'bind' && item.content[key]"
                             :key="index2"
                           >
                             {{ key }}:{{ item.content[key] }}
@@ -467,14 +515,6 @@
                   </div>
                 </div>
                 <div class="flex-item">
-                  <div>
-                    <label>{{ $t("Log Table") }} : </label>
-                    <a-input
-                      :placeholder="$t('unset')"
-                      v-model:value="payload.json.log.table"
-                      class="width-220"
-                    />
-                  </div>
                   <div class="mt-10">
                     <label>{{ $t("Template") }} : </label>
                     <a-select
@@ -691,6 +731,7 @@ export default {
   created() {
     if (this.$isPro) {
       this.icons = {
+        log: "icon-log",
         pipy: "icon-pipy",
         pipy4lb: "icon-pipy",
         clickhouse: "icon-clickhouse",
@@ -710,14 +751,20 @@ export default {
           type: "virtual",
         },
 
+        log: {
+          type: "clickhouse",
+          bind: {
+            id: null,
+          },
+
+          table: "",
+        },
+
         pipy: {
           log: {
-            type: "clickhouse",
             bind: {
               id: null,
             },
-
-            table: "",
           },
 
           port: 80,
@@ -839,20 +886,27 @@ export default {
       };
     } else {
       this.icons = {
+        log: "icon-log",
         //pipy: 'icon-pipy',
         prometheus: "icon-prometheus",
         clickhouse: "icon-clickhouse",
         webConsole: "icon-fenxi",
       };
       this.initContent = {
+        log: {
+          type: "clickhouse",
+          bind: {
+            id: null,
+          },
+
+          table: "",
+        },
+
         pipy: {
           log: {
-            type: "clickhouse",
             bind: {
               id: null,
             },
-
-            table: "",
           },
 
           port: 80,
@@ -888,10 +942,10 @@ export default {
       this.payload = {
         name: "",
         id: "",
-        type: this.$isPro ? "pipy" : "prometheus",
+        type: "log",
         content: "",
         json: {},
-        apply:true,
+        apply:false,
         template: null,
       };
       this.renderCallback();
@@ -932,7 +986,6 @@ export default {
       ) {
         if (
           !this.payload.json.log.bind.id ||
-          !this.payload.json.log.table ||
           !this.payload.template
         ) {
           this.$message.error(this.$t("Please set all config"), 3);
@@ -950,17 +1003,14 @@ export default {
     apply(item) {
       this.$gql
         .mutation(
-          `updateFleet(input: $input){fleet{id}}`,
+          `updateFleet(id:${item.id}, data: $data){data{id}}`,
           {
-            input: {
-              where: { id: item.id },
-              data: {
-                apply: true
-              },
+            data: {
+              apply: true
             },
           },
           {
-            input: "updateFleetInput",
+            data: "FleetInput!",
           },
         )
         .then(() => {
@@ -980,7 +1030,8 @@ export default {
       if (
         savedata.type.toLowerCase() == "pipy" ||
         savedata.type.toLowerCase() == "pipy4lb" ||
-        savedata.type.toLowerCase() == "sidecar"
+        savedata.type.toLowerCase() == "sidecar" ||
+        savedata.type.toLowerCase() == "log"
       ) {
         content = _.cloneDeep(savedata.json);
       } else {
@@ -989,24 +1040,23 @@ export default {
       delete savedata.content;
       delete savedata.json;
       delete this.payload.json;
+
       if (this.isEdit) {
         const whereID = savedata.id;
         delete savedata.id;
+        delete savedata.template;
         this.$gql
           .mutation(
-            `updateFleet(input: $input){fleet{id}}`,
+            `updateFleet(id:${whereID}, data: $data){data{id}}`,
             {
-              input: {
-                where: { id: whereID },
-                data: {
-                  content,
-                  ...savedata,
-                },
+              data: {
+                content,
+                ...savedata,
               },
             },
             {
-              input: "updateFleetInput",
-            },
+              data: "FleetInput!",
+            }
           )
           .then(() => {
             this.$message.success(this.$t("Save successfully"), 3);
@@ -1015,18 +1065,19 @@ export default {
           });
       } else {
         delete savedata.id;
+        savedata.apply = this.tabs[savedata.type].length == 0;
         this.$gql
           .mutation(
-            `createFleet(input: $input){fleet{id}}`,
+            `createFleet(data: $data){data{id}}`,
             {
-              input: {
-                data: {
-                  content,
-                  ...savedata,
-                },
+              data: {
+                content,
+                ...savedata,
               },
             },
-            { input: "createFleetInput" },
+            {
+              data: "FleetInput!",
+            }
           )
           .then(() => {
             this.$message.success(this.$t("Created successfully"), 3);
@@ -1052,9 +1103,9 @@ export default {
     setting(index, type, item) {
       this.isEdit = true;
       this.$gql
-        .query(`fleet(id: ${item.id}){id,name,type,apply,content}`)
+        .query(`fleet(id: ${item.id}){data{id,attributes{name,type,apply,content}}}`)
         .then((res) => {
-          this.payload = res;
+          this.payload = res.data;
           this.payload.content = JSON.stringify(item.content);
           this.payload.json = item.content;
           this.payload.template = item.template;
@@ -1065,7 +1116,7 @@ export default {
 
     remove(index, type, item) {
       this.$gql
-        .mutation(`deleteFleet(input:{ where: {id: ${item.id}} }){fleet{id}}`)
+        .mutation(`deleteFleet(id: ${item.id}){data{id}}`)
         .then(() => {
           this.$message.success(this.$t("Deleted successfully"), 3);
           this.loaddata();
@@ -1074,33 +1125,39 @@ export default {
 
     loaddata() {
       this.$gql
-        .query(`fleets(where:{type:"clickhouse"}){id,name,apply,content}`)
+        .query(`fleets(filters:{type:{eq:"log"}}){data{id,attributes{name,apply,content}}}`)
         .then((res) => {
-          this.clickhouses = res;
+          this.logs = res.data;
         });
       this.$gql
-        .query(`templates(where:{type:"sidecars"}){id,name,type,content}`)
+        .query(`fleets(filters:{type:{eq:"clickhouse"}}){data{id,attributes{name,apply,content}}}`)
         .then((res) => {
-          this.templates["sidecar"] = res;
+          this.clickhouses = res.data;
         });
       this.$gql
-        .query(`templates(where:{type:"pipy"}){id,name,type,content}`)
+        .query(`templates(filters:{type:{eq:"sidecars"}}){data{id,attributes{name,type,content}}}`)
         .then((res) => {
-          this.templates["pipy"] = res;
+          this.templates["sidecar"] = res.data;
         });
       this.$gql
-        .query(`templates(where:{type:"pipy4lb"}){id,name,type,content}`)
+        .query(`templates(filters:{type:{eq:"pipy"}}){data{id,attributes{name,type,content}}}`)
         .then((res) => {
-          this.templates["pipy4lb"] = res;
+          this.templates["pipy"] = res.data;
         });
       this.$gql
-        .query(`templates(where:{type:"checkpoint"}){id,name,type,content}`)
+        .query(`templates(filters:{type:{eq:"pipy4lb"}}){data{id,attributes{name,type,content}}}`)
         .then((res) => {
-          this.templates["checkpoint"] = res;
+          this.templates["pipy4lb"] = res.data;
         });
       this.$gql
-        .query(`fleets{id,name,type,content,apply,template{id,name}, status}`)
+        .query(`templates(filters:{type:{eq:"checkpoint"}}){data{id,attributes{name,type,content}}}`)
         .then((res) => {
+          this.templates["checkpoint"] = res.data;
+        });
+      this.$gql
+        .query(`fleets(pagination:{limit: ${this.$DFT_LIMIT}}){data{id,attributes{name,type,content,apply,template{data{id,attributes{name}}}, status}}}`)
+        .then((res) => {
+          this.tabs.log = [];
           if (this.$isPro) {
             this.tabs.pipy = [];
             this.tabs.pipy4lb = [];
@@ -1116,8 +1173,8 @@ export default {
             this.tabs.host = [];
           }
           this.tabs.webConsole = [];
-          if (res) {
-            res.forEach((item) => {
+          if (res.data) {
+            res.data.forEach((item) => {
               if (item.template && item.template.id) {
                 item.template = item.template.id;
               }

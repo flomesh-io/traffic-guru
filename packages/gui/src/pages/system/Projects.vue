@@ -155,7 +155,7 @@ export default {
 
     remove(index, type, item) {
       this.$gql
-        .mutation(`deleteProject(input:{where:{id:${item.id}}}){project{id}}`)
+        .mutation(`deleteProject(id:${item.id}){data{id}}`)
         .then(() => {
           this.$message.success(this.$t("Deleted successfully"), 3);
           this.loaddata();
@@ -190,15 +190,23 @@ export default {
       this.loading = true;
       this.$gql
         .query(
-          `projectsConnection(start: ${this.start}, limit: ${this.pageSize}){values{id,name,organization{id,name},users{id,username},content},aggregate{totalCount}}`
+          `projects(pagination:{start: ${this.start}, limit: ${this.pageSize}}){
+						data{id,attributes{
+							name,
+							organization{data{id,attributes{name}}},
+							users{data{id,attributes{username}}},
+							content
+						}},
+						meta{pagination{total}}
+					}`
         )
         .then((res) => {
-          this.projects = res.values;
-          this.total = res.aggregate.totalCount;
+          this.projects = res.data;
+          this.total = res.pagination.total;
           this.loading = false;
         });
-      this.$gql.query(`organizations{id,name}`).then((res) => {
-        this.orgs = res;
+      this.$gql.query(`organizations{data{id,attributes{name}}}`).then((res) => {
+        this.orgs = res.data;
       });
     },
   },
