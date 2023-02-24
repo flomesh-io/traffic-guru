@@ -158,41 +158,51 @@ module.exports = createCoreService('api::service.service', {
     return serviceDB;
   },
 
-  async createServiceSync(ctx) {
-    const k8s_cluster_id = ctx.request.body.registry || '';
+  async createServiceSync(args, ctx) {
+    const k8s_cluster_id = args.data.registry ||  ctx.koaContext.request.header.schema_id || '';
+    const k8s_cluster_ns = args.data.namespace || ctx.koaContext.request.header.namespace || '';
     const k8s_cluster_type = ctx.koaContext.request.header.schema_type || '';
-    const k8s_cluster_ns = ctx.request.body.namespace || '';
 
     const kc = await strapi.service('api::kubernetes.kubernetes').getKubeConfig(
       k8s_cluster_id,
       k8s_cluster_type
     );
     const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
-
     try {
-      delete ctx.request.body.content.metadata.creationTimestamp;
-      delete ctx.request.body.content.metadata.managedFields;
+      delete args.data.content.metadata.creationTimestamp;
+      delete args.data.content.metadata.managedFields;
     } catch (error) {
       strapi.log.error(error);
     }
-
-    await k8sApi.createNamespacedService(
-      k8s_cluster_ns,
-      ctx.request.body.content
-    );
+    try {
+      await k8sApi.createNamespacedService(
+        k8s_cluster_ns,
+        args.data.content
+      );
+    } catch (error) {
+      strapi.log.error(error?.response?.body)
+      if (error?.response?.body?.message) {
+        throw new Error(error?.response?.body?.message);
+      } else {
+        throw new Error("Failed to deploy to k8s");
+      }
+    }
+    
     const res = await k8sApi.readNamespacedService(
-      ctx.request.body.content.metadata.name,
-      ctx.request.body.content.metadata.namespace
+      args.data.content.metadata.name,
+      args.data.content.metadata.namespace
     );
-    ctx.request.body.content = res.body;
-    const ns = await strapi
-      .query('namespace')
-      .findOne({ registry: k8s_cluster_id, name: k8s_cluster_ns });
-    ctx.request.body.ns = ns?.id;
-    return await strapi.query(type).create(ctx.request.body);
+    args.data.content = res.body;
+    const ns = await strapi.db
+      .query('api::namespace.namespace')
+      .findOne({where: { registry: k8s_cluster_id, name: k8s_cluster_ns }});
+    args.data.ns = ns?.id;
+    args.data.uid = res.body?.metadata?.uid;
+    return await strapi.db.query("api::" + type + "." + type).create(args);
   },
 
-  async deleteServiceSync (ctx) {
+  async deleteServiceSync (args, ctx) {
+    const values = await strapi.db.query("api::" + type + "." + type).findOne({where: { id: args.id }, populate:true});
     const k8s_cluster_id = ctx.koaContext.request.header.schema_id || '';
     const k8s_cluster_type = ctx.koaContext.request.header.schema_type || '';
 
@@ -202,15 +212,16 @@ module.exports = createCoreService('api::service.service', {
     );
     const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 
-    const id = ctx.params.id;
-    const values = await strapi.query(type).findOne({ id: id });
+    try {
+      await k8sApi.deleteNamespacedService(
+        values.content.metadata.name,
+        values.namespace
+      );
+    } catch (error) {
+      strapi.log.error(error?.response?.body)
+    }
 
-    await k8sApi.deleteNamespacedService(
-      values.content.metadata.name,
-      values.namespace
-    );
-
-    return await strapi.query(type).delete({ id: id });
+    return await strapi.db.query("api::" + type + "." + type).delete({where: { id: args.id }});
   },
 
   async deployService() {

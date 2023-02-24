@@ -54,13 +54,13 @@ module.exports = createCoreService('api::ingress.ingress',{
           id
         );
       },
-      async updateIngressSync(args) {
-        const id = args.id;
-        const data = await strapi.db.query("api::" + type + "." + type).findOne({where: { id: id }, populate: true});
-        const ns = await strapi.db.query("api::namespace.namespace").findOne({where: { id: data.namespace.id }, populate: true});
+      async updateIngressSync(args, ctx) {
+        const k8s_cluster_id = args.data.registry ||  ctx.koaContext.request.header.schema_id || '';
+        const k8s_cluster_type = ctx.koaContext.request.header.schema_type || '';
+
         const kc = await await strapi.service('api::kubernetes.kubernetes').getKubeConfig(
-          ns.registry.id,
-          'k8s'
+          k8s_cluster_id,
+          k8s_cluster_type
         );
         const k8sApi = kc.makeApiClient(k8s.NetworkingV1Api);
     
@@ -87,11 +87,10 @@ module.exports = createCoreService('api::ingress.ingress',{
         return await strapi.db.query("api::" + type + "." + type).update({where: {id: args.id}, data: args.data});
       },
     
-      async createIngressSync(args) {
-        const ns = await strapi.db.query("api::namespace.namespace").findOne({where: { id: args.data.namespace }});
-        const k8s_cluster_id = ns.registry.id;
-        const k8s_cluster_ns = ns.name;
-        const k8s_cluster_type = k8s;
+      async createIngressSync(args, ctx) {
+        const k8s_cluster_id = args.data.registry ||  ctx.koaContext.request.header.schema_id || '';
+        const k8s_cluster_ns = args.data.content.metadata.namespace || ctx.koaContext.request.header.namespace || '';
+        const k8s_cluster_type = ctx.koaContext.request.header.schema_type || '';
     
         const kc = await await strapi.service('api::kubernetes.kubernetes').getKubeConfig(
           k8s_cluster_id,
@@ -110,8 +109,12 @@ module.exports = createCoreService('api::ingress.ingress',{
             args.data.content
           );
         } catch (error) {
-          strapi.log.info(error.response.body.message);
-          throw new Error(error.response.body.message);
+          strapi.log.error(error?.response?.body)
+          if (error?.response?.body?.message) {
+            throw new Error(error?.response?.body?.message);
+          } else {
+            throw new Error("Failed to deploy to k8s");
+          }
         }
         const res = await k8sApi.readNamespacedIngress(
           args.data.content.metadata.name,
@@ -119,28 +122,29 @@ module.exports = createCoreService('api::ingress.ingress',{
         );
         args.data.content = res.body;
         args.data.uid = res.body?.metadata?.uid;
-        return await strapi.query(type).create(args.data);
+        return await strapi.db.query("api::" + type + "." + type).create(args);
       },
     
-      async deleteIngressSync(ctx) {
-        const id = ctx.params.id;
-        const data = await strapi.query(type).findOne({ id: id });
+      async deleteIngressSync(args, ctx) {
+        const values = await strapi.db.query("api::" + type + "." + type).findOne({where: { id: args.id }});
+        const k8s_cluster_id = ctx.koaContext.request.header.schema_id || '';
+        const k8s_cluster_type = ctx.koaContext.request.header.schema_type || '';
     
-        const kc = await await strapi.service('api::kubernetes.kubernetes').getKubeConfig(
-          data.namespace.registry,
-          'k8s'
+        const kc = await strapi.service('api::kubernetes.kubernetes').getKubeConfig(
+          k8s_cluster_id,
+          k8s_cluster_type
         );
         const k8sApi = kc.makeApiClient(k8s.NetworkingV1Api);
     
         try {
           await k8sApi.deleteNamespacedIngress(
-            data.content.metadata.name,
-            data.namespace.name
+            values.content.metadata.name,
+            values.content.metadata.namespace
           );
         } catch (error) {
-          strapi.log.info(error.response.body.message);
+          strapi.log.error(error?.response?.body)
         }
     
-        return await strapi.query(type).delete({ id: id });
-      },
+        return await strapi.db.query("api::" + type + "." + type).delete({where: { id: args.id }});
+    },
 });

@@ -51,11 +51,11 @@ module.exports = createCoreController('api::service.service',({ strapi }) => ({
         return await strapi.service('api::service.service').updateServiceSync(args, ctx);
       },
     
-      async createServiceSync(ctx) {
-        return await strapi.service('api::service.service').createServiceSync(ctx);
+      async createServiceSync(args, ctx) {
+        return await strapi.service('api::service.service').createServiceSync(args, ctx);
       },
     
-      async deleteServiceSync(ctx) {
-        return await strapi.service('api::service.service').deleteServiceSync(ctx);
+      async deleteServiceSync(args, ctx) {
+        return await strapi.service('api::service.service').deleteServiceSync(args, ctx);
       },
 }));

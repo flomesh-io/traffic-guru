@@ -163,21 +163,22 @@ module.exports = {
         }
         type Mutation {
 
-          fetchIngresses: Boolean
-          createIngressSync(data: IngressInput): Ingress
-          updateIngressSync(id: ID!, data: IngressInput): IngressEntityResponse
-          deleteIngressSync(data: IngressInput): Ingress
 
           createRoleResourcePermission(data: RolePermissionInput): Int
           updateRoleResourcePermission(id: ID!, data: RolePermissionInput): Int
     
           batchCreateRouterSetting(data: JSON ): JSON
 
+          fetchIngresses: Boolean
+          createIngressSync(data: IngressInput!): IngressEntityResponse
+          updateIngressSync(id: ID!, data: IngressInput): IngressEntityResponse
+          deleteIngressSync(id: ID!): IngressEntityResponse
+
           fetchServices: Boolean
           fetchAllServices: Boolean
-          createServiceSync(data: ServiceInput): Service
+          createServiceSync(data: ServiceInput!): ServiceEntityResponse
           updateServiceSync(id: ID!, data: ServiceInput!): ServiceEntityResponse
-          deleteServiceSync(data: ServiceInput): Service
+          deleteServiceSync(id: ID!): ServiceEntityResponse
 
           loginByCode(data: UsersPermissionsLoginByCodeInput!): UsersPermissionsLoginPayload!
           changePasswordByCode(data: JSON): Boolean
@@ -285,30 +286,6 @@ module.exports = {
 
         },
         Mutation: {
-          
-          fetchIngresses: {
-            async resolve (obj, args, ctx) {
-              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('api::ingress.ingress'), false)
-              const result = await strapi.controller('api::ingress.ingress').fetchIngresses(transformedArgs, ctx);
-              return result;
-            }
-          },
-          updateIngressSync: {
-            async resolve (obj, args, ctx) {
-              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('api::ingress.ingress'))
-              const result = await strapi.controller('api::ingress.ingress').updateIngressSync(transformedArgs, ctx);
-              return entityUtils.toEntityResponse(transformedArgs, 'api::ingress.ingress', result)
-            },
-          },
-          deleteIngressSync: {
-            resolver: 'application::Ingress.Ingress.deleteIngressSync',
-          },
-          createIngressSync: {
-            resolver: 'application::Ingress.Ingress.create',
-            async resolve (obj, args, ctx) {
-              return await strapi.controllers.ingress.createIngressSync(ctx.context);
-            },
-          },
 
           createRoleResourcePermission: {
             async resolve (obj, args, ctx) {
@@ -330,6 +307,35 @@ module.exports = {
             }
           },
 
+          fetchIngresses: {
+            async resolve (obj, args, ctx) {
+              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('api::ingress.ingress'), false)
+              const result = await strapi.controller('api::ingress.ingress').fetchIngresses(transformedArgs, ctx);
+              return result;
+            }
+          },
+          updateIngressSync: {
+            async resolve (obj, args, ctx) {
+              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('api::ingress.ingress'))
+              const result = await strapi.service('api::ingress.ingress').updateIngressSync(transformedArgs, ctx);
+              return entityUtils.toEntityResponse(transformedArgs, 'api::ingress.ingress', result)
+            },
+          },
+          deleteIngressSync: {
+            async resolve (obj, args, ctx) {
+              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('api::ingress.ingress'))
+              const result = await strapi.service('api::ingress.ingress').deleteIngressSync(transformedArgs, ctx);
+              return entityUtils.toEntityResponse(transformedArgs, 'api::ingress.ingress', result)
+            },
+          },
+          createIngressSync: {
+            async resolve (obj, args, ctx) {
+              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('api::ingress.ingress'))
+              const result = await strapi.service('api::ingress.ingress').createIngressSync(transformedArgs, ctx);
+              return entityUtils.toEntityResponse(transformedArgs, 'api::ingress.ingress', result)
+            },
+          },
+
           fetchServices: {
             async resolve (obj, args, ctx) {
               const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel("api::service.service"), true)
@@ -347,15 +353,23 @@ module.exports = {
           updateServiceSync: {
             async resolve (obj, args, ctx) {
               const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('api::service.service'))
-              const result = await strapi.controller('api::service.service').updateServiceSync(transformedArgs, ctx);
+              const result = await strapi.service('api::service.service').updateServiceSync(transformedArgs, ctx);
               return entityUtils.toEntityResponse(transformedArgs, 'api::service.service', result)
             },
           },
           deleteServiceSync: {
-            resolver: 'application::Service.Service.deleteServiceSync',
+            async resolve (obj, args, ctx) {
+              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('api::service.service'))
+              const result = await strapi.service('api::service.service').deleteServiceSync(transformedArgs, ctx);
+              return entityUtils.toEntityResponse(transformedArgs, 'api::service.service', result)
+            },
           },
           createServiceSync: {
-            resolver: 'application::Service.Service.create',
+            async resolve (obj, args, ctx) {
+              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('api::service.service'))
+              const result = await strapi.service('api::service.service').createServiceSync(transformedArgs, ctx);
+              return entityUtils.toEntityResponse(transformedArgs, 'api::service.service', result)
+            },
           },
 
           loginByCode: {

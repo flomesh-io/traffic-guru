@@ -175,7 +175,7 @@ export default {
 
     emitChange(selectedOption) {
       this.$emit("update:namespace", {
-        register: {
+        registry: {
           id: this.k8svalue[0].split(",")[0],
           name: selectedOption.name,
         },

@@ -715,6 +715,7 @@ export default {
       pid: "",
       pjsConfig: "",
       namespace: "",
+      registry: "",
       isMounted: false,
       metrics: [],
       columns,
@@ -763,6 +764,9 @@ export default {
     this.pid = this.$route.params.id || "";
     this.namespace =
       this.$route.params.namespace || localStorage.getItem("NAMESPACE");
+    this.registry =
+      this.$route.params.registry || localStorage.getItem("SCHEMA_ID");
+    console.log(this.registry)
     this.getDefaultPjsConfig();
   },
 
@@ -1043,7 +1047,7 @@ export default {
     getServices() {
       this.selectorLoading = true;
       const filters = {
-        namespace: {id: { eq: this.detail.namespace.name }},
+        namespace: { eq: this.detail.namespace.name },
         registry: {id: { eq: this.detail.namespace.registry.id }},
       };
       this.$gql
@@ -1060,7 +1064,7 @@ export default {
 						meta{pagination{total}}
 					}`,
           { 
-            filters,pagination
+            filters
           },{
             filters: "ServiceFiltersInput",
             pagination: "PaginationArg",
@@ -1131,6 +1135,7 @@ export default {
               data: {
                 name: this.detail.name,
                 namespace: this.detail.namespace.id,
+                registry: this.registry,
                 content: savedata,
               },
             },
@@ -1141,6 +1146,12 @@ export default {
             this.$closePage(this.$route);
           });
       } else {
+        console.log({
+          name: this.detail.name,
+          content: savedata,
+          namespace: this.detail.namespace.id,
+          registry: this.registry
+        })
         this.$gql
           .mutation(
             `createIngressSync(data: $data){data{id}}`,
@@ -1149,9 +1160,10 @@ export default {
                 name: this.detail.name,
                 content: savedata,
                 namespace: this.detail.namespace.id,
+                registry: this.registry
               },
             },
-            { data: "IngressInput" },
+            { data: "IngressInput!" },
           )
           .then((res) => {
             this.pid = res.data.id;

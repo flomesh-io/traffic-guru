@@ -48,7 +48,7 @@ module.exports = {
       query.where["namespace"] = iNS.namespaces.map((e) => e.id)
     }
     const dbDatas = await strapi.db.query("api::" + type + "." + type).findMany(query);
-
+    
     for (const item of res.body.items) {
       const dbData = dbDatas.find((a) => {
         return a.uid == item.metadata.uid;

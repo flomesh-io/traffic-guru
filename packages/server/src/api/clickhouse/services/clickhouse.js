@@ -124,7 +124,6 @@ module.exports = createCoreService('api::clickhouse.clickhouse', {
         });
       }
 
-      console.log(queryTable,urlQueryTable)
       if (response.data == 0) {
         const ddl = fs.readFileSync(`${__dirname}/log.ddl`, 'utf8');
 
