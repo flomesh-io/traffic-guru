@@ -1,7 +1,7 @@
 
 module.exports = ({ env }) => ({
   connection: {
-    client: env('DATABASE_TYPE', 'mysql'),
+    client: env('DATABASE_TYPE', 'mysql') == 'default' ? 'mysql' : env('DATABASE_TYPE', 'mysql'),
     connection: {
       host: env('DATABASE_HOST', '127.0.0.1'),
       port: env.int('DATABASE_PORT', 5432),
