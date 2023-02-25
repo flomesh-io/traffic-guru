@@ -1,4 +1,5 @@
 <template>
+  {{ themeVal }}
   <svg
     @click="toggleTheme"
     v-if="themeVal == 'light'"
@@ -192,6 +193,7 @@ export default {
   data() {
     return {
       themeVal:'',
+      isInit:false,
       copyConfig: 'Sorry, you have copied nothing O(∩_∩)O~',
       isDev: false
     }
@@ -219,14 +221,18 @@ export default {
         if(localSetting && localSetting.theme){
           this.themeVal = localSetting.theme.mode;
         } else {
-          this.themeVal = 'light';
+          this.themeVal = process.env.VUE_APP_THEME;
+          if(!this.isInit){
+            this.isInit = true;
+            this.setTheme({...this.theme, mode: this.getThemeMode(this.themeVal)});
+          }
         }
       },
 
       immediate:true,
     }
   },
-	
+
   methods: {
     getThemeMode(d) {
       if(d == 'light' || d == 'night'){
@@ -282,16 +288,16 @@ export default {
       let config = {}
       let mySetting = this.$store.state.setting
       if(mySetting && mySetting.theme){
-        mySetting.theme.mode = this.themeVal;
+        mySetting.theme.mode = this.getThemeMode(this.themeVal);
       }
       let dftSetting = local ? deepMerge(setting, sysConfig) : setting
       Object.keys(mySetting).forEach(key => {
         const dftValue = dftSetting[key], myValue = mySetting[key]
-        if (dftValue != undefined && !fastEqual(dftValue, myValue)) {
+        if (dftValue != undefined && !fastEqual(dftValue, myValue) || key == 'theme') {
           config[key] = myValue
         }
       })
-      return config
+      return this.themeVal == "auto" ? {} : config;
     },
 
     ...mapMutations('setting', ['setTheme', 'setLayout', 'setMultiPage', 'setWeekMode',
