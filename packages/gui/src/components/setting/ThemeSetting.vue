@@ -1,5 +1,4 @@
 <template>
-  {{ themeVal }}
   <svg
     @click="toggleTheme"
     v-if="themeVal == 'light'"
@@ -217,7 +216,7 @@ export default {
         const localSettingStr = localStorage.getItem(
           process.env.VUE_APP_SETTING_KEY,
         );
-        const localSetting = JSON.parse(localSettingStr);
+        const localSetting = localSettingStr?JSON.parse(localSettingStr):null;
         if(localSetting && localSetting.theme){
           this.themeVal = localSetting.theme.mode;
         } else {
@@ -288,7 +287,7 @@ export default {
       let config = {}
       let mySetting = this.$store.state.setting
       if(mySetting && mySetting.theme){
-        mySetting.theme.mode = this.getThemeMode(this.themeVal);
+        mySetting.theme.mode = this.themeVal;
       }
       let dftSetting = local ? deepMerge(setting, sysConfig) : setting
       Object.keys(mySetting).forEach(key => {
@@ -297,7 +296,7 @@ export default {
           config[key] = myValue
         }
       })
-      return this.themeVal == "auto" ? {} : config;
+      return config;
     },
 
     ...mapMutations('setting', ['setTheme', 'setLayout', 'setMultiPage', 'setWeekMode',

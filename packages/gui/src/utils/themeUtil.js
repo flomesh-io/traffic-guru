@@ -86,11 +86,14 @@ function getLocalSetting(loadTheme) {
     const localSettingStr = localStorage.getItem(
       process.env.VUE_APP_SETTING_KEY,
     );
-    localSetting = JSON.parse(localSettingStr);
+    localSetting = localSettingStr ? JSON.parse(localSettingStr) : null;
   } catch (e) {
     console.error(e);
   }
-	if(localSetting && localSetting.theme && localSetting.theme.mode == "auto"){
+	if((localSetting && localSetting.theme && localSetting.theme.mode == "auto") || !localSetting){
+		if(!localSetting){
+			localSetting = {theme:{mode:'light'}};
+		}
 		if (window.matchMedia && 
 				window.matchMedia('(prefers-color-scheme: dark)').matches ) {
 			localSetting.theme.mode = "night"
