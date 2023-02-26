@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traffic-guru
+  labels:
+    {{- include "traffic-guru.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "traffic-guru.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "traffic-guru.labels" . | nindent 8 }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{- include "traffic-guru.imageName" .}}:{{- include "traffic-guru.tag" .}}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: HOST
+            value: '::'
+          - name: PIPY_REPO_HOST
+            value: localhost
+          - name: PIPY_REPO_PORT
+            value: "6060"
+          - name: PORT
+            value: "8080"
+          {{- range $k, $v := .Values.gui.env }}
+          - name: {{$k}}
+            value: {{$v}}
+          {{- end }}
+          - name: COMPONENT_PROMETHEUS_HOST
+            value: {{ include "traffic-guru.prometheusHost" . | quote }}           
+          envFrom:
+          - secretRef:
+              name: traffic-guru-db-cred
+          - secretRef:
+              name: traffic-guru-ch-cred              
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 5
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 10
+            failureThreshold: 18
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+        - name: pipy-repo
+          image: "{{- include "pipyRepo.imageName" .}}:{{ .Values.pipyRepo.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+          - pipy
+          ports:
+            - name: http
+              containerPort: 6060
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /api/v1/repo
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /api/v1/repo
+              port: http
+          resources:
+            {{- toYaml .Values.pipyRepo.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
