@@ -100,9 +100,9 @@ Return the Prometheus Hostname
 */}}
 {{- define "traffic-guru.prometheusHost" -}}
 {{- if .Values.prometheus.enabled }}
-    {{- printf "http://%s:%s" (include "traffic-guru.prometheus.fullname" .) .Values.externalPrometheus.port -}}
+    {{- printf "http://%s:%d" (include "traffic-guru.prometheus.fullname" .) (.Values.externalPrometheus.port | int ) -}}
 {{- else -}}
-    {{- printf "%s:%s" .Values.externalPrometheus.host .Values.externalPrometheus.port -}}
+    {{- printf "%s:%d" .Values.externalPrometheus.host (.Values.externalPrometheus.port | int ) -}}
 {{- end -}}
 {{- end -}}
 

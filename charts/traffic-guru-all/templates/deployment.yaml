@@ -41,21 +41,13 @@ spec:
           - name: {{$k}}
             value: {{$v}}
           {{- end }}
-          - name: COMPONENT_CLICKHOUSE_HOST
-            value: "{{ .Release.Name}}-clickhouse"
-          - name: COMPONENT_CLICKHOUSE_PORT
-            value: "8123"
-          - name: COMPONENT_CLICKHOUSE_DATABASE
-            value: "default"            
-          - name: COMPONENT_CLICKHOUSE_USER
-            value: {{ .Values.clickhouse.auth.username | quote }}
-          - name: COMPONENT_CLICKHOUSE_PASSWORD
-            value: {{ .Values.clickhouse.auth.password | quote }} 
           - name: COMPONENT_PROMETHEUS_HOST
             value: {{ include "traffic-guru.prometheusHost" . | quote }}           
           envFrom:
           - secretRef:
               name: traffic-guru-db-cred
+          - secretRef:
+              name: traffic-guru-ch-cred              
           ports:
             - name: http
               containerPort: 8080
