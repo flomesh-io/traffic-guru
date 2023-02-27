@@ -5,10 +5,7 @@ set -e
 HOST_IP=$(if [ "$(uname)" == "Darwin" ]; then ipconfig getifaddr en0; else ip -o route get to 8.8.8.8 | sed -n 's/.*src \([0-9.]\+\).*/\1/p'; fi) 
 kubeconfig_guru=${KUBECONFIG_GURU:-"guru.kubeconfig"}
 API_PORT=6443
-DB_USER="flomesh"
-DB_PWD="Flomesh1234"
-DB_NAME="flomesh"
-TRAFFIC_GURU_VERSION=${TRAFFIC_GURU_VERSION:-"0.0.7-11"}
+TRAFFIC_GURU_VERSION=${TRAFFIC_GURU_VERSION:-"latest"}
 CLUSTER_NAME=${CLUSTER_NAME:-"traffic-guru"}
 NODE_PORT=${NODE_PORT:-30000}
 KUBE="kubectl --kubeconfig ${kubeconfig_guru}"
@@ -64,38 +61,12 @@ function create_cluster() {
     --wait
 }
 
-function install_deps() {
-   echo "installing mysql database"
-   helm repo add bitnami https://charts.bitnami.com/bitnami
-   helm install --kubeconfig ${kubeconfig_guru} mysql bitnami/mysql  --namespace mysql --create-namespace  \
-    --set auth.database=${DB_NAME} \
-    --set auth.username=${DB_USER} \
-    --set auth.password=${DB_PWD} \
-    --set auth.rootPassword=root
-
-   wait_for_pods "mysql"
-
-   echo "installing clickhouse server"
-   helm repo add bitnami https://charts.bitnami.com/bitnami
-   helm install --kubeconfig ${kubeconfig_guru} clickhouse bitnami/clickhouse --namespace click-house --create-namespace \
-    --set auth.username=flomesh \
-    --set auth.password=password \
-    --set shards=1 \
-    --set replicaCount=1 \
-    --set zookeeper.enabled=false
-
-   wait_for_pods "click-house"
-}
-
 function install_traffic_guru() {
     echo "installing traffic guru"
     helm repo add flomesh https://flomesh-io.github.io/helm-charts
-    helm install --kubeconfig ${kubeconfig_guru} traffic-guru flomesh/traffic-guru --namespace traffic-guru --create-namespace \
+    helm repo update
+    helm install --kubeconfig ${kubeconfig_guru} traffic-guru flomesh/traffic-guru-all --namespace traffic-guru --create-namespace \
         --set gui.tag=${TRAFFIC_GURU_VERSION} \
-        --set database.host=mysql.mysql.svc.cluster.local \
-        --set database.port=3306 \
-        --set database.username=${DB_USER} \
-        --set database.password=${DB_PWD} \
         --set service.type=NodePort
 
     wait_for_pods "traffic-guru"
@@ -118,33 +89,15 @@ function login() {
     fi
 }
 
-function add_component() {
-    RET=$(curl --silent -X POST -H "Content-Type: application/json" \
-           -H "Authorization: Bearer $JWT" \
-           -d '{"query":"mutation($input: createFleetInput){createFleet(input: $input){fleet{id}}}","variables":{"input":{"data":{"content":{"host":"clickhouse.click-house.svc.cluster.local","port":8123,"user":"flomesh","password":"password","database":"default"},"name":"clickhouse","type":"clickhouse","apply":true,"template":null}}}}' \
-           http://$HOST_IP:$NODE_PORT/graphql
-    )
-    RESP=$(echo $RET | jq '.data.createFleet.fleet.id')
-    if [ "$RESP" == "null" ]; then
-      RESP=""
-    fi
-    if [ ! -z "$RESP" ]; then
-      echo "Clickhouse component added with id $RESP"
-    else
-      echo "Unable to add Clickhouse component. Please add that manually"
-       echo $RET | jq
-    fi
-}
-
 function add_registry() {
     config=$(<${kubeconfig_guru})
     config="${config//$'\n'/"\n"}"
     RET=$(curl --silent -X POST http://$HOST_IP:$NODE_PORT/graphql \
            -H "Content-Type: application/json" \
            -H "Authorization: Bearer $JWT" \
-           -d '{"query":"mutation($input: createRegistryInput){createRegistry(input: $input){registry{id}}}","variables":{"input":{"data":{"organization":null,"type":"k8s","name":"guru-cluster","config":"'"$config"'","content":{"credit":"","autoUpstream":false,"autoApplication":false,"isGateway":false,"gatewayPath":"","gatewayPort":0},"address":""}}}}' 
+           -d '{"query":"mutation($data: RegistryInput!){createRegistry(data: $data){data{id}}}","variables":{"data":{"organization":null,"type":"k8s","name":"guru-cluster","config":"'"$config"'","content":{"credit":"","autoUpstream":false,"autoApplication":false,"isGateway":false,"gatewayPath":"","gatewayPort":0},"address":""}}}'
     )
-    RESP=$(echo $RET | jq '.data.createRegistry.registry.id' )
+    RESP=$(echo $RET | jq '.data.createRegistry.data.id' )
     if [ "$RESP" == "null" ]; then
       RESP=""
     fi
@@ -182,9 +135,6 @@ if $INSTALL; then
     sleep 5
     wait_for_pods "kube-system"
 
-    # install dependent services
-    install_deps
-
     # install traffic guru
     install_traffic_guru
 
@@ -196,9 +146,6 @@ if $INSTALL; then
 
     echo "Trying Logging in with demo credentials"
     login
-
-    echo "Adding Clickhouse component"
-    add_component
 
     echo "Adding Registry"
     add_registry
