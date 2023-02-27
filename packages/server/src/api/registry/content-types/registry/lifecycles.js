@@ -5,7 +5,6 @@ const YAML = require('yaml');
 module.exports = {
   beforeDelete: async (event) => {
     const { params } = event;
-    // strapi.log.debug("registry::beforeDelete --> result = " + JSON.stringify(params));
     try {
       // Delete namespaces of the registry
       const nsList = await strapi.db.query('api::namespace.namespace').findMany({
@@ -54,9 +53,9 @@ module.exports = {
     strapi.log.debug("registry::beforeCreate --> data.address = " + JSON.stringify(data.address));
     if (process.env.APP_VERSION && process.env.APP_VERSION == 'free') {
       const registry = await strapi.service('api::registry.registry').find();
-      if (registry.length > 2) {
+      if (registry.length > 4) {
         throw new Error(
-          `The current free version can only add three registries, please upgrade to pro version`
+          `The current free version can only add five registries, please upgrade to pro version`
         );
       }
     }
@@ -91,17 +90,9 @@ module.exports = {
   },
   afterCreate: async (event) => {
     const { result } = event;
-    // strapi.log.debug("registry::afterCreate --> params = " + JSON.stringify(params));
-    // strapi.log.debug("registry::afterCreate --> result = " + JSON.stringify(result));
     if (result.type == 'k8s') {
       strapi.log.debug('fetch k8s namespace');
       await strapi.service('api::registry.registry').fetchK8sNamespace(result);
-      // TODO::V3-->V4
-      // try {
-      //   await strapi.service('api::registry.registry').initK8sMetrics(result);
-      // } catch (error) {
-      //   strapi.log.error(error)
-      // }
     } else if (result.type == 'eureka') {
       strapi.service('api::registry.registry').fetchEurekaServices(result);
     } else {
@@ -114,8 +105,6 @@ module.exports = {
       try {
         strapi.log.info('fetch k8s namespace');
         await strapi.service('api::registry.registry').fetchK8sNamespace(result);
-        // TODO::V3-->V4
-        // await strapi.service('api::registry.registry').initK8sMetrics(result);
       } catch (error) {
         strapi.log.error(error)
       }

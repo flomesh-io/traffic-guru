@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.15.1",
+    "@strapi/provider-email-nodemailer": "^4.1.7",
     "get-ip-range": "^4.0.1",
     "atomic-sleep": "^1.0.0",
     "axios": "^0.26.0",

@@ -5,29 +5,10 @@ const k8s = require('@kubernetes/client-node');
 module.exports = {
   afterCreate: (event) => {
     const { result, params } = event;
-    // strapi.log.debug("namespace::afterCreate --> params = " + JSON.stringify(params));
-    // strapi.log.debug("namespace::afterCreate --> result = " + JSON.stringify(result));
     if (params.data.regType == 'k8s') {
       strapi.log.debug('-- fetch k8s service --');
       strapi.service('api::namespace.namespace').fetchK8sService(result, params.data.regData);
 
-      // 暂时注释：考虑从K8S获取namespace的情况，不需要又反向到k8s创建
-      // const kc = await strapi.services.kubernetes.getKubeConfig(
-      //   result.registry.id,
-      //   'k8s'
-      // );
-      // const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
-      // const body = {
-      //   kind: 'Namespace',
-      //   apiVersion: 'v1',
-      //   metadata: {
-      //     name: result.name,
-      //     labels: {
-      //       name: result.name,
-      //     },
-      //   },
-      // };
-      // k8sApi.createNamespace(body);
     } else {
       // TODO
       strapi.log.debug('-- fetch xxx service --');

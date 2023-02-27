@@ -89,6 +89,38 @@ module.exports = {
       }
     }
 
+    // remove config cache file
+    if (event.result.type === 'kubernetes') {
+      const path = require('path');
+      const os = require('os');
+      const fs = require('fs');
+      const util = require('util');
+      const KUBE_CONFIG_DIR = path.join(os.tmpdir());
+      const kubeconfigPath = path.join(
+        KUBE_CONFIG_DIR,
+        `${event.result.id}.kubeconfig`
+      );
+      try {
+        const fsOpenAsync = util.promisify(fs.open);
+        await fsOpenAsync(kubeconfigPath);
+        fs.unlinkSync(kubeconfigPath);
+        strapi.log.debug(kubeconfigPath);
+      } catch (err) { }
+    }
+    // if (event.result.type === 'pipy') {
+    //   const apis = await strapi.db
+    //     .query('api::api.api')
+    //     .findMany({ where: { pipy: event.result.id }, limit: 99999 });
+    //   strapi.log.info('deploy all api ', apis.length);
+    //   if (apis.length > 0) {
+    //     for (const api of apis) {
+    //       if (api.step === 2) {
+    //         await strapi.service("api::api.api").deploy(api);
+    //       }
+    //     }
+    //   }
+    // }
+
 
   },
   afterDelete: async (event) => {

@@ -110,7 +110,6 @@ module.exports = createCoreService('api::registry.registry', {
     const k8sApi = await this.getK8sApi(data.config);
     try {
       await k8sApi.listNamespace();
-      // strapi.log.debug("nsList == " +  JSON.stringify(nsList));
       return {
         isOK: true,
         status: 1,

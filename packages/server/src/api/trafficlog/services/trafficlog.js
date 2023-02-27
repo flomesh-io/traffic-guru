@@ -9,7 +9,7 @@ const { createCoreService } = require('@strapi/strapi').factories;
 module.exports = createCoreService('api::trafficlog.trafficlog',{
     async getErrStatusAlarms(scaleTime) {
         const alarms = [];
-        const errStatusLogs = await strapi.services.clickhouse.query(`
+        const errStatusLogs = await strapi.service("api::clickhouse.clickhouse").query(`
           SELECT x_parameters.aid, toString(toDateTime(reqTime/1000)), res.status
           FROM log
           WHERE timestamp > toDateTime(toUnixTimestamp(now64())-${scaleTime})
