@@ -96,6 +96,8 @@ spec:
               path: /healthz
               port: 9091
           env:
+            - name: CONTROLLER_SVC_NAME
+              value: osm-controller
             # The INJECTOR_POD_NAME env variable sets pod name dynamically, used by osm-injector to register events
             - name: INJECTOR_POD_NAME
               valueFrom:

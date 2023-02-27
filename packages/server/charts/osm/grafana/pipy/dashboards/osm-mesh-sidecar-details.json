@@ -122,7 +122,9 @@
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": {
-          "calcs": ["last"],
+          "calcs": [
+            "last"
+          ],
           "values": false
         }
       },
@@ -685,7 +687,9 @@
       "options": {
         "reduceOptions": {
           "values": false,
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": ""
         },
         "orientation": "auto",
@@ -744,7 +748,9 @@
       "options": {
         "reduceOptions": {
           "values": false,
-          "calcs": ["lastNotNull"],
+          "calcs": [
+            "lastNotNull"
+          ],
           "fields": ""
         },
         "orientation": "auto",
@@ -1421,7 +1427,9 @@
         "current": {
           "selected": true,
           "text": "All",
-          "value": ["$__all"]
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": "${DS_PROMETHEUS}",
         "definition": "label_values(osm_proxy_connect_count, source_pod_name)",
@@ -1447,7 +1455,9 @@
         "current": {
           "selected": true,
           "text": "All",
-          "value": ["$__all"]
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": "${DS_PROMETHEUS}",
         "definition": "label_values(osm_cert_issued_count, source_pod_name)",
@@ -1499,7 +1509,9 @@
         "current": {
           "selected": true,
           "text": "All",
-          "value": ["$__all"]
+          "value": [
+            "$__all"
+          ]
         },
         "datasource": "${DS_PROMETHEUS}",
         "definition": "label_values(osm_error_err_code_count, err_code)",

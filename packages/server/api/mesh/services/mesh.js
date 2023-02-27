@@ -49,6 +49,12 @@ module.exports = {
   async osmInstall(result) {
     if (!result.options) return;
 
+    const kc = await strapi.services.kubernetes.getKubeConfig(
+      result.namespace.registry,
+      'k8s'
+    );
+    const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
+    
     if (!result.options.osm.remoteLogging.address) {
       const ch = await strapi
         .query('fleet')
@@ -67,6 +73,17 @@ module.exports = {
         ch.content.user + ':' + ch.content.password
       ).toString('base64');
       result.options.osm.remoteLogging.authorization = 'Basic ' + base64Str;
+
+      if (result.mcsEnable) {
+        result.options.osm.localDNSProxy.enable=true
+
+        const res = await k8sApi.listNamespacedService(
+          "kube-system", null, null, null, null, "k8s-app=kube-dns"
+        );
+        if (res.body.items.length) {
+          result.options.osm.localDNSProxy.primaryUpstreamDNSServerIPAddr = res.body.items[0].spec.clusterIP
+        }
+      }
     }
 
     const registry = await strapi
@@ -129,7 +146,7 @@ module.exports = {
     });
 
     if (result.mcsEnable) {
-      let helmFsmCmd = `helm repo add fsm https://charts.flomesh.io && helm install --namespace ${result.namespace.name} --kubeconfig ${kubeconfigPath} --set fsm.logLevel=5 --version=0.2.0-beta.3 fsm fsm/fsm --create-namespace`;
+      let helmFsmCmd = `helm repo add fsm https://charts.flomesh.io && helm install --namespace ${result.namespace.name} --kubeconfig ${kubeconfigPath} --set fsm.logLevel=5 --version=0.2.0 fsm fsm/fsm --create-namespace`;
 
       if (result.timeout) {
         helmFsmCmd += ' --timeout ${result.timeout}';
@@ -137,7 +154,6 @@ module.exports = {
       if (result.atomic) {
         helmFsmCmd += ' --atomic';
       }
-
       exec(helmFsmCmd, function (error, stdout, stderr) {
         strapi.log.info(error, stdout, stderr, __dirname);
         if (error) {
@@ -150,19 +166,11 @@ module.exports = {
         }
 
          const addCluster = async () => {
-          const kc = await strapi.services.kubernetes.getKubeConfig(
-            result.namespace.registry,
-            'k8s'
-          );
-          const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
           const res = await k8sApi.readNamespacedService(
             'fsm-ingress-pipy-controller',
             result.namespace.name
           );
           const name = "cluster" + registry.id;
-          const ca = registry.content.certificate;
-          const token = registry.content.credit;
-          const server = registry.address;
           const cluster = {
             apiVersion: 'flomesh.io/v1alpha1',
             kind: 'Cluster',
@@ -172,7 +180,7 @@ module.exports = {
             spec: {
               gatewayHost: res.body.status.loadBalancer.ingress[0].ip,
               gatewayPort: res.body.spec.ports[0].port,
-              kubeconfig: `apiVersion: v1\nclusters:\n- cluster:\n    certificate-authority-data: ${ca}\n    server: ${server}\n  name: fsm-${name}\ncontexts:\n- context:\n    cluster: fsm-${name}\n    user: admin@fsm-${name}\n  name: fsm-${name}\ncurrent-context: fsm-${name}\nkind: Config\npreferences: {}\nusers:\n- name: admin@fsm-${name}\n  user:\n    token: ${token}`,
+              kubeconfig: registry.config,
             },
           };
       

@@ -9,7 +9,7 @@ rules:
     resources: ["daemonsets", "deployments", "replicasets", "statefulsets"]
     verbs: ["list", "get", "watch"]
   - apiGroups: ["networking.k8s.io"]
-    resources: ["ingresses"]
+    resources: ["ingresses", "ingressclasses"]
     verbs: ["list", "get", "watch"]
   - apiGroups: ["batch"]
     resources: ["jobs"]
@@ -62,6 +62,19 @@ rules:
     verbs: ["list", "get", "watch"]
   - apiGroups: ["policy.openservicemesh.io"]
     resources: ["ingressbackends/status", "accesscontrols/status", "accesscerts/status", "upstreamtrafficsettings/status"]
+    verbs: ["update"]
+
+  # FSM's custom resource API
+  - apiGroups: ["flomesh.io"]
+    resources: ["serviceexports", "serviceimports", "globaltrafficpolicies"]
+    verbs: ["list", "get", "watch"]
+
+  # OSM Edge's custom plugin API
+  - apiGroups: ["plugin.flomesh.io"]
+    resources: ["plugins", "pluginchains", "pluginconfigs"]
+    verbs: ["list", "get", "watch"]
+  - apiGroups: ["plugin.flomesh.io"]
+    resources: ["plugins/status", "pluginchains/status", "pluginconfigs/status"]
     verbs: ["update"]
 
   # Used for interacting with cert-manager CertificateRequest resources.

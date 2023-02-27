@@ -89,6 +89,36 @@ module.exports = async () => {
         .create(adminUser);
     }
 
+    // init components
+    const envs = process.env
+    const components = {}
+    const componentsTypes = ["clickhouse","prometheus"]
+    for (const env in envs) {
+      const keys = env.toLowerCase().split("_")
+      if (keys.length == 3 && keys[0] == "component" && componentsTypes.indexOf(keys[1]) > -1) {
+        if (!components[keys[1]]) {
+          components[keys[1]] = {}
+        }
+        components[keys[1]][keys[2]] = envs[env]
+      }
+    }
+    for (const component in components) {
+      const dbComponent = await strapi
+        .query('fleet')
+        .findOne({name: component});
+      if (!dbComponent) {
+        try {
+          strapi.log.info("init component: " + component)
+          await strapi
+            .query('fleet')
+            .create({name: component,  type: component, content: components[component]});
+        } catch (error) {
+          strapi.log.error(error)
+        }
+      }
+    }
+
+
     const clickhouses = await strapi
       .query('fleet')
       .find({ type: 'clickhouse' });
@@ -100,6 +130,7 @@ module.exports = async () => {
         .query('fleet')
         .update({ type: 'clickhouse' }, { apply: true, type: 'clickhouse' });
     }
+
   };
 
   await initDBData();

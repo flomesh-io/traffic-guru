@@ -18,6 +18,13 @@ module.exports = {
 
   async refresh(ctx) {
     const result = await strapi.controllers.registry.update(ctx);
+    try {
+      ctx.headers.schema_id = ctx.request.body.input.where.id;
+      ctx.headers.namespace = '_all';
+      ctx.headers.schema_type = 'k8s';
+      await strapi.services.service.fetchServices(ctx);
+    } catch {
+    }
     return {
       registry: result,
     };

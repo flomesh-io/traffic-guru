@@ -107,6 +107,12 @@ module.exports = {
             name: item.metadata.namespace,
           });
           data.namespace = ns.id;
+        } else if (type == 'service') {
+          const ns = await strapi.query('namespace').findOne({
+            registry: k8s_cluster_id,
+            name: item.metadata.namespace,
+          });
+          data.ns = ns.id;
         }
 
         await strapi.query(type).create(data);
@@ -121,10 +127,11 @@ module.exports = {
     }
 
     const json = YAML.parse(reg.config)
-    const cluster = json.clusters.find((e) => e.name == json['current-context']);
-    const user = json.users.find((e) => e.name == json['current-context']);
+    const context = json.contexts.find((e) => e.name == json['current-context']);
+    const cluster = json.clusters.find((e) => e.name == context.context.cluster);
+    const user = json.users.find((e) => e.name == context.context.user);
 
-    if (user.user.token) {
+    if (user?.user?.token) {
       return axios.create({
         httpsAgent: new https.Agent({ rejectUnauthorized: false }),
         baseURL: cluster.cluster.server,
