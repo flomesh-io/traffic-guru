@@ -55,6 +55,7 @@ To disable the dependency during installation, set `mariadb.enabled`, `clickhous
 helm install traffic-guru flomesh/traffic-guru \
     --namespace flomesh \
     --create-namespace \
+    --set=mariadb.enabled=false \
     --set=externalDatabase.host=<db addr> \
     --set=externalDatabase.port=<db port> \
     --set=externalDatabase.user=<db user> \
@@ -67,6 +68,7 @@ helm install traffic-guru flomesh/traffic-guru \
 helm install traffic-guru flomesh/traffic-guru \
     --namespace flomesh \
     --create-namespace \
+    --set=mariadb.enabled=false \
     --set=externalDatabase.type=postgres \
     --set=externalDatabase.host=<db addr> \
     --set=externalDatabase.port=<db port> \

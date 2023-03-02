@@ -89,7 +89,7 @@ Return the MariaDB Secret Name
         {{- printf "%s" (include "traffic-guru.mariadb.fullname" .) -}}
     {{- end -}}
 {{- else if .Values.externalDatabase.password -}}
-    {{- printf "%s" .Values.externalDatabase.existingSecret -}}
+    {{- printf "%s" .Values.externalDatabase.password -}}
 {{- else -}}
     {{- printf "%s-externaldb" (include "traffic-guru.mariadb.fullname" .) -}}
 {{- end -}}
