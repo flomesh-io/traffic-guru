@@ -1,0 +1,9 @@
+dependencies:
+- name: mariadb
+  repository: https://charts.bitnami.com/bitnami
+  version: 11.5.0
+- name: clickhouse
+  repository: https://charts.bitnami.com/bitnami
+  version: 3.0.2
+digest: sha256:825b1bcd3722c878c4d8fa61ea58531c9450189dbcb3f4f1b841af11c002133c
+generated: "2023-03-01T18:14:44.407714497+08:00"

@@ -2,11 +2,11 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: trafficguru-prometheus-server-conf
+  name: traffic-guru-prometheus-server-conf
   namespace: {{ .Release.Namespace | quote }}
   labels:
     {{- include "traffic-guru.labels" . | nindent 4 }}
-    name: trafficguru-prometheus-server-conf
+    name: traffic-guru-prometheus-server-conf
 data:
   prometheus.yml: |
     global:
