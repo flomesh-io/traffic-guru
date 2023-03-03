@@ -59,7 +59,8 @@ helm install traffic-guru flomesh/traffic-guru \
     --set=externalDatabase.host=<db addr> \
     --set=externalDatabase.port=<db port> \
     --set=externalDatabase.user=<db user> \
-    --set=externalDatabase.password=<db password>
+    --set=externalDatabase.password=<db password> \
+    --set=externalDatabase.database=<database>
 ```
 
 ## PostgreSQL
@@ -73,7 +74,8 @@ helm install traffic-guru flomesh/traffic-guru \
     --set=externalDatabase.host=<db addr> \
     --set=externalDatabase.port=<db port> \
     --set=externalDatabase.user=<db user> \
-    --set=externalDatabase.password=<db password>
+    --set=externalDatabase.password=<db password> \
+    --set=externalDatabase.database=<database>
 ```
 
 _See [helm dependency](https://helm.sh/docs/helm/helm_dependency/) for command documentation._
