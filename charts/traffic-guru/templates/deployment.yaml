@@ -16,7 +16,8 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "traffic-guru.selectorLabels" . | nindent 8 }}
+        {{- include "traffic-guru.labels" . | nindent 8 }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -40,9 +41,13 @@ spec:
           - name: {{$k}}
             value: {{$v}}
           {{- end }}
+          - name: COMPONENT_PROMETHEUS_HOST
+            value: {{ include "traffic-guru.prometheusHost" . | quote }}           
           envFrom:
           - secretRef:
               name: traffic-guru-db-cred
+          - secretRef:
+              name: traffic-guru-ch-cred              
           ports:
             - name: http
               containerPort: 8080

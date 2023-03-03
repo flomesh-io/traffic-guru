@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: trafficguru-prometheus
+  name: traffic-guru-prometheus
   namespace: {{ .Release.Namespace | quote }}
   labels:
     {{- include "traffic-guru.labels" . | nindent 4 }}
@@ -12,13 +12,13 @@ spec:
     type: Recreate
   selector:
     matchLabels:
-      app: trafficguru-prometheus
+      app: traffic-guru-prometheus
   template:
     metadata:
       labels:
         {{- include "traffic-guru.labels" . | nindent 8 }}
         app.kubernetes.io/component: prometheus
-        app: trafficguru-prometheus
+        app: traffic-guru-prometheus
     spec:
       {{- if not (.Capabilities.APIVersions.Has "security.openshift.io/v1") }}
       {{- include "restricted.securityContext" . | nindent 6 }}
@@ -46,12 +46,12 @@ spec:
           name: prometheus-config-volume
         - mountPath: /prometheus/
           name: prometheus-storage-volume
-      serviceAccountName: trafficguru-prometheus
+      serviceAccountName: traffic-guru-prometheus
       volumes:
       - name: prometheus-config-volume
         configMap:
           defaultMode: 420
-          name: trafficguru-prometheus-server-conf
+          name: traffic-guru-prometheus-server-conf
       - name: prometheus-storage-volume
         emptyDir: {}
       {{- if .Values.prometheus.affinity }}

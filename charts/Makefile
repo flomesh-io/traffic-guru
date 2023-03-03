@@ -1,12 +1,15 @@
 HELM_PACKAGE ?= traffic-guru
 TAG ?= 0.0.7-1
 HELM_REPO_OWNER ?= flomesh-io
-CHART_VERSION = $(shell echo ${TAG} | cut -f1 -d '-')
+CHART_VERSION ?= $(shell echo ${TAG} | cut -f1 -d '-')
 
 clean-helm-repo:
 	rm -rf helm-repo || true
 
 package-chart:
+	helm repo add bitmani https://charts.bitnami.com/bitnami
+	helm repo update
+	helm dependency build ${HELM_PACKAGE}
 	helm package --version ${CHART_VERSION} --app-version ${TAG} ${HELM_PACKAGE} 
 
 release-chart: clean-helm-repo package-chart

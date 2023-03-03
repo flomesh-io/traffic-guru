@@ -23,7 +23,7 @@ metadata:
     {{- include "traffic-guru.labels" . | nindent 4 }}
 subjects:
   - kind: ServiceAccount
-    name: trafficguru-prometheus
+    name: traffic-guru-prometheus
     namespace: {{ .Release.Namespace | quote }}
 roleRef:
   kind: ClusterRole
@@ -33,7 +33,7 @@ roleRef:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: trafficguru-prometheus
+  name: traffic-guru-prometheus
   namespace: {{ .Release.Namespace | quote }}
   labels:
     {{- include "traffic-guru.labels" . | nindent 4 }}
