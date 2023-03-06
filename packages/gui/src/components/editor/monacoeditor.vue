@@ -40,6 +40,11 @@ export default {
           code.val = newValue;
           ctx.emit("change", newValue);
         });
+        inst.onKeyUp((e) => {
+          if(e.code == "Enter"){
+            ctx.emit("enter", inst.getValue());
+          }
+        });
       },10)
     });
   },

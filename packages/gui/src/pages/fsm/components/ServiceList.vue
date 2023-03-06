@@ -93,6 +93,41 @@
         :data-source="embed && embedServices ? embedList : list"
         class="bg-white"
       >
+        <template
+          #customFilterDropdown="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
+        >
+          <div style="padding: 8px">
+            <a-input
+              ref="searchInput"
+              :placeholder="$t('search')"
+              :value="selectedKeys[0]"
+              style="width: 188px; margin-bottom: 8px; display: block"
+              @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
+              @pressEnter="handleSearch(selectedKeys, confirm, column.dataIndex)"
+            />
+            <a-button
+              type="primary"
+              size="small"
+              style="width: 90px; margin-right: 8px"
+              @click="handleSearch(selectedKeys, confirm, column.dataIndex)"
+            >
+              <template #icon>
+                <SearchOutlined />
+              </template>
+              {{ $t('search') }}
+            </a-button>
+            <a-button
+              size="small"
+              style="width: 90px"
+              @click="handleReset(clearFilters)"
+            >
+              {{ $t('Reset') }}
+            </a-button>
+          </div>
+        </template>
+        <template #customFilterIcon="{ filtered }">
+          <SearchOutlined :style="{ color: filtered ? '#108ee9' : undefined }" />
+        </template>
         <template #bodyCell="{ column, record }">
           <template v-if="column.dataIndex === 't'">
             <Status :d="{status:record.t}" />
@@ -227,6 +262,7 @@ import {
   CheckCircleOutlined,
   StopOutlined,
   PlusCircleTwoTone,
+  SearchOutlined,
 } from "@ant-design/icons-vue";
 import EnvSelector from "@/components/menu/EnvSelector";
 import SyncBar from "@/components/tool/SyncBar";
@@ -235,6 +271,16 @@ const regcolumns = [
   {
     key: "Service",
     dataIndex: "name",
+    customFilterDropdown: true,
+    onFilter: (value, record) =>
+      record.name.toString().toLowerCase().includes(value.toLowerCase()),
+    onFilterDropdownVisibleChange: visible => {
+      if (visible) {
+        setTimeout(() => {
+          this.$refs.searchInput.focus();
+        }, 100);
+      }
+    },
   },
   {
     key: "Namespace",
@@ -324,6 +370,7 @@ const columns = [
 export default {
   name: "ServiceList",
   components: {
+    SearchOutlined,
     MoreOutlined,
     CheckCircleOutlined,
     StopOutlined,
@@ -361,6 +408,8 @@ export default {
       short2columns,
       short3columns,
       loading: true,
+      searchText: '',
+      searchedColumn: '',
       list: [],
     };
   },
@@ -447,6 +496,18 @@ export default {
   },
 
   methods: {
+		
+    handleSearch(selectedKeys, confirm, dataIndex){
+      confirm();
+      this.searchText = selectedKeys[0];
+      this.searchedColumn = dataIndex;
+    },
+
+    handleReset(clearFilters){
+      clearFilters({ confirm: true });
+      this.searchText = '';
+    },
+
     onTabChange(d){
       this.$emit("update:tabKey",d);
       this.$emit("nsChange",d);

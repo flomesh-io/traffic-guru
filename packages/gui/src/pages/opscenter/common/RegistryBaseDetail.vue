@@ -358,6 +358,7 @@ export default {
     },
 		
     getYaml(){
+      this.detail.config = this.yamlConfig;
       this.configJson = YAML.load(this.yamlConfig);
     },
 

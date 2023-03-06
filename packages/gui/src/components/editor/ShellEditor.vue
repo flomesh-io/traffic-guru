@@ -5,6 +5,7 @@
       v-model:content="code"
       :option="cmOptions"
       @change="change"
+      @enter="enter"
       :height="height"
       :theme="theme"
       :is-readonly="isReadonly"
@@ -51,6 +52,13 @@ export default {
     change(event) {
       if (typeof event == "string") {
         this.$emit("update:value", event);
+      }
+    },
+
+    enter(event) {
+      if (typeof event == "string") {
+        let inline_val = event.split("\n");
+        this.$emit("enter", inline_val[inline_val.length-2]);
       }
     },
 

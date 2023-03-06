@@ -290,11 +290,11 @@ export function getTopoWhere(dateIndex, endDateIndex) {
 }
 
 export function getServiceName(name, namespace, domain) {
-  return domain ? `${name}.${namespace}.svc.${domain}` : `${name}.${namespace}`;
+  return domain ? `${name}.${namespace}.svc.${domain}` : (namespace? `${name}.${namespace}` : name);
 }
 
 export function getReqServiceName(name, namespace, domain) {
-  return domain ? `${name}.${namespace}.${domain}` : `${name}.${namespace}`;
+  return domain ? `${name}.${namespace}.${domain}` : namespace? `${name}.${namespace}` : name;
 }
 
 export function getServiceWhere(type, name, namespace, domain) {

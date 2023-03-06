@@ -436,6 +436,15 @@
                       class="width-220"
                     />
                   </div>
+									
+                  <div class="mt-10">
+                    <label>{{ $t("Log Input Path") }} : </label>
+                    <a-input
+                      :placeholder="$t('unset')"
+                      v-model:value="payload.json.input"
+                      class="width-220"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -758,6 +767,7 @@ export default {
           },
 
           table: "",
+          input: "",
         },
 
         pipy: {
@@ -900,6 +910,7 @@ export default {
           },
 
           table: "",
+          input: "",
         },
 
         pipy: {

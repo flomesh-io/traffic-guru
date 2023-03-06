@@ -46,6 +46,13 @@
           {{ $t("Email") }}
         </MdInput>
       </FormItem>
+      <SnsCode
+        class="mb-20"
+        ref="snscode"
+        v-model:value="formState.snscode"
+        @validate="validate"
+        :username="formState.name"
+      />
       <FormItem
         class="mb-20"
         name="password"
@@ -66,7 +73,7 @@
         </MdInput>
       </FormItem>
       <div
-        v-if="!nofoot"
+        v-if="false"
         class="font-right"
       >
         <a @click="gologin">{{ $t("Go Login") }} <ArrowRightOutlined /></a>
@@ -80,7 +87,7 @@
           type="dashed"
           ghost
         >
-          {{ $t("Register") }}
+          {{ $t("Register initial user") }}
         </a-button>
       </a-form-item>
     </a-form>
@@ -99,6 +106,7 @@ import { notification } from "ant-design-vue";
 import { h } from "vue";
 import { mapState } from "vuex";
 import FormItem from "@/components/tool/FormItem";
+import SnsCode from "./SnsCode";
 
 export default {
   name: "RegForm",
@@ -106,6 +114,7 @@ export default {
     MdInput,
     ArrowRightOutlined,
     FormItem,
+    SnsCode,
   },
 
   i18n: require("./i18n"),
@@ -123,6 +132,7 @@ export default {
       user: "",
       password: "",
       formState: {
+        snscode: "",
         name: "",
         email: "",
         password: "",
@@ -148,8 +158,9 @@ export default {
       this.logging = true;
       const name = this.formState.name;
       const email = this.formState.email;
+      const snscode = this.formState.snscode;
       const password = this.formState.password;
-      register(name, email, password)
+      register(name, email, password, snscode)
         .then(this.afterLogin)
         .catch(() => {
           this.logging = false;

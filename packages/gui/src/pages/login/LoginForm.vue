@@ -73,14 +73,6 @@
           <ArrowRightOutlined />
         </a>
       </div>
-      <div>
-        <!--
-          <a @click="reg"
-          ><ArrowLeftOutlined />
-          {{ $t('Register') }}
-          </a> 
-        -->
-      </div>
       <a-form-item>
         <a-button
           :loading="logging"
@@ -150,9 +142,6 @@ export default {
 
   methods: {
     ...mapMutations("account", ["setUser", "setPermissions", "setRoles"]),
-    reg() {
-      this.last();
-    },
 
     getCookies() {
       if (this.formState.name) {

@@ -95,7 +95,7 @@ export function query(query, variables, variablesType, fetchPolicy) {
               messageError(res.errors[0].message);
               reject(res.errors);
             } else if (!_d || Object.keys(_d).length == 0) {
-              resolve(null);
+              resolve(_d);
             } else if(_d && _d.meta) {
               resolve({data:reset(_d),pagination:_d.meta.pagination});
             } else if(_d && _d.data) {
@@ -160,7 +160,7 @@ export function mutation(mutation, variables, variablesType, update, noMsg) {
 							messageError(res.errors[0].message, noMsg);
               reject(res.errors);
             } else if (!_d || Object.keys(_d).length == 0) {
-              resolve(null);
+              resolve(_d);
             } else if(_d && _d.data) {
 							resolve({data:reset(_d)});
             } else {

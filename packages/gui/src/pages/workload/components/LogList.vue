@@ -35,7 +35,10 @@
         </div>
       </div>
     </template>
-    <ShellEditor :value="log.logs" />
+    <ShellEditor
+      :is-readonly="true"
+      :value="log.logs"
+    />
   </a-card>
 </template>
 

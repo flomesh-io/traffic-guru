@@ -33,6 +33,9 @@
           style="top: 25px; margin: 0 3px"
         />
         <div class="header-item">
+          <WebTerm />
+        </div>
+        <div class="header-item">
           <WebConsole />
         </div>
         <a-divider
@@ -94,6 +97,7 @@ import HeaderNotice from "./HeaderNotice";
 import HeaderAvatar from "./HeaderAvatar";
 import SystemSetting from "./SystemSetting";
 import WebConsole from "./WebConsole";
+import WebTerm from "./WebTerm";
 import ThemeSetting from '@/components/setting/ThemeSetting'
 import { mapState, mapMutations } from "vuex";
 
@@ -102,6 +106,7 @@ export default {
   components: {
     ThemeSetting,
     WebConsole,
+    WebTerm,
     SystemSetting,
     HeaderAvatar,
     HeaderNotice,

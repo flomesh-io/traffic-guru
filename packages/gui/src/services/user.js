@@ -59,10 +59,15 @@ export async function forget(email, newPassword, verificationCode) {
   );
 }
 
-export async function register(username, email, password) {
+export async function register(username, email, password, verificationCode) {
   const input = { username, email, password };
+  let isPass = process.env.VUE_APP_LOGIN_CODE == "pass";
+  if (!isPass) {
+    input.verificationCode = verificationCode;
+  }
+  let _fun = !isPass ? "registerByCode" : "register";
   return mutation(
-    `register(input: $input){jwt,user{id,username,email,role{id,name,type,description}}}`,
+    `${_fun}(input: $input){jwt,user{id,username,email,role{id,name,type,description}}}`,
     { input },
     { input: "UsersPermissionsRegisterInput!" },
     null,

@@ -386,7 +386,7 @@ export default {
       this.loading = true;
       this.$gql
         .query(
-          `routerSettings(sort: "sort:asc", filters: { level: { eq: 1 } }){data{id,attributes{
+          `routerSettings(sort: "sort:asc", pagination: {limit: 9999 }, filters: { level: { eq: 1 } }){data{id,attributes{
 						name,
 						displayName,
 						path,

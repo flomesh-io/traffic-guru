@@ -34,11 +34,6 @@ const flb = {
                 value: alldata.layer4_loadbalancer_amount,
                 unit: "unitge",
               },
-              {
-                label: "7LB",
-                value: alldata.layer7_loadbalancer_amount,
-                unit: "unitge",
-              },
             ],
             foot: [
               { label: "activeClient", value: alldata.active_clients },
@@ -150,12 +145,7 @@ const flb = {
               title: "conections",
               items: [
                 {
-                  title: "4 LB conections top",
                   list: alldata.layer4_loadbalancer_connections_top,
-                },
-                {
-                  title: "7 LB conections top",
-                  list: alldata.layer7_loadbalancer_connections_top,
                 },
               ],
             },

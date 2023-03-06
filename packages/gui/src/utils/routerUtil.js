@@ -272,7 +272,7 @@ async function getStrapiRoutes() {
   // get strapi async routes
   let strapiRoutes = [];
   await query(
-    `routerSettings(sort: "sort:asc"){data{id,attributes{
+    `routerSettings(sort: "sort:asc", pagination: {limit: 9999 }){data{id,attributes{
 			name,
 			displayName,
 			path,

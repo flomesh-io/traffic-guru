@@ -81,7 +81,23 @@ export default {
     };
   },
 
+  created(){
+    this.isInitialized();
+  },
+
   methods: {
+    isInitialized() {
+      this.$gql
+        .query(
+          `getInitialized`
+        )
+        .then((res) => {
+          if(!res){
+            this.last();
+          }
+        });
+    },
+
     next() {
       this.direction = 1;
       this.step += this.direction;
