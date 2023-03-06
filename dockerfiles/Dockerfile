@@ -54,6 +54,8 @@ COPY --from=builder --chown=flomesh:0 /usr/local/flomesh /usr/local/flomesh
 RUN apk add --no-cache --virtual .build-deps tar \
     && apk add --no-cache npm openssl su-exec tzdata curl vips-dev \
     && curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | sh \
+    && curl -L -o /usr/local/bin/kubectl "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/$(uname -m | sed -E 's/x86_/amd/;s/aarch/arm/' )/kubectl" \
+    && chmod +x /usr/local/bin/kubectl \
     && apk del .build-deps tar \
     && ln -s /usr/local/flomesh/public/flomesh /usr/local/flomesh/public/flomesh-gui
 
