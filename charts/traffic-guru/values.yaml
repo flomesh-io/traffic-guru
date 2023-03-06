@@ -18,7 +18,7 @@ gui:
 
 pipyRepo:
   imageName: pipy-repo
-  tag: 0.70.0-46
+  tag: 0.90.0-18
   resources: {}
     #limits:
     #  cpu: 1
@@ -27,14 +27,138 @@ pipyRepo:
     #  cpu: 1
     #  memory: 1Gi
 
-database:
-  host: mysql.traffic-guru.svc
+  service:
+    port: 6060
+    nodePort: 30060
+
+mariadb:
+  ## @param mariadb.enabled Deploy a MariaDB server to satisfy the applications database requirements
+  ## To use an external database set this to false and configure the `externalDatabase.*` parameters
+  ##
+  enabled: true
+  ## @param mariadb.architecture MariaDB architecture. Allowed values: `standalone` or `replication`
+  ##
+  architecture: standalone
+  ## MariaDB Authentication parameters
+  ## @param mariadb.auth.rootPassword MariaDB root password
+  ## @param mariadb.auth.database MariaDB custom database
+  ## @param mariadb.auth.username MariaDB custom user name
+  ## @param mariadb.auth.password MariaDB custom user password
+  ## ref: https://github.com/bitnami/containers/tree/main/bitnami/mariadb#setting-the-root-password-on-first-run
+  ##      https://github.com/bitnami/containers/blob/main/bitnami/mariadb/README.md#creating-a-database-on-first-run
+  ##      https://github.com/bitnami/containers/blob/main/bitnami/mariadb/README.md#creating-a-database-user-on-first-run
+  ##
+  auth:
+    rootPassword: "root"
+    database: "flomesh"
+    username: "flomesh"
+    password: "Flomesh1234"
+  ## MariaDB Primary configuration
+  ##
+  primary:
+    ## MariaDB Primary Persistence parameters
+    ## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+    ## @param mariadb.primary.persistence.enabled Enable persistence on MariaDB using PVC(s)
+    ## @param mariadb.primary.persistence.storageClass Persistent Volume storage class
+    ## @param mariadb.primary.persistence.accessModes [array] Persistent Volume access modes
+    ## @param mariadb.primary.persistence.size Persistent Volume size
+    ##
+    persistence:
+      enabled: true
+      storageClass: ""
+      accessModes:
+        - ReadWriteOnce
+      size: 8Gi
+## External Database Configuration
+## All of these values are only used if `mariadb.enabled=false`
+##
+externalDatabase:
+  ## @param externalDatabase.host External Database server host
+  ##
+  host: localhost
+  ## @param externalDatabase.port External Database server port
+  ##
   port: 3306
-  db: "flomesh"
-  username: "flomesh"
-  password: ""
+  ## @param externalDatabase.user External Database username
+  ##
+  user: flomesh
+  ## @param externalDatabase.password External Database user password
+  ##
+  password: "Flomesh1234"
+  ## @param externalDatabase.database External Database database name
+  ##
+  database: flomesh
+  ## @param externalDatabase.existingSecret The name of an existing secret with database credentials. Evaluated as a template
+  ## NOTE: Must contain key `mariadb-password`
+  ## NOTE: When it's set, the `externalDatabase.password` parameter is ignored
+  ##
+  existingSecret: ""
+
+clickhouse:
+  enabled: true
+  shards: 1
+  replicaCount: 1
+  zookeeper:
+    enabled: false
+  auth:
+    username: "flomesh"
+    password: "password"
+  serviceAccount:
+    name: "click-house"
+
+prometheus:
+  enabled: true
+  # -- Prometheus's container resource parameters
+  resources:
+    limits:
+      cpu: "1"
+      memory: "2G"
+    requests:
+      cpu: "0.5"
+      memory: "512M"
+  # -- Prometheus service's port
+  port: 7070
+  # -- Prometheus data rentention configuration
+  retention:
+    # -- Prometheus data retention time
+    time: 15d
+  # -- Image used for Prometheus
+  image: prom/prometheus:v2.34.0
+  ## Node labels for pod assignment
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  nodeSelector: { }
+
+  ## Affinity settings for pod assignment
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: kubernetes.io/os
+                operator: In
+                values:
+                  - linux
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                  - amd64
+                  - arm64
+                  - arm
+                  - ppc64le
+                  - s390x
+
+  # -- Node tolerations applied to control plane pods.
+  # The specified tolerations allow pods to schedule onto nodes with matching taints.
+  tolerations: [ ]
+
+externalPrometheus:
+  host: localhost
+  port: 7070
+  
+database:
   # The database type should be default or postgres
-  type: default
+  type: mysql
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -59,7 +183,7 @@ securityContext: {}
   # runAsUser: 1000
 
 service:
-  type: ClusterIP
+  type: NodePort
   port: 8080
   nodePort: 30000
 

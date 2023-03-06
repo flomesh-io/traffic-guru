@@ -1,0 +1,19 @@
+{{- if .Values.prometheus.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: traffic-guru-prometheus
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "traffic-guru.labels" . | nindent 4 }}
+  annotations:
+    prometheus.io/port: "{{.Values.prometheus.port}}"
+    prometheus.io/scrape: "true"
+spec:
+  ports:
+  - port: {{.Values.prometheus.port}}
+    protocol: TCP
+    targetPort: {{.Values.prometheus.port}}
+  selector:
+    app: traffic-guru-prometheus
+{{- end }}

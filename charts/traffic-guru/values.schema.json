@@ -11,7 +11,6 @@
         "fullnameOverride",
         "gui",
         "pipyRepo",
-        "database",
         "serviceAccount",
         "podAnnotations",
         "podSecurityContext",
@@ -96,7 +95,7 @@
                     "default": "",
                     "title": "The imageName Schema",
                     "examples": [
-                        "traffic-guru-ubi8"
+                        "traffic-guru"
                     ]
                 },
                 "tag": {
@@ -104,7 +103,7 @@
                     "default": "",
                     "title": "The tag Schema",
                     "examples": [
-                        "0.70.0-25"
+                        ""
                     ]
                 },
                 "resources": {
@@ -130,8 +129,8 @@
             },
             "examples": [
                 {
-                    "imageName": "traffic-guru-ubi8",
-                    "tag": "0.70.0-25",
+                    "imageName": "traffic-guru",
+                    "tag": "",
                     "resources": {},
                     "env": {}
                 }
@@ -152,7 +151,7 @@
                     "default": "",
                     "title": "The imageName Schema",
                     "examples": [
-                        "pipy-repo-ubi8"
+                        "pipy-repo"
                     ]
                 },
                 "tag": {
@@ -160,7 +159,7 @@
                     "default": "",
                     "title": "The tag Schema",
                     "examples": [
-                        "0.70.0-46"
+                        "0.90.0-18"
                     ]
                 },
                 "resources": {
@@ -170,7 +169,7 @@
                     "required": [],
                     "properties": {},
                     "examples": [
-                        {}
+                        7070
                     ]
                 }
             },
@@ -187,71 +186,21 @@
             "default": {},
             "title": "The database Schema",
             "required": [
-                "host",
-                "port",
-                "db",
-                "username",
-                "password",
                 "type"
             ],
             "properties": {
-                "host": {
-                    "type": "string",
-                    "default": "",
-                    "title": "The host Schema",
-                    "examples": [
-                        "mysql.traffic-guru.svc"
-                    ]
-                },
-                "port": {
-                    "type": "integer",
-                    "default": 0,
-                    "title": "The port Schema",
-                    "examples": [
-                        3306
-                    ]
-                },
-                "db": {
-                    "type": "string",
-                    "default": "",
-                    "title": "The db Schema",
-                    "examples": [
-                        "flomesh"
-                    ]
-                },
-                "username": {
-                    "type": "string",
-                    "default": "",
-                    "title": "The username Schema",
-                    "examples": [
-                        "flomesh"
-                    ]
-                },
-                "password": {
-                    "type": "string",
-                    "default": "",
-                    "title": "The password Schema",
-                    "examples": [
-                        ""
-                    ]
-                },
                 "type": {
                     "type": "string",
                     "default": "",
                     "title": "The type Schema",
                     "examples": [
-                        "default"
+                        "mysql"
                     ]
                 }
             },
             "examples": [
                 {
-                    "host": "mysql.traffic-guru.svc",
-                    "port": 3306,
-                    "db": "flomesh",
-                    "username": "flomesh",
-                    "password": "",
-                    "type": "default"
+                    "type": "mysql"
                 }
             ]
         },
@@ -533,22 +482,114 @@
             "fullnameOverride": "traffic-guru",
             "gui": {
                 "imageName": "traffic-guru",
-                "tag": "0.70.0-25",
+                "tag": "",
                 "resources": {},
                 "env": {}
             },
             "pipyRepo": {
-                "imageName": "pipy-repo-ubi8",
-                "tag": "0.70.0-46",
+                "imageName": "pipy-repo",
+                "tag": "0.90.0-18",
                 "resources": {}
             },
-            "database": {
-                "host": "mysql.traffic-guru.svc",
+            "mariadb": {
+                "enabled": true,
+                "architecture": "standalone",
+                "auth": {
+                    "rootPassword": "root",
+                    "database": "flomesh",
+                    "username": "flomesh",
+                    "password": "Flomesh1234"
+                },
+                "primary": {
+                    "persistence": {
+                        "enabled": true,
+                        "storageClass": "",
+                        "accessModes": [
+                            "ReadWriteOnce"
+                        ],
+                        "size": "8Gi"
+                    }
+                }
+            },
+            "externalDatabase": {
+                "host": "localhost",
                 "port": 3306,
-                "db": "flomesh",
                 "username": "flomesh",
-                "password": "",
-                "type": "default"
+                "password": "Flomesh1234",
+                "database": "flomesh",
+                "existingSecret": ""
+            },
+            "clickhouse": {
+                "enabled": true,
+                "shards": 1,
+                "replicaCount": 1,
+                "zookeeper": {
+                    "enabled": false
+                },
+                "auth": {
+                    "username": "flomesh",
+                    "password": "password"
+                },
+                "serviceAccount": {
+                    "name": "click-house"
+                }
+            },
+            "prometheus": {
+                "enabled": true,
+                "resources": {
+                    "limits": {
+                        "cpu": "1",
+                        "memory": "2G"
+                    },
+                    "requests": {
+                        "cpu": "0.5",
+                        "memory": "512M"
+                    }
+                },
+                "port": 7070,
+                "retention": {
+                    "time": "15d"
+                },
+                "image": "prom/prometheus:v2.34.0",
+                "nodeSelector": {},
+                "affinity": {
+                    "nodeAffinity": {
+                        "requiredDuringSchedulingIgnoredDuringExecution": {
+                            "nodeSelectorTerms": [
+                                {
+                                    "matchExpressions": [
+                                        {
+                                            "key": "kubernetes.io/os",
+                                            "operator": "In",
+                                            "values": [
+                                                "linux"
+                                            ]
+                                        },
+                                        {
+                                            "key": "kubernetes.io/arch",
+                                            "operator": "In",
+                                            "values": [
+                                                "amd64",
+                                                "arm64",
+                                                "arm",
+                                                "ppc64le",
+                                                "s390x"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                },
+                "tolerations": []
+            },
+            "externalPrometheus": {
+                "host": "localhost",
+                "port": 7070
+            },
+            "database": {
+                "type": "mysql"
             },
             "serviceAccount": {
                 "create": true,
