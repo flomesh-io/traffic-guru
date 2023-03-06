@@ -12,20 +12,6 @@ const https = require('https');
 const YAML = require('yaml');
 
 module.exports = createCoreService('api::kubernetes.kubernetes', {
-    async getCurrentKubernetesConfig() {
-        const fleet = await strapi.query('fleet').findOne({ id: 1 });
-        if (!fleet) {
-          return undefined;
-        }
-        const conf = fleet.content;
-        return {
-          server: conf.server,
-          certificate_authority_data: conf.certificate_authority_data,
-          user: conf.user,
-          token: conf.token,
-          dashboard_server: conf.dashboard_server,
-        };
-      },
     
       async getKubeConfig(clusterId) {
         const registry = await strapi.db.query("api::registry.registry").findOne({where: {id: clusterId}})

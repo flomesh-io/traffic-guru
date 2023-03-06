@@ -1,0 +1,18 @@
+{
+  "kind": "collectionType",
+  "collectionName": "api_dashboards",
+  "info": {
+    "singularName": "api-dashboard",
+    "pluralName": "api-dashboards",
+    "displayName": "ApiDashboard"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    }
+  }
+}

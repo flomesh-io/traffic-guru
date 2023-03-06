@@ -216,8 +216,8 @@ module.exports = createCoreService('api::registry.registry', {
     let ns;
     let oldSvcs;
     if (isSync) {
-      ns = await await strapi.query('api::namespace.namespace').findOne({ registry: registry.id });
-      oldSvcs = await strapi.query('api::service.service').findMany({ registry: registry.id });
+      ns = await await strapi.db.query('api::namespace.namespace').findOne({ registry: registry.id });
+      oldSvcs = await strapi.db.query('api::service.service').findMany({ registry: registry.id });
       if (oldSvcs) {
       } else {
         isSync = false;

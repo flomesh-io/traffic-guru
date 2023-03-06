@@ -113,6 +113,18 @@
       "relation": "oneToMany",
       "target": "api::user-organization-role.user-organization-role",
       "mappedBy": "user"
+    },
+    "yamls": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::yaml.yaml",
+      "mappedBy": "user"
+    },
+    "kubectls": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::kubectl.kubectl",
+      "mappedBy": "user"
     }
   }
 }

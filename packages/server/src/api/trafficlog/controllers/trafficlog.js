@@ -3,7 +3,6 @@
 /**
  * trafficlog controller
  */
-const axios = require('axios');
 const { createCoreController } = require('@strapi/strapi').factories;
 
 module.exports = createCoreController('api::trafficlog.trafficlog',{
@@ -30,27 +29,135 @@ module.exports = createCoreController('api::trafficlog.trafficlog',{
   // },
 
   // get jeager traces
-  async traces(ctx) {
-    const jeager = await strapi.query('fleet').findOne({ type: 'jeager' });
-    if (!jeager) {
-      return { status: 404, error: 'Please add the jeager component first!' };
+  // async traces(ctx) {
+  //   const jeager = await strapi.db.query('api::fleet.fleet').findOne({where: { type: 'jeager' }});
+  //   if (!jeager) {
+  //     return { status: 404, error: 'Please add the jeager component first!' };
+  //   }
+  //   const tracesAxios = axios.create({
+  //     baseURL: jeager.content.server,
+  //     headers: { 'Content-Type': 'application/json' },
+  //   });
+
+  //   strapi.log.info('------> trafficlog.traces');
+  //   const tracesQuery = ctx.query._input;
+
+  //   const response = await tracesAxios.get('/api/traces', {
+  //     params: tracesQuery,
+  //   });
+  //   if (response.status == 200) {
+  //     return response.data;
+  //   } else {
+  //     return { status: response.status, error: response.statusText };
+  //   }
+  // },
+
+  async querylogs(ctx) {
+    // strapi.log.debug(JSON.stringify(ctx.request.body));
+    try {
+      const fleet = await strapi.service('api::trafficlog.trafficlog').getLogFleet();
+      const reqBody = ctx.request.body;
+      //strapi.log.debug(JSON.stringify(reqBody));
+      if(fleet.type === 'clickhouse'){
+        return await strapi.service('api::trafficlog.trafficlog').queryLogs2Clickhouse(reqBody, fleet.content);
+      }
+      else if(fleet.type === 'postgresql'){
+        return await strapi.service('api::trafficlog.trafficlog').queryLogs2Postgresql(reqBody, fleet.content);
+      } 
+      //error return
+      return {error: fleet.type + ' not supported'};
+    } catch (error) {
+      return {error: error};
     }
+  },
 
-    const tracesAxios = axios.create({
-      baseURL: jeager.content.server,
-      headers: { 'Content-Type': 'application/json' },
-    });
+  async querysvclogs(ctx) {
+    try {
+      const fleet = await strapi.service('api::trafficlog.trafficlog').getLogFleet();
+      const reqBody = ctx.request.body;
+      //strapi.log.debug(JSON.stringify(reqBody));
+      if(fleet.type === 'clickhouse'){
+        return await strapi.service('api::trafficlog.trafficlog').querySvcLogs2Clickhouse(reqBody, fleet.content);
+      }
+      else if(fleet.type === 'postgresql'){
+        return await strapi.service('api::trafficlog.trafficlog').querySvcLogs2Postgresql(reqBody, fleet.content);
+      } 
+      //error return
+      return {error: fleet.type + ' not supported'};
+    } catch (error) {
+      return {error: error};
+    }
+  },
 
-    strapi.log.info('------> trafficlog.traces');
-    const tracesQuery = ctx.query._input;
+  async countlatency(ctx) {
+    try {
+      const fleet = await strapi.service('api::trafficlog.trafficlog').getLogFleet();
+      const reqBody = ctx.request.body;
+      //strapi.log.debug(JSON.stringify(reqBody));
+      if(fleet.type === 'clickhouse'){
+        return await strapi.service('api::trafficlog.trafficlog').countLatency2Clickhouse(reqBody, fleet.content);
+      }
+      else if(fleet.type === 'postgresql'){
+        return await strapi.service('api::trafficlog.trafficlog').countLatency2Postgresql(reqBody, fleet.content);
+      } 
+      //error return
+      return {error: fleet.type + ' not supported'};
+    } catch (error) {
+      return {error: error};
+    }
+  },
 
-    const response = await tracesAxios.get('/api/traces', {
-      params: tracesQuery,
-    });
-    if (response.status == 200) {
-      return response.data;
-    } else {
-      return { status: response.status, error: response.statusText };
+  async countstatus(ctx) {
+    try {
+      const fleet = await strapi.service('api::trafficlog.trafficlog').getLogFleet();
+      const reqBody = ctx.request.body;
+      //strapi.log.debug(JSON.stringify(reqBody));
+      if(fleet.type === 'clickhouse'){
+        return await strapi.service('api::trafficlog.trafficlog').countStatus2Clickhouse(reqBody, fleet.content);
+      }
+      else if(fleet.type === 'postgresql'){
+        return await strapi.service('api::trafficlog.trafficlog').countStatus2Postgresql(reqBody, fleet.content);
+      } 
+      //error return
+      return {error: fleet.type + ' not supported'};
+    } catch (error) {
+      return {error: error};
+    }
+  },
+
+  async counttps(ctx) {
+    try {
+      const fleet = await strapi.service('api::trafficlog.trafficlog').getLogFleet();
+      const reqBody = ctx.request.body;
+      //strapi.log.debug(JSON.stringify(reqBody));
+      if(fleet.type === 'clickhouse'){
+        return await strapi.service('api::trafficlog.trafficlog').countTps2Clickhouse(reqBody, fleet.content);
+      }
+      else if(fleet.type === 'postgresql'){
+        return await strapi.service('api::trafficlog.trafficlog').countTps2Postgresql(reqBody, fleet.content);
+      } 
+      //error return
+      return {error: fleet.type + ' not supported'};
+    } catch (error) {
+      return {error: error};
+    }
+  },
+
+  async totaltps(ctx) {
+    try {
+      const fleet = await strapi.service('api::trafficlog.trafficlog').getLogFleet();
+      const reqBody = ctx.request.body;
+      //strapi.log.debug(JSON.stringify(reqBody));
+      if(fleet.type === 'clickhouse'){
+        return await strapi.service('api::trafficlog.trafficlog').totalTps2Clickhouse(reqBody, fleet.content);
+      }
+      else if(fleet.type === 'postgresql'){
+        return await strapi.service('api::trafficlog.trafficlog').totalTps2Postgresql(reqBody, fleet.content);
+      } 
+      //error return
+      return {error: fleet.type + ' not supported'};
+    } catch (error) {
+      return {error: error};
     }
   }
 

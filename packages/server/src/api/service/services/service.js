@@ -30,6 +30,10 @@ module.exports = createCoreService('api::service.service', {
   },
 
   async fetchServices(ctx, args, id) {
+    const schemaType = ctx.koaContext.request.header.schema_type;
+    if (schemaType != 'k8s') {
+      return true;
+    }
     if (id) {
       const serv = await strapi.db.query('api::service.service').findOne({ where: { id }, populate: true });
       if (serv) {
@@ -40,6 +44,9 @@ module.exports = createCoreService('api::service.service', {
     const k8s_cluster_id = ctx.koaContext.request.header.schema_id || '';
     const k8s_cluster_ns = ctx.koaContext.request.header.namespace || '';
     const k8s_cluster_type = ctx.koaContext.request.header.schema_type || '';
+    if (k8s_cluster_type != 'k8s') {
+      return true;
+    }
     const kc = await strapi.service('api::kubernetes.kubernetes').getKubeConfig(
       k8s_cluster_id,
       k8s_cluster_type
@@ -73,7 +80,7 @@ module.exports = createCoreService('api::service.service', {
     );
   },
   async fetchAllServices(args, ctx) {
-    const registries = await strapi.query('registry').find({ type: 'k8s' });
+    const registries = await strapi.db.query('registry').find({ type: 'k8s' });
 
     for (const registry of registries) {
       const kc = await strapi.service('api::kubernetes.kubernetes').getKubeConfig(

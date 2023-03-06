@@ -89,7 +89,7 @@
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::organization.organization",
-      "inversedBy": "whiteOrgs"
+      "mappedBy": "whiteOrgs"
     }
   }
 }

@@ -64,6 +64,15 @@
     },
     "reqMethod": {
       "type": "string"
+    },
+    "reqProtocol": {
+      "type": "string"
+    },
+    "reqHeaders": {
+      "type": "json"
+    },
+    "podName": {
+      "type": "string"
     }
   }
 }

@@ -22,7 +22,7 @@ async function syncRegistries () {
   }
 
   const now = new Date();
-  await strapi.db.query("api::metric.metric").deleteMany({ where: { created_at: { $lt: new Date((now.getTime() - (16 * 60 * 1000))) } } })
+  await strapi.db.query("api::metric.metric").deleteMany({ where: { createdAt: { $lt: new Date((now.getTime() - (16 * 60 * 1000))) } } })
 }
 
 async function syncOsm () {

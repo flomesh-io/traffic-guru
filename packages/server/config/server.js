@@ -9,5 +9,8 @@ module.exports = ({ env }) => ({
   cron: {
     enabled: true,
     tasks: cronTasks
-  }
+  },
+  webhooks: {
+    populateRelations: env.bool('WEBHOOKS_POPULATE_RELATIONS', false),
+  },
 });

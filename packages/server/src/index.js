@@ -136,11 +136,41 @@ module.exports = {
           verificationCode: String!
           provider: String = "local"
         }
+        input UsersPermissionsRegisterByCodeInput {
+          username: String!
+          email: String!
+          password: String!
+          verificationCode: String!
+        }
+        type ApiStatus {
+          run     : Int!
+          error   : Int!
+        }
+        type Apis {
+          total   : Int!
+          run     : Int!
+          error   : Int!
+        }
+        type Applications {
+          total   : Int!
+          run     : Int!
+          error   : Int!
+        }
+        type ApiDashboardPageInfo {
+          apis           : Apis
+          applications   : Applications
+          api_status     : ApiStatus
+          api_week       : JSON
+          api_month      : JSON
+        }
 
         type Query {
           uniSearch(filters: JSON, pagination: PaginationArg = {}, sort: [String] = []): JSON
 
+          getFlbDashboardPageInfo(filters: JSON): DashboardPageInfo!
           getFsmDashboardPageInfo(filters: JSON): FSMDashboardPageInfo!
+          getApiDashboardPageInfo(filters: JSON): ApiDashboardPageInfo!
+          getHealthcheckDashboardPageInfo(filters: JSON): HealthcheckDashboardPageInfo
 
           getIngresses(filters: IngressFiltersInput,pagination: PaginationArg = {},sort: [String] = []): IngressEntityResponseCollection
           getIngress(id: ID): IngressEntityResponse
@@ -160,6 +190,7 @@ module.exports = {
 
           getUser(id: ID): UsersPermissionsUserEntityResponse!
 
+          getInitialized: Boolean!
         }
         type Mutation {
 
@@ -181,7 +212,9 @@ module.exports = {
           deleteServiceSync(id: ID!): ServiceEntityResponse
 
           loginByCode(data: UsersPermissionsLoginByCodeInput!): UsersPermissionsLoginPayload!
-          changePasswordByCode(data: JSON): Boolean
+          registerByCode(data: UsersPermissionsRegisterByCodeInput!): UsersPermissionsLoginPayload!
+          changePasswordByCode(data: JSON!): Boolean
+          generateVerificationCode(identifier: String): JSON
 
           pingRegistry(data: RegistryInput): JSON
           refreshRegistry(id: Int): Boolean
@@ -190,7 +223,6 @@ module.exports = {
       resolvers: {
         Query: {
 
-          //  TODO
           uniSearch: {
             async resolve (obj, args, ctx) {
               const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel("api::uni-component.uni-component"), true)
@@ -198,13 +230,32 @@ module.exports = {
               return results
             },
           },
-
+          
+          getFlbDashboardPageInfo: {
+            async resolve (obj, args, ctx) {
+              const result = await strapi.service('api::flb-dashboard.flb-dashboard').getFlbDashboardPageInfo(args, ctx);
+              return result;
+            }
+          },
           getFsmDashboardPageInfo: {
             async resolve (obj, args, ctx) {
               const result = await strapi.service('api::fsm-dashboard.fsm-dashboard').getFsmDashboardPageInfo(args, ctx);
               return result;
             }
           },
+          getApiDashboardPageInfo: {
+            async resolve (obj, args, ctx) {
+              const result = await strapi.service('api::api-dashboard.api-dashboard').getApiDashboardPageInfo(args, ctx);
+              return result;
+            }
+          },
+          getHealthcheckDashboardPageInfo: {
+            async resolve (obj, args, ctx) {
+              const result = await strapi.service('api::healthcheck.healthcheck').getHealthcheckDashboardPageInfo(args, ctx);
+              return result;
+            }
+          },
+
           getIngresses: {
             async resolve (obj, args, ctx) {
               const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('api::ingress.ingress'), false)
@@ -283,6 +334,13 @@ module.exports = {
               return entityUtils.toEntityResponse(args, 'plugin::users-permissions.user', results)
             }
           },
+          getInitialized: {
+            async resolve () {
+              const results = await strapi.db.query('plugin::users-permissions.user').count();
+              return results > 0 ? true : false
+            }
+          },
+
 
         },
         Mutation: {
@@ -374,12 +432,27 @@ module.exports = {
 
           loginByCode: {
             async resolve (obj, args, ctx) {
-              return await loginUtils.loginByCode(obj, args, ctx);
+              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('plugin::plugin::users-permissions.user.plugin::users-permissions.user'))
+              return await loginUtils.loginByCode(obj, transformedArgs, ctx);
+            },
+          },
+          registerByCode: {
+            async resolve (obj, args, ctx) {
+              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('plugin::plugin::users-permissions.user.plugin::users-permissions.user'))
+              return await loginUtils.registerByCode(obj, transformedArgs, ctx);
             },
           },
           changePasswordByCode: {
             async resolve (obj, args) {
-              const result = await strapi.service('api::user.user').changePasswordByCode(args);
+              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('plugin::plugin::users-permissions.user.plugin::users-permissions.user'))
+              const result = await loginUtils.changePasswordByCode(obj, transformedArgs);
+              return result;
+            },
+          },
+          generateVerificationCode: {
+            async resolve (obj, args) {
+              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('plugin::plugin::users-permissions.user.plugin::users-permissions.user'))
+              const result = await loginUtils.generateVerificationCode(obj, transformedArgs);
               return result;
             },
           },
@@ -396,6 +469,22 @@ module.exports = {
               return result;
             },
           },
+          createYaml: {
+            async resolve (obj, args, ctx) {
+              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('api::yaml.yaml'))
+              args.data.user = ctx.state.user.id;
+              const result = await strapi.db.query("api::yaml.yaml").create(args)
+              return entityUtils.toEntityResponse(transformedArgs, 'api::yaml.yaml', result)
+            },
+          },
+          createKubectl: {
+            async resolve (obj, args, ctx) {
+              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('api::kubectl.kubectl'))
+              args.data.user = ctx.state.user.id;
+              const result = await strapi.db.query("api::kubectl.kubectl").create(args)
+              return entityUtils.toEntityResponse(transformedArgs, 'api::kubectl.kubectl', result)
+            },
+          },
         }
       },
       resolversConfig: {
@@ -408,7 +497,19 @@ module.exports = {
         'Query.uniSearch': {
           scope: ['api::message.message.find']
         },
+        'Query.getInitialized': {
+          auth: false
+        },
         'Mutation.loginByCode': {
+          auth: false
+        },
+        'Mutation.changePasswordByCode': {
+          auth: false
+        },
+        'Mutation.registerByCode': {
+          auth: false
+        },
+        'Mutation.generateVerificationCode': {
           auth: false
         },
       },

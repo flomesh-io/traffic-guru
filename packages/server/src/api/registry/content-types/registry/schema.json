@@ -71,6 +71,12 @@
       "relation": "oneToMany",
       "target": "api::ingress.ingress",
       "mappedBy": "registry"
+    },
+    "kubectls": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::kubectl.kubectl",
+      "mappedBy": "registry"
     }
   }
 }

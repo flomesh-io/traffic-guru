@@ -29,13 +29,6 @@ module.exports = {
     return await strapi.db.query("api::" + type + "." + type).findMany(args);
   },
 
-  async getAllKubeEntitys(ctx, type) {
-    const values = await strapi.query(type).find(ctx.params);
-    const totalCount = await strapi.query(type).count(ctx.params);
-
-    return { values, aggregate: { totalCount } };
-  },
-
   async initKubeEntitys(ctx, type, res, id) {
     const k8s_cluster_id = ctx.koaContext.request.header.schema_id || '';
 

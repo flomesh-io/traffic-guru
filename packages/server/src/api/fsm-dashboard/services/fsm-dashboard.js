@@ -16,7 +16,7 @@ module.exports = createCoreService('api::fsm-dashboard.fsm-dashboard', {
           services_no_sidecar_summary = services_summary - 0;
         }
     
-        const registries_summary = await strapi.query('api::registry.registry').count();
+        const registries_summary = await strapi.db.query('api::registry.registry').count();
         let registries_valid_summary = registries_summary - 1;
         let registries_invalid_summary = 1;
         if (registries_summary == 0) {

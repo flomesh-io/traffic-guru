@@ -12,7 +12,7 @@ module.exports = {
     }
   },
   async afterCreate(event) {
-    const result = await strapi.query("api::mesh.mesh").findOne({where: {id: event.result.id}, populate: true})
+    const result = await strapi.db.query("api::mesh.mesh").findOne({where: {id: event.result.id}, populate: true})
     await strapi.service("api::mesh.mesh").osmInstall(result);
   },
   async afterUpdate(event) {

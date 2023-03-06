@@ -1,9 +1,9 @@
 'use strict';
 
 /**
- * upstream service
+ * kubectl service
  */
+
 const { createCoreService } = require('@strapi/strapi').factories;
 
-module.exports = createCoreService('api::user.user',{
-});
+module.exports = createCoreService('api::kubectl.kubectl');

@@ -1,0 +1,40 @@
+{
+  "kind": "collectionType",
+  "collectionName": "kubectls",
+  "info": {
+    "singularName": "kubectl",
+    "pluralName": "kubectls",
+    "displayName": "kubectl",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "command": {
+      "type": "text"
+    },
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "kubectls"
+    },
+    "result": {
+      "type": "text"
+    },
+    "namespace": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::namespace.namespace",
+      "inversedBy": "kubectls"
+    },
+    "registry": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::registry.registry",
+      "inversedBy": "kubectls"
+    }
+  }
+}

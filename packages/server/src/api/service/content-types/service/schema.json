@@ -106,13 +106,13 @@
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::service.service",
-      "inversedBy": "whitelistServices"
+      "mappedBy": "whitelistServices"
     },
     "blacklistServices": {
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::service.service",
-      "inversedBy": "blacklistServicesback"
+      "mappedBy": "blacklistServicesback"
     },
     "blacklistServicesback": {
       "type": "relation",

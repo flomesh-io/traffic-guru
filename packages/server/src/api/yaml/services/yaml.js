@@ -1,9 +1,9 @@
 'use strict';
 
 /**
- * upstream service
+ * yaml service
  */
+
 const { createCoreService } = require('@strapi/strapi').factories;
 
-module.exports = createCoreService('api::user.user',{
-});
+module.exports = createCoreService('api::yaml.yaml');

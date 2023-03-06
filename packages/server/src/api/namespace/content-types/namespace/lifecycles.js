@@ -10,7 +10,6 @@ module.exports = {
       strapi.service('api::namespace.namespace').fetchK8sService(result, params.data.regData);
 
     } else {
-      // TODO
       strapi.log.debug('-- fetch xxx service --');
     }
   },

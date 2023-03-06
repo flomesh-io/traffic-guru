@@ -7,6 +7,7 @@
 const { createCoreService } = require('@strapi/strapi').factories;
 
 const axios = require('axios');
+axios.defaults.timeout = 1000
 const querystring = require('querystring');
 const fs = require('fs');
 
@@ -115,7 +116,7 @@ module.exports = createCoreService('api::clickhouse.clickhouse', {
           method: method,
           url: urlQueryTable,
           headers: { Authorization: 'Basic ' + base64Str },
-          timeout: 30000,
+          timeout: 1000,
         });
       } else {
         response = await axios({
@@ -123,7 +124,7 @@ module.exports = createCoreService('api::clickhouse.clickhouse', {
           url: urlQueryTable,
         });
       }
-
+      
       if (response.data == 0) {
         const ddl = fs.readFileSync(`${__dirname}/log.ddl`, 'utf8');
 
@@ -139,7 +140,7 @@ module.exports = createCoreService('api::clickhouse.clickhouse', {
             method: method,
             url: urlCreateTable,
             headers: { Authorization: 'Basic ' + base64Str },
-            timeout: 30000,
+            timeout: 1000,
           });
         } else {
           response = await axios({

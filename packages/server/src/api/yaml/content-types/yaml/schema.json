@@ -1,0 +1,34 @@
+{
+  "kind": "collectionType",
+  "collectionName": "yamls",
+  "info": {
+    "singularName": "yaml",
+    "pluralName": "yamls",
+    "displayName": "yaml",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "yaml": {
+      "type": "text"
+    },
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "yamls"
+    },
+    "result": {
+      "type": "text"
+    },
+    "namespace": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::namespace.namespace",
+      "inversedBy": "yamls"
+    }
+  }
+}
