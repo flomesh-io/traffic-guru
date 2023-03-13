@@ -51,12 +51,12 @@
         name="snscode"
         :rules="rules.required"
       >
-      <SnsCode
-        ref="snscode"
-        v-model:value="formState.snscode"
-        @validate="validate"
-        :username="formState.email"
-      />
+        <SnsCode
+          ref="snscode"
+          v-model:value="formState.snscode"
+          @validate="validate"
+          :username="formState.email"
+        />
       </FormItem>
       <FormItem
         class="mb-20"
