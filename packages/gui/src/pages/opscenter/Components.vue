@@ -522,6 +522,17 @@
                       class="width-120"
                     />
                   </div>
+                  <div
+                    class="mt-10"
+                    v-if="payload.type.toLowerCase() == 'pipy4lb'"
+                  >
+                    <label>{{ $t("Global Id Prefix") }} : </label>
+                    <a-input
+                      :placeholder="$t('unset')"
+                      v-model:value="payload.json.idPrefix"
+                      class="width-120"
+                    />
+                  </div>
                 </div>
                 <div class="flex-item">
                   <div class="mt-10">
@@ -562,6 +573,17 @@
                     <a-input
                       :placeholder="$t('unset')"
                       v-model:value="payload.json.writeTimeout"
+                      class="width-120"
+                    />
+                  </div>
+                  <div
+                    class="mt-10"
+                    v-if="payload.type.toLowerCase() == 'pipy4lb'"
+                  >
+                    <label>{{ $t("Max LBs") }} : </label>
+                    <a-input
+                      :placeholder="$t('unset')"
+                      v-model:value="payload.json.maxLBs"
                       class="width-120"
                     />
                   </div>
@@ -804,8 +826,9 @@ export default {
           readTimeout: "5s",
           writeTimeout: "5s",
           idleTimeout: "60s",
+          maxLBs: 20,
           maxConnectionsGlobal: "3000",
-
+          idPrefix: "",
           bgp: '{\n  \"admin_port\": \"0.0.0.0:8080\",\n  \"bgp_nodes\": [\n    \"192.168.10.31\",\n    \"192.168.10.32\"\n  ],\n  \"debug\": false,\n  \"ipv6\": false,\n  \"asn4\": false,\n  \"afi_safi\": [\n    [\n      1,\n      1\n    ]\n  ],\n  \"bgp_addresses\": [\n    \"192.168.52.147\"\n  ],\n  \"my_asn\": 7675,\n  \"hold_time\": 180,\n  \"bgp_id\": \"192.168.52.148:179\",\n  \"withdrawn_routes\": [],\n  \"origin\": 0,\n  \"as_path\": [\n    [\n      2,\n      [\n        7675\n      ]\n    ]\n  ],\n  \"nexthop\": \"192.168.52.148\",\n  \"prefixes\": []\n}',
         },
 
@@ -1127,7 +1150,7 @@ export default {
 
     remove(index, type, item) {
       this.$gql
-        .mutation(`deleteFleet(id: ${item.id}){data{id}}`)
+        .mutation(`deleteFleet(id: ${item.id}){data{id,attributes{name}}}`)
         .then(() => {
           this.$message.success(this.$t("Deleted successfully"), 3);
           this.loaddata();

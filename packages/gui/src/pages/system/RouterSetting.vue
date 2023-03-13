@@ -397,7 +397,7 @@ export default {
 						sort,
 						level,
 						parent{data{id,attributes{name,displayName,path,fullPath,disabled,authority,invisible,sort,level}}},
-						children{data{id,attributes{name,displayName,path,fullPath,disabled,authority,invisible,sort,level}}}
+						children(pagination: {limit: 9999}){data{id,attributes{name,displayName,path,fullPath,disabled,authority,invisible,sort,level}}}
 					}}}`,
         )
         .then((res) => {

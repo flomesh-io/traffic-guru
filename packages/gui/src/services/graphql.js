@@ -87,7 +87,7 @@ export function query(query, variables, variablesType, fetchPolicy) {
         .then((fetchRes) => {
           if (fetchRes.status == 200) {
             const res = fetchRes.data;
-						let _d = res.data ? (res.data[fun] || res.data):null;
+						let _d = res.data ? (res.data[fun] != null?res.data[fun]: res.data) :null;
             if (res.errors && res.errors.message) {
               messageError(res.errors.message);
               reject(res.errors);

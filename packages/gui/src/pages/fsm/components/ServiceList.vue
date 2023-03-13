@@ -159,9 +159,10 @@
               name="organization"
               :item="record"
             />
-            <a-tag v-else>
+            <a-tag v-else-if="record.organizationName && record.organizationName!='-'">
               {{ record.organizationName }}
             </a-tag>
+            <span v-else>-</span>
           </template>
           <template v-else-if="column.dataIndex === 'labels'">
             <div v-if="record.labels">

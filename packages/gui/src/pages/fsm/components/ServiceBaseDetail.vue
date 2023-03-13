@@ -68,10 +68,35 @@
           }}
         </DetailListItem>
         <DetailListItem
-          v-if="pid != '' && $isPro"
+          v-if="$isPro"
           :term="$t('Organization')"
+          name="organization"
         >
-          {{ organization?.name || "-" }}
+          <a-select
+            v-permission="pid?['admin']:''"
+            :placeholder="$t('unset')"
+            v-model:value="organization.id"
+            class="width-180"
+            ref="select"
+          >
+            <a-select-option
+              :value="org.id"
+              :key="index"
+              v-for="(org, index) in orgs"
+            >
+              {{
+                org.name
+              }}
+            </a-select-option>
+          </a-select>
+          <div
+            class="width-180"
+            v-if="pid"
+          >
+            <a-tag v-permission="['!admin']">
+              {{ organization?.name }}
+            </a-tag>
+          </div>
         </DetailListItem>
         <DetailListItem
           :term="$t('Sidecar')"
@@ -316,7 +341,7 @@ export default {
       creationTimestamp: "-",
       annotationValue: "",
       certificates: [],
-      organization: null,
+      organization: {id:null},
       sidecar: null,
       isGateway: null,
       gatewayPath: null,
@@ -637,7 +662,7 @@ export default {
           }
           let registry = res.registry;
           let ns = res.ns;
-          this.organization = res.organization ? res.organization : {};
+          this.organization = res.organization ? res.organization : {id:null};
           this.sidecar = res.sidecar ? res.sidecar.id : null;
           this.isGateway = res.isGateway;
           this.gatewayPath = res.gatewayPath;
@@ -766,7 +791,7 @@ export default {
       }
       let input = {
         name: this.detail.metadata.name,
-        // organization: this.organization,
+        organization: this.organization?.id,
         isGateway: this.isGateway,
         gatewayPath: this.gatewayPath,
         sidecar: this.sidecar || null,

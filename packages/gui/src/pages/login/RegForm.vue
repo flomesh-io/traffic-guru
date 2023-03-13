@@ -33,7 +33,7 @@
       </FormItem>
       <FormItem
         class="mb-20"
-        name="name"
+        name="email"
         :rules="rules.email"
       >
         <MdInput
@@ -46,13 +46,18 @@
           {{ $t("Email") }}
         </MdInput>
       </FormItem>
-      <SnsCode
+      <FormItem
         class="mb-20"
+        name="snscode"
+        :rules="rules.required"
+      >
+      <SnsCode
         ref="snscode"
         v-model:value="formState.snscode"
         @validate="validate"
-        :username="formState.name"
+        :username="formState.email"
       />
+      </FormItem>
       <FormItem
         class="mb-20"
         name="password"
@@ -95,7 +100,7 @@
 </template>
 
 <script>
-import { register, verificationCode, getPermission } from "@/services/user";
+import { register, getPermission, getUserInfo } from "@/services/user";
 import { setAuthorization } from "@/utils/request";
 import { mapMutations } from "vuex";
 import MdInput from "@/components/MDinput/MDinput";
@@ -162,9 +167,13 @@ export default {
       const password = this.formState.password;
       register(name, email, password, snscode)
         .then(this.afterLogin)
-        .catch(() => {
+        .catch((e) => {
           this.logging = false;
-          this.$message.error(this.$t("The email already exists"), 3);
+          if (e.length && e[0].message) {
+            this.$message.error(this.$t(e[0].message), 3);
+          } else {
+            this.$message.error(this.$t("The email already exists"), 3);
+          }
         });
     },
 
@@ -232,7 +241,7 @@ export default {
 								
                 this.$gql
                   .query(
-                    `userOrganizationRoles(pagination:{limit: ${this.$DFT_LIMIT}},filters:{user:{eq:${loginRes.user.id}}}){data{id,attributes{
+                    `userOrganizationRoles(pagination:{limit: ${this.$DFT_LIMIT}},filters:{user:{id:{eq:${loginRes.user.id}}}}){data{id,attributes{
 											type,
 											project{data{id,attributes{name}}},
 											organization{data{id,attributes{name}}},
@@ -268,31 +277,6 @@ export default {
       }
     },
 
-    countdown() {
-      this.snsnum--;
-      if (this.snsnum > 0) {
-        setTimeout(() => {
-          this.countdown();
-        }, 1000);
-      }
-    },
-
-    snshover() {
-      if (this.snsstatus == "ok") {
-        this.snsstatus = "retry";
-      }
-    },
-
-    snssend() {
-      this.snsloading = true;
-      setTimeout(() => {
-        this.snsloading = false;
-        this.snsstatus = "ok";
-        verificationCode(this.formState.email, this.$t);
-        this.snsnum = 8;
-        this.countdown();
-      }, 1000);
-    },
   },
 };
 </script>

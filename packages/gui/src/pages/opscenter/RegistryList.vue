@@ -269,8 +269,8 @@ export default {
 							name,
 							type,
 							address,
-							services{data{id,attributes{name}}},
-							namespaces{data{id,attributes{
+							services(pagination: {limit: 9999 }){data{id,attributes{name}}},
+							namespaces(pagination: {limit: 9999 }){data{id,attributes{
 								name,
 								services{data{id,attributes{
 									uid,

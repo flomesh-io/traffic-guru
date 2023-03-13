@@ -26,10 +26,9 @@ export function verificationCode(identifier, $t, call) {
   );
 }
 
-export async function login(identifier, password, verificationCode) {
+export async function login(identifier, password, verificationCode, isPass) {
   logout();
   let input = { identifier, password };
-  let isPass = process.env.VUE_APP_LOGIN_CODE == "pass";
   if (!isPass) {
     input.verificationCode = verificationCode;
   }
@@ -69,7 +68,11 @@ export async function register(username, email, password, verificationCode) {
   return mutation(
     `${_fun}(input: $input){jwt,user{id,username,email,role{id,name,type,description}}}`,
     { input },
-    { input: "UsersPermissionsRegisterInput!" },
+    {
+      input: !isPass
+        ? "UsersPermissionsRegisterByCodeInput!"
+        : "UsersPermissionsRegisterInput!",
+    },
     null,
     true,
   );
@@ -89,6 +92,7 @@ export function logout() {
   localStorage.removeItem(process.env.VUE_APP_ROUTES_KEY);
   localStorage.removeItem(process.env.VUE_APP_PERMISSIONS_KEY);
   localStorage.removeItem(process.env.VUE_APP_ROLES_KEY);
+  localStorage.removeItem(process.env.VUE_APP_USER_KEY);
   removeAuthorization();
 }
 

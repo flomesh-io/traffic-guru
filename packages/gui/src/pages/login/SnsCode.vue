@@ -1,5 +1,8 @@
 <template>
-  <div class="flex">
+  <div
+    class="flex"
+    v-if="loginCode != 'pass'"
+  >
     <div class="flex-item">
       <MdInput
         icon="safty"
@@ -61,9 +64,11 @@ export default {
   },
 
   props: ["value", "username"],
+	
   i18n: require("./i18n"),
   data() {
     return {
+      loginCode: process.env.VUE_APP_LOGIN_CODE,
       code: '',
       snsloading: false,
       snsstatus: "free",

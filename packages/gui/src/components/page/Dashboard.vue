@@ -101,7 +101,10 @@
           <InfoCircleOutlined class="info-circle" />
         </template>
       </a-tooltip>
-      <HeadInfo :title="$t('Count of components')">
+      <HeadInfo
+        :title="$t('Count of components')"
+        v-if="false"
+      >
         <template #body>
           <a-badge
             v-if="subscribes.length > 0"

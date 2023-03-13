@@ -212,7 +212,7 @@ export default {
         },
       ],
 
-      shell: "",
+      shell: ">",
       historyShell: "",
       aid: "",
       name: "",
@@ -236,7 +236,7 @@ export default {
 
   methods: {
     enter(cmd){
-      if(cmd.indexOf("kubectl ") == 0){
+      if(cmd.indexOf("kubectl ") == 0 || cmd.indexOf(">kubectl ") == 0 ){
         this.createKubectl(cmd);
       } else {
         this.$message.error(this.$t("Must a kubectl command"), 3);
@@ -291,14 +291,15 @@ export default {
 
     changeShell(cmd) {
       if (cmd == "clear") {
-        this.shell = "";
+        this.shell = ">";
       } else {
         this.shell += cmd + "\n";
         this.createKubectl(cmd);
       }
     },
 		
-    createKubectl(command) {
+    createKubectl(cmd) {
+      let command = cmd.indexOf(">")==0?cmd.substr(1):cmd;
       let data = {
         command,
         registry: this.env1.registerId
@@ -316,9 +317,9 @@ export default {
         )
         .then((res) => {
           if(res.data.result){
-            this.shell += res.data.result + "\n";
+            this.shell += res.data.result + "\n>";
           }else {
-            this.shell += '[void]' + "\n";
+            this.shell += '[void]' + "\n>";
           }
         });
     },
@@ -430,7 +431,7 @@ export default {
           this.historyShell = "";
           this.kubectls = res.data;
           this.kubectls.forEach((kubectl)=>{
-            this.historyShell += (kubectl.namespace?`[${kubectl.registry?.name}/${kubectl.namespace?.name}] >`:`[${kubectl.registry?.name}] >`)+kubectl.command +'\n';
+            this.historyShell += (kubectl.namespace?`[${kubectl.registry?.name}/${kubectl.namespace?.name}] > `:`[${kubectl.registry?.name}] > `)+kubectl.command +'\n';
             this.historyShell += kubectl.result?kubectl.result:'[void]' +'\n';
           })
           this.total = res.pagination.total;

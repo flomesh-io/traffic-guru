@@ -54,6 +54,7 @@
       <SnsCode
         class="mb-20"
         ref="snscode"
+        v-if="user?.name != formState.name"
         v-model:value="formState.snscode"
         @validate="validate"
         :username="formState.name"
@@ -91,7 +92,7 @@
 <script>
 import { login, getPermission, getUserInfo } from "@/services/user";
 import { setAuthorization } from "@/utils/request";
-import { mapMutations } from "vuex";
+import { mapMutations, mapGetters, mapState } from "vuex";
 import MdInput from "@/components/MDinput/MDinput";
 import SnsCode from "./SnsCode";
 import Cookie from "js-cookie";
@@ -99,7 +100,6 @@ import { ArrowRightOutlined } from "@ant-design/icons-vue";
 import { notification } from "ant-design-vue";
 import { h } from "vue";
 import { loadRoutes } from "@/utils/routerUtil";
-import { mapState } from "vuex";
 import FormItem from "@/components/tool/FormItem";
 
 export default {
@@ -122,7 +122,6 @@ export default {
       logging: false,
       error: "",
       activeKey: "1",
-      user: "",
       password: "",
       formState: {
         snscode: "",
@@ -135,11 +134,12 @@ export default {
 
   computed: {
     ...mapState("rules", ["rules"]),
+    ...mapGetters("account", ["user"]),
     systemName() {
       return this.$store.state.setting.systemName;
     },
   },
-
+	
   methods: {
     ...mapMutations("account", ["setUser", "setPermissions", "setRoles"]),
 
@@ -161,7 +161,10 @@ export default {
       const name = this.formState.name;
       const password = this.formState.password;
       const snscode = this.formState.snscode;
-      login(name, password, snscode)
+			
+      let isPass = process.env.VUE_APP_LOGIN_CODE == "pass" 
+        || this.user?.name == this.formState.name;
+      login(name, password, snscode, isPass)
         .then(this.afterLogin)
         .catch(() => {
           this.logging = false;

@@ -99,3 +99,39 @@ getPermission({id:uor.role.id})
           });
       }
     },
+		
+
+        <DetailListItem
+          :term="$t('Organization')"
+          :rules="rules.required"
+          name="organization"
+        >
+          <a-select
+            :placeholder="$t('unset')"
+            v-model:value="detail.organization"
+            class="width-180"
+            ref="select"
+          >
+            <a-select-option
+              :value="org.id"
+              :key="index"
+              v-for="(org, index) in orgs"
+            >
+              {{
+                org.name
+              }}
+            </a-select-option>
+          </a-select>
+        </DetailListItem>
+				
+				
+				this.detail.organization = res.organization
+				  ? res.organization.id
+				    ? res.organization.id
+				    : res.organization
+				  : null;
+					
+
+      this.$gql.query(`myOrganizations{data{id,attributes{name}}}`).then((res) => {
+        this.orgs = res.data;
+      });

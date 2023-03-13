@@ -518,10 +518,10 @@ export default {
 						address,
 						config,
 						content,
-						namespaces{data{id,attributes{
+						namespaces(pagination: {limit: 9999 }){data{id,attributes{
 							name,
 							organization{data{id,attributes{name}}},
-							services{data{id,attributes{
+							services(pagination: {limit: 9999 }){data{id,attributes{
 								uid,
 								gatewayPath,
 								fleet{data{id,attributes{name}}},

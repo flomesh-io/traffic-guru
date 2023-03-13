@@ -43,6 +43,9 @@ module.exports = {
           detail: { name: "配置文件详情" },
           create: { name: "新建配置" },
         },
+        lbevent: {
+          list: { name: "LB操作记录" },
+        },
       },
       fsm: {
         name: "FSM ∣ 服务网格",

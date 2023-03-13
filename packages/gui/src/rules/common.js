@@ -81,6 +81,21 @@ const rules = {
 			trigger: "blur",
 		},
 	],
+	uniqueGlobalId:(mode, where) => {
+		return [
+			{
+				required: true,
+				message: "Global ID is required",
+				whitespace: true,
+				trigger: "blur",
+			},
+			{
+				message: "Global ID already exists",
+				asyncValidator: uniqueNameValidate('globalId', mode, where),
+				trigger: "blur",
+			},
+		];
+	},
 	uniqueName:(mode, where) => {
 		return [
 			{
