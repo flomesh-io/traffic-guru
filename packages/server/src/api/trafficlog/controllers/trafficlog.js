@@ -52,6 +52,24 @@ module.exports = createCoreController('api::trafficlog.trafficlog',{
   //   }
   // },
 
+  async logs(ctx) {
+    try {
+      const fleet = await strapi.service('api::trafficlog.trafficlog').getLogFleet();
+      const reqBody = ctx.request.body;
+      strapi.log.debug('xxxxxxxxxxxxxx');
+      if(fleet.type === 'clickhouse'){
+        return await strapi.service('api::trafficlog.trafficlog').logs2Clickhouse(reqBody, fleet.content);
+      }
+      else if(fleet.type === 'postgresql'){
+        return await strapi.service('api::trafficlog.trafficlog').logs2Postgresql(reqBody, fleet.content);
+      } 
+      //error return
+      return {error: fleet.type + ' not supported'};
+    } catch (error) {
+      return {error: error};
+    }
+  },
+
   async querylogs(ctx) {
     // strapi.log.debug(JSON.stringify(ctx.request.body));
     try {

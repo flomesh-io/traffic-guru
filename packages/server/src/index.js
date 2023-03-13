@@ -175,10 +175,8 @@ module.exports = {
           getIngresses(filters: IngressFiltersInput,pagination: PaginationArg = {},sort: [String] = []): IngressEntityResponseCollection
           getIngress(id: ID): IngressEntityResponse
 
-          myMessages(filters: MessageFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): MessageEntityResponseCollection
 
           getOrganizationsTree: JSON
-          myOrganizations(filters: OrganizationFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): OrganizationEntityResponseCollection
 
           getRoleResourcePermission(type: String, id: ID): RolePermission
 
@@ -191,6 +189,9 @@ module.exports = {
           getUser(id: ID): UsersPermissionsUserEntityResponse!
 
           getInitialized: Boolean!
+
+          myOrganizations(filters: OrganizationFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): OrganizationEntityResponseCollection
+          myMessages(filters: MessageFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): MessageEntityResponseCollection
         }
         type Mutation {
 
@@ -211,8 +212,8 @@ module.exports = {
           updateServiceSync(id: ID!, data: ServiceInput!): ServiceEntityResponse
           deleteServiceSync(id: ID!): ServiceEntityResponse
 
-          loginByCode(data: UsersPermissionsLoginByCodeInput!): UsersPermissionsLoginPayload!
-          registerByCode(data: UsersPermissionsRegisterByCodeInput!): UsersPermissionsLoginPayload!
+          loginByCode(input: UsersPermissionsLoginByCodeInput!): UsersPermissionsLoginPayload!
+          registerByCode(input: UsersPermissionsRegisterByCodeInput!): UsersPermissionsLoginPayload!
           changePasswordByCode(data: JSON!): Boolean
           generateVerificationCode(identifier: String): JSON
 
@@ -271,28 +272,12 @@ module.exports = {
             }
           },
 
-          myMessages: {
-            async resolve (obj, args, ctx) {
-              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('api::message.message'), true)
-              const { results } = await strapi.service('api::message.message').myMessages(transformedArgs, ctx);
-              return entityUtils.toEntityResponseCollection(transformedArgs, 'api::message.message', results);
-            }
-          },
-
           getOrganizationsTree: {
             async resolve (obj, args, ctx) {
               const results = await strapi.controller('api::organization.organization').getOrgsTree(args, ctx);
               return results
             },
           },
-          myOrganizations: {
-            async resolve (obj, args, ctx) {
-              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel("api::organization.organization"), true)
-              const results = await strapi.controller('api::organization.organization').myOrganizations(transformedArgs, ctx);
-              return entityUtils.toEntityResponseCollection(transformedArgs, 'api::organization.organization', results)
-            },
-          },
-
           getRoleResourcePermission: {
             async resolve (obj, args, ctx) {
               const results = await strapi.service('api::resource-permission.resource-permission').getResourcePermission(args, ctx);
@@ -341,6 +326,21 @@ module.exports = {
             }
           },
 
+          myMessages: {
+            async resolve (obj, args, ctx) {
+              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('api::message.message'), true)
+              const { results } = await strapi.service('api::message.message').myMessages(transformedArgs, ctx);
+              return entityUtils.toEntityResponseCollection(transformedArgs, 'api::message.message', results);
+            }
+          },
+
+          myOrganizations: {
+            async resolve (obj, args, ctx) {
+              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel("api::organization.organization"), true)
+              const results = await strapi.controller('api::organization.organization').myOrganizations(transformedArgs, ctx);
+              return entityUtils.toEntityResponseCollection(transformedArgs, 'api::organization.organization', results)
+            },
+          },
 
         },
         Mutation: {

@@ -38,7 +38,7 @@ async function checkCode(identifier, verificationCode) {
     .query('api::system-setting.system-setting')
     .findOne({ where: { type: 'EmailConf' } });
   let code = null;
-  if (emailConf?.content?.service) {
+  if (emailConf?.content?.service && emailConf?.content?.enabled) {
     const date = new Date(new Date().getTime() - 5 * 60 * 1000).toISOString();
     code = await strapi.db
       .query('api::verification-code.verification-code')
@@ -63,12 +63,12 @@ async function checkCode(identifier, verificationCode) {
 
 module.exports = {
   async loginByCode(obj, args, context) {
-    const {emailConf, code} = await checkCode(args.data.identifier, args.data.verificationCode);
+    const {emailConf, code} = await checkCode(args.input.identifier, args.input.verificationCode);
 
     const { koaContext } = context;
 
-    koaContext.params = { provider: args.data.provider };
-    koaContext.request.body = toPlainObject(args.data);
+    koaContext.params = { provider: args.input.provider };
+    koaContext.request.body = toPlainObject(args.input);
 
     await strapi
       .plugin('users-permissions')
@@ -95,11 +95,11 @@ module.exports = {
   },
 
   async registerByCode(obj, args, context) {
-    const {emailConf, code} = await checkCode(args.data.email, args.data.verificationCode);
+    const {emailConf, code} = await checkCode(args.input.email, args.input.verificationCode);
 
     const { koaContext } = context;
 
-    koaContext.request.body = toPlainObject(args.data);
+    koaContext.request.body = toPlainObject(args.input);
 
     await strapi
       .plugin('users-permissions')

@@ -9,6 +9,11 @@ module.exports = {
   routes: [
     { 
       method: 'POST',
+      path: '/log4pipy/logs', 
+      handler: 'trafficlog.logs',
+    },
+    { 
+      method: 'POST',
       path: '/log4pipy/querylogs', 
       handler: 'trafficlog.querylogs',
     },

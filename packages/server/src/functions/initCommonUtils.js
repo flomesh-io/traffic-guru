@@ -21,19 +21,19 @@ module.exports = {
     await strapi.plugin('users-permissions').service('role').updateRole(publicRoleId, rolePublic);
 
     // add admin user
-    const userCount = await strapi.db.query('plugin::users-permissions.user').count();
-    if (userCount == 0) {
-      const adminUser = {
-        username: 'admin',
-        email: 'admin@flomesh.cn',
-        password: 'flomesh123',
-        role: 1,
-        confirmed: true,
-        blocked: false,
-        provider: "local"
-      }
-      await strapi.plugin('users-permissions').service('user').add(adminUser);
-    }
+    // const userCount = await strapi.db.query('plugin::users-permissions.user').count();
+    // if (userCount == 0) {
+    //   const adminUser = {
+    //     username: 'admin',
+    //     email: 'admin@flomesh.cn',
+    //     password: 'flomesh123',
+    //     role: 1,
+    //     confirmed: true,
+    //     blocked: false,
+    //     provider: "local"
+    //   }
+    //   await strapi.plugin('users-permissions').service('user').add(adminUser);
+    // }
 
     // init components
     const envs = process.env
@@ -64,5 +64,26 @@ module.exports = {
       }
     }
 
+
+    const emailConf = await strapi.db.query('api::system-setting.system-setting').findOne({where: {type: 'EmailConf'}});
+    if (!emailConf) {
+      const systemSettingEmailConf = {
+        auth: {
+          pass: 'oCSGerZusMB262dU',
+          user: 'john@flomesh.cn',
+        },
+        port: 465,
+        service: 'QQex',
+        secureConnection: true,
+        enabled: true
+      };
+      await strapi.db.query('api::system-setting.system-setting').create({
+        data: {
+          type: 'EmailConf',
+          mode: 'global',
+          content: systemSettingEmailConf,
+        }
+      });
+    }
   }
 };

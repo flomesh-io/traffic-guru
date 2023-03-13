@@ -26,6 +26,21 @@
       "relation": "manyToOne",
       "target": "plugin::users-permissions.user",
       "inversedBy": "events"
+    },
+    "name": {
+      "type": "string"
+    },
+    "data": {
+      "type": "json"
+    },
+    "organization": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::organization.organization",
+      "inversedBy": "events"
+    },
+    "from": {
+      "type": "string"
     }
   }
 }

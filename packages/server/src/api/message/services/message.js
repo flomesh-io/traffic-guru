@@ -8,6 +8,6 @@ const { createCoreService } = require('@strapi/strapi').factories;
 
 module.exports = createCoreService('api::message.message',{
     async myMessages (args) {
-        return await strapi.db.query("api::message.message").findMany(args)
+        return await strapi.entityService.findMany('api::message.message',args);
     },
 });

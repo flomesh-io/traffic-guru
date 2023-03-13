@@ -24,6 +24,52 @@ module.exports = createCoreService('api::trafficlog.trafficlog',{
   },
 
   /**
+   * save logs
+   */
+  async logs2Clickhouse(reqBody) {
+    const logs = reqBody.split('\n');
+    return {
+      "data": logs
+    };
+  },
+  async logs2Postgresql(reqBody, dbConf) {
+    const logs = reqBody.split('\n');
+    const connStr = `tcp://${dbConf.user}:${dbConf.password}@${dbConf.host}:${dbConf.port}/${dbConf.database}`;
+    const pgClient =  new pg.Client(connStr);
+    pgClient.connect();
+    const baseSql = `
+    INSERT INTO trafficlogs (req_size, res_size, req_time, res_time, end_time, 
+    remote_addr, local_addr, remote_port, local_port, req_path, req_method, req_protocol,
+    req_headers, res_status, service_name, pod_name, mesh_name, cluster_name, bond_type, message)  
+     VALUES 
+     `
+    let valueSql = '';
+    for (let index = 0; index < logs.length; index++) {
+      if(index>0){
+        valueSql += ',';
+      }
+      if(logs[index]){
+        const log = JSON.parse(logs[index]);
+        valueSql += `
+        (
+           ${log.reqSize}, ${log.resSize}, ${log.reqTime}, ${log.resTime}, ${log.endTime}, 
+          '${log.remoteAddr}', '${log.localAddr}', ${log.remotePort}, ${log.localPort}, 
+          '${log.req.path}', '${log.req.method}', '${log.req.protocol}', '${JSON.stringify(log.req.headers)}', ${log.res.status}, 
+          '${log.service.name}', '${log.pod.name}', '${log.meshName}', '${log.clusterName}', '${log.type}',
+          '
+          ${logs[index]}
+          '
+        ) 
+        `;
+      }
+    }
+    console.debug(baseSql + valueSql);
+    await pgClient.query(baseSql + valueSql)
+      .then(() => pgClient.end());
+    return {msg: 'ok'}
+  },
+
+  /**
    * query logs
    */
   async queryLogs2Clickhouse(reqBody, dbConf) {

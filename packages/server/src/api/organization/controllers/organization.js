@@ -27,14 +27,17 @@ module.exports = createCoreController('api::organization.organization',{
   },
   async myOrganizations(args, ctx) {
     if (ctx.state.user.role.id != 1) {
-      const orgRole = await strapi.db
-        .query('api::user-organization-role.user-organization-role')
-        .findMany({where: { type: 'organization', user: ctx.state.user.id },populate: true});
-      const ids = orgRole.map((item) => item['organization'].id);
-      if (!args.where) args.where = {}
-      args.where.id = {$in: ids}
+      const organizations = await strapi.db
+        .query('api::organization.organization')
+        .findMany({
+          where: { users: ctx.state.user.id },
+          populate: true,
+        });
+      const ids = organizations.map((item) => item.id);
+      if (!args.filters) args.filters = {}
+      args.filters.id = {$in: ids}
     }
-    const values = await strapi.db.query('api::organization.organization').findMany(args);
+    const values = await strapi.entityService.findMany('api::organization.organization',args);
     return values;
   },
 });

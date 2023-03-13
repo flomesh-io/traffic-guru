@@ -9,8 +9,15 @@ const fsOpenAsync = util.promisify(fs.open);
 const fsWriteFile = util.promisify(fs.writeFile);
 const exec = require('child_process').execSync;
 const namespacedCMD = [" get "]
+const noSupportCMD = ["edit", "exec"]
 module.exports = {
   beforeCreate: async (event) => {
+    for (const cmd of noSupportCMD) {
+      if (event.params.data.command.indexOf("kubectl " + cmd) > -1) {
+         event.params.data.result = "The current interactive command is not supported"
+         return;
+      }
+    }
     const registry = await strapi.db.query("api::registry.registry").findOne({where: {id: event.params.data.registry}, populate: true});
     if (!registry) {
       throw new Error(`Specify a registry`);
@@ -23,7 +30,7 @@ module.exports = {
         break;
       }
     }
-    if (namespaced) {
+    if (namespaced && event.params.data.command.indexOf(" -n ") == -1 && event.params.data.command.indexOf(" -A ") == -1) {
       if (!event.params.data.namespace) {
         nsCmd = " -A"
       } else {

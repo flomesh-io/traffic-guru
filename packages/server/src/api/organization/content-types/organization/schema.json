@@ -90,6 +90,12 @@
       "relation": "manyToMany",
       "target": "api::organization.organization",
       "mappedBy": "whiteOrgs"
+    },
+    "events": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::event.event",
+      "mappedBy": "organization"
     }
   }
 }
