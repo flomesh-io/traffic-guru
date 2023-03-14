@@ -20,13 +20,18 @@ module.exports = {
         }
     } else {
       if (args.filters) {
-        args.filters.registry = k8s_cluster_id
-        if (k8s_cluster_ns !== '_all') {
+        if (!args.filters.registry) {
+          args.filters.registry = k8s_cluster_id
+        }
+        if (!args.filters.namespace) {
           args.filters.namespace = k8s_cluster_ns
+        }
+        if (args.filters?.namespace == "_all" || args.filters?.namespace?.$eq == "_all") {
+          delete args.filters.namespace
         }
       }
     }
-    return await strapi.db.query("api::" + type + "." + type).findMany(args);
+    return await strapi.db.query("api::" + type + "." + type).findMany({where: args.filters});
   },
 
   async initKubeEntitys(ctx, type, res, id) {
@@ -73,13 +78,13 @@ module.exports = {
             registry: k8s_cluster_id,
             name: item.metadata.namespace,
           }});
-          data.namespace = ns.id;
+          data.namespace = ns?.id;
         } else if (type == 'service') {
           const ns = await strapi.db.query('api::namespace.namespace').findOne({where: {
             registry: k8s_cluster_id,
             name: item.metadata.namespace,
           }});
-          data.ns = ns.id;
+          data.ns = ns?.id;
         }
 
         await strapi.db.query("api::" + type + "." + type).create({data});

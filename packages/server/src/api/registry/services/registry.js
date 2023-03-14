@@ -7,6 +7,7 @@ const k8s = require('@kubernetes/client-node');
 const axios = require('axios');
 
 async function syncKubernetes (data) {
+  await strapi.service('api::registry.registry').fetchK8sNamespace(data);
   const kc = await strapi.service('api::kubernetes.kubernetes').getKubeConfig(data.id, 'k8s');
   const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 
@@ -19,7 +20,7 @@ async function syncKubernetes (data) {
   for (const sercet of sercets.body.items) {
     const ns = await strapi.db.query('api::namespace.namespace')
       .findOne({where: { registry: data.id, name: sercet.metadata.namespace }});
-    if (!ns) return;
+    if (!ns) return
     const cert = await strapi.db.query('api::certificate.certificate')
       .findOne({where: { name: sercet.metadata.name, namespace: ns.id }});
 
@@ -129,11 +130,13 @@ module.exports = createCoreService('api::registry.registry', {
     const auth = data.content.credit;
     const buf = Buffer.from(auth, 'ascii');
 
+    const url = new URL(data.address)
     const eurekaAxios = axios.create({
       baseURL: data.address,
       headers: {
         'Content-Type': 'application/json',
         Authorization: 'Basic ' + buf.toString('base64'),
+        Host: url.host
       },
     });
     try {
