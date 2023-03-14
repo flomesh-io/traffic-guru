@@ -96,6 +96,12 @@
       "relation": "oneToMany",
       "target": "api::event.event",
       "mappedBy": "organization"
+    },
+    "customEvents": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::custom-event.custom-event",
+      "mappedBy": "organization"
     }
   }
 }

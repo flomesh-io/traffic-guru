@@ -1,6 +1,6 @@
 # Open Service Mesh Edge Helm Chart
 
-![Version: 1.3.0](https://img.shields.io/badge/Version-1.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.3.0](https://img.shields.io/badge/AppVersion-v1.3.0-informational?style=flat-square)
+![Version: 1.3.2](https://img.shields.io/badge/Version-1.3.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.3.2](https://img.shields.io/badge/AppVersion-v1.3.2-informational?style=flat-square)
 
 A Helm chart to install the [osm-edge](https://github.com/flomesh-io/osm-edge) control plane on Kubernetes.
 
@@ -130,25 +130,27 @@ The following table lists the configurable parameters of the osm chart and their
 | osm.grafana.port | int | `3000` | Grafana service's port |
 | osm.grafana.rendererImage | string | `"grafana/grafana-image-renderer:3.2.1"` | Image used for Grafana Renderer |
 | osm.grafana.tolerations | list | `[]` | Node tolerations applied to control plane pods. The specified tolerations allow pods to schedule onto nodes with matching taints. |
-| osm.image.digest | object | `{"osmBootstrap":"","osmCRDs":"","osmController":"","osmHealthcheck":"","osmInjector":"","osmPreinstall":"","osmSidecarInit":""}` | Image digest (defaults to latest compatible tag) |
+| osm.image.digest | object | `{"osmBootstrap":"","osmCRDs":"","osmController":"","osmHealthcheck":"","osmInjector":"","osmInterceptor":"","osmPreinstall":"","osmSidecarInit":""}` | Image digest (defaults to latest compatible tag) |
 | osm.image.digest.osmBootstrap | string | `""` | osm-boostrap's image digest |
 | osm.image.digest.osmCRDs | string | `""` | osm-crds' image digest |
 | osm.image.digest.osmController | string | `""` | osm-controller's image digest |
 | osm.image.digest.osmHealthcheck | string | `""` | osm-healthcheck's image digest |
 | osm.image.digest.osmInjector | string | `""` | osm-injector's image digest |
+| osm.image.digest.osmInterceptor | string | `""` | osm-interceptor's image digest |
 | osm.image.digest.osmPreinstall | string | `""` | osm-preinstall's image digest |
 | osm.image.digest.osmSidecarInit | string | `""` | Sidecar init container's image digest |
-| osm.image.name | object | `{"osmBootstrap":"osm-edge-bootstrap","osmCRDs":"osm-edge-crds","osmController":"osm-edge-controller","osmHealthcheck":"osm-edge-healthcheck","osmInjector":"osm-edge-injector","osmPreinstall":"osm-edge-preinstall","osmSidecarInit":"osm-edge-sidecar-init"}` | Image name defaults |
+| osm.image.name | object | `{"osmBootstrap":"osm-edge-bootstrap","osmCRDs":"osm-edge-crds","osmController":"osm-edge-controller","osmHealthcheck":"osm-edge-healthcheck","osmInjector":"osm-edge-injector","osmInterceptor":"osm-edge-interceptor","osmPreinstall":"osm-edge-preinstall","osmSidecarInit":"osm-edge-sidecar-init"}` | Image name defaults |
 | osm.image.name.osmBootstrap | string | `"osm-edge-bootstrap"` | osm-boostrap's image name |
 | osm.image.name.osmCRDs | string | `"osm-edge-crds"` | osm-crds' image name |
 | osm.image.name.osmController | string | `"osm-edge-controller"` | osm-controller's image name |
 | osm.image.name.osmHealthcheck | string | `"osm-edge-healthcheck"` | osm-healthcheck's image name |
 | osm.image.name.osmInjector | string | `"osm-edge-injector"` | osm-injector's image name |
+| osm.image.name.osmInterceptor | string | `"osm-edge-interceptor"` | osm-interceptor's image name |
 | osm.image.name.osmPreinstall | string | `"osm-edge-preinstall"` | osm-preinstall's image name |
 | osm.image.name.osmSidecarInit | string | `"osm-edge-sidecar-init"` | Sidecar init container's image name |
 | osm.image.pullPolicy | string | `"IfNotPresent"` | Container image pull policy for control plane containers |
 | osm.image.registry | string | `"flomesh"` | Container image registry for control plane images |
-| osm.image.tag | string | `"1.3.0"` | Container image tag for control plane images |
+| osm.image.tag | string | `"1.3.2"` | Container image tag for control plane images |
 | osm.imagePullSecrets | list | `[]` | `osm-controller` image pull secret |
 | osm.inboundPortExclusionList | list | `[]` | Specifies a global list of ports to exclude from inbound traffic interception by the sidecar proxy. If specified, must be a list of positive integers. |
 | osm.injector.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[0].key | string | `"kubernetes.io/os"` |  |
@@ -221,6 +223,24 @@ The following table lists the configurable parameters of the osm chart and their
 | osm.osmController.replicaCount | int | `1` | OSM controller's replica count (ignored when autoscale.enable is true) |
 | osm.osmController.resource | object | `{"limits":{"cpu":"1.5","memory":"1G"},"requests":{"cpu":"0.5","memory":"128M"}}` | OSM controller's container resource parameters. See https://docs.openservicemesh.io/docs/guides/ha_scale/scale/ for more details. |
 | osm.osmController.tolerations | list | `[]` | Node tolerations applied to control plane pods. The specified tolerations allow pods to schedule onto nodes with matching taints. |
+| osm.osmInterceptor.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[0].key | string | `"kubernetes.io/os"` |  |
+| osm.osmInterceptor.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[0].operator | string | `"In"` |  |
+| osm.osmInterceptor.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[0].values[0] | string | `"linux"` |  |
+| osm.osmInterceptor.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[1].key | string | `"kubernetes.io/arch"` |  |
+| osm.osmInterceptor.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[1].operator | string | `"In"` |  |
+| osm.osmInterceptor.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[1].values[0] | string | `"amd64"` |  |
+| osm.osmInterceptor.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[1].values[1] | string | `"arm64"` |  |
+| osm.osmInterceptor.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].podAffinityTerm.labelSelector.matchExpressions[0].key | string | `"app"` |  |
+| osm.osmInterceptor.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].podAffinityTerm.labelSelector.matchExpressions[0].operator | string | `"In"` |  |
+| osm.osmInterceptor.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].podAffinityTerm.labelSelector.matchExpressions[0].values[0] | string | `"osm-controller"` |  |
+| osm.osmInterceptor.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].podAffinityTerm.topologyKey | string | `"kubernetes.io/hostname"` |  |
+| osm.osmInterceptor.affinity.podAntiAffinity.preferredDuringSchedulingIgnoredDuringExecution[0].weight | int | `100` |  |
+| osm.osmInterceptor.debug | bool | `false` |  |
+| osm.osmInterceptor.resource.limits.cpu | string | `"1.5"` |  |
+| osm.osmInterceptor.resource.limits.memory | string | `"1G"` |  |
+| osm.osmInterceptor.resource.requests.cpu | string | `"0.5"` |  |
+| osm.osmInterceptor.resource.requests.memory | string | `"256M"` |  |
+| osm.osmInterceptor.tolerations | list | `[]` | Node tolerations applied to control plane pods. The specified tolerations allow pods to schedule onto nodes with matching taints. |
 | osm.osmNamespace | string | `""` | Namespace to deploy OSM in. If not specified, the Helm release namespace is used. |
 | osm.outboundIPRangeExclusionList | list | `[]` | Specifies a global list of IP ranges to exclude from outbound traffic interception by the sidecar proxy. If specified, must be a list of IP ranges of the form a.b.c.d/x. |
 | osm.outboundIPRangeInclusionList | list | `[]` | Specifies a global list of IP ranges to include for outbound traffic interception by the sidecar proxy. If specified, must be a list of IP ranges of the form a.b.c.d/x. |
@@ -307,15 +327,15 @@ The following table lists the configurable parameters of the osm chart and their
 | osm.remoteLogging.endpoint | string | `""` | Remote logging's API path where the spans will be sent to |
 | osm.remoteLogging.port | int | `30514` | Port of the remote logging service |
 | osm.remoteLogging.sampledFraction | string | `"1.0"` | Sampled Fraction |
-| osm.repoServer | object | `{"codebase":"","image":"flomesh/pipy-repo:0.90.0-18","ipaddr":"127.0.0.1","standalone":false}` | Pipy RepoServer |
+| osm.repoServer | object | `{"codebase":"","image":"flomesh/pipy-repo:0.90.0-54","ipaddr":"127.0.0.1","standalone":false}` | Pipy RepoServer |
 | osm.repoServer.codebase | string | `""` | codebase is the folder used by osmController. |
-| osm.repoServer.image | string | `"flomesh/pipy-repo:0.90.0-18"` | Image used for Pipy RepoServer |
+| osm.repoServer.image | string | `"flomesh/pipy-repo:0.90.0-54"` | Image used for Pipy RepoServer |
 | osm.repoServer.ipaddr | string | `"127.0.0.1"` | ipaddr of host/service where Pipy RepoServer is installed |
 | osm.repoServer.standalone | bool | `false` | if false , Pipy RepoServer is installed within osmController pod. |
 | osm.sidecarClass | string | `"pipy"` | The class of the OSM Sidecar Driver |
-| osm.sidecarDrivers | list | `[{"proxyServerPort":6060,"sidecarImage":"flomesh/pipy:0.90.0-18","sidecarName":"pipy"},{"proxyServerPort":15128,"sidecarImage":"envoyproxy/envoy:v1.19.3","sidecarName":"envoy","sidecarWindowsImage":"envoyproxy/envoy-windows:latest"}]` | Sidecar drivers supported by osm-edge |
+| osm.sidecarDrivers | list | `[{"proxyServerPort":6060,"sidecarImage":"flomesh/pipy:0.90.0-54","sidecarName":"pipy"},{"proxyServerPort":15128,"sidecarImage":"envoyproxy/envoy:v1.19.3","sidecarName":"envoy","sidecarWindowsImage":"envoyproxy/envoy-windows:latest"}]` | Sidecar drivers supported by osm-edge |
 | osm.sidecarDrivers[0].proxyServerPort | int | `6060` | Remote destination port on which the Discovery Service listens for new connections from Sidecars. |
-| osm.sidecarDrivers[0].sidecarImage | string | `"flomesh/pipy:0.90.0-18"` | Sidecar image for Linux workloads |
+| osm.sidecarDrivers[0].sidecarImage | string | `"flomesh/pipy:0.90.0-54"` | Sidecar image for Linux workloads |
 | osm.sidecarDrivers[1].proxyServerPort | int | `15128` | Remote destination port on which the Discovery Service listens for new connections from Sidecars. |
 | osm.sidecarDrivers[1].sidecarImage | string | `"envoyproxy/envoy:v1.19.3"` | Sidecar image for Linux workloads |
 | osm.sidecarDrivers[1].sidecarWindowsImage | string | `"envoyproxy/envoy-windows:latest"` | Sidecar image for Windows workloads |

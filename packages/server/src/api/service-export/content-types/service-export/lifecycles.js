@@ -39,7 +39,7 @@ module.exports = {
       if (error.response.status === 409) {
         strapi.log.info('Exported already!');
       } else {
-        strapi.log.error(error);
+        console.error(error);
         throw new Error('ErieCanal ' + error);
       }
     });
@@ -98,12 +98,12 @@ module.exports = {
         svcExportData.metadata.resourceVersion =
           response.data.metadata.resourceVersion;
         k8sAxios.put(svcExportsUrl, svcExportData).catch(function (error) {
-          strapi.log.error(error);
+          console.error(error);
           throw new Error('ErieCanal ' + error);
         });
       })
       .catch(function (error) {
-        strapi.log.error(error);
+        console.error(error);
         throw new Error('ErieCanal ' + error);
       });
   },
@@ -139,7 +139,7 @@ module.exports = {
       '/serviceexports/' +
       svc.name;
     await k8sAxios.delete(svcExportUrl).catch(function (error) {
-      strapi.log.error(error);
+      console.error(error);
     });
   },
   async afterDelete(event) {

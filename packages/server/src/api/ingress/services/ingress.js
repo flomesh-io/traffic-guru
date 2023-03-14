@@ -109,7 +109,7 @@ module.exports = createCoreService('api::ingress.ingress',{
             args.data.content
           );
         } catch (error) {
-          strapi.log.error(error?.response?.body)
+          console.error(error?.response?.body)
           if (error?.response?.body?.message) {
             throw new Error(error?.response?.body?.message);
           } else {
@@ -142,7 +142,7 @@ module.exports = createCoreService('api::ingress.ingress',{
             values.content.metadata.namespace
           );
         } catch (error) {
-          strapi.log.error(error?.response?.body)
+          console.error(error?.response?.body)
         }
     
         return await strapi.db.query("api::" + type + "." + type).delete({where: { id: args.id }});

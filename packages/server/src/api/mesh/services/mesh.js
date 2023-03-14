@@ -80,7 +80,7 @@ module.exports = createCoreService('api::mesh.mesh',{
       // -- Address of the remote logging service (must contain the namespace). When left empty, this is computed in helper template to "remote-logging-service.<osm-namespace>.svc.cluster.local".
       result.options.osm.remoteLogging.address = ch.content.host;
       // -- Port of the remote logging service
-      result.options.osm.remoteLogging.port = ch.content.port;
+      result.options.osm.remoteLogging.port = Number(ch.content.port);
       // -- The authorization for remote logging service
       const base64Str = new Buffer.from(
         ch.content.user + ':' + ch.content.password
@@ -159,7 +159,7 @@ module.exports = createCoreService('api::mesh.mesh',{
     });
 
     if (result.mcsEnable) {
-      let helmFsmCmd = `helm repo add fsm https://charts.flomesh.io && helm install --namespace ${namespace.name} --kubeconfig ${kubeconfigPath} --set fsm.logLevel=5 --version=0.2.1 fsm fsm/fsm --create-namespace`;
+      let helmFsmCmd = `helm repo add fsm https://charts.flomesh.io && helm install --namespace ${namespace.name} --kubeconfig ${kubeconfigPath} --set fsm.logLevel=5 --version=0.2.3 fsm fsm/fsm --create-namespace`;
 
       if (result.timeout) {
         helmFsmCmd += ' --timeout ${result.timeout}';
@@ -226,7 +226,7 @@ module.exports = createCoreService('api::mesh.mesh',{
               );
             }
           } catch (error) {
-            strapi.log.error(error)
+            console.error(error)
           }
           strapi.log.info('add cluster', res.body.status.loadBalancer);
          };
@@ -462,7 +462,7 @@ module.exports = createCoreService('api::mesh.mesh',{
             );
           }
         } catch (error) {
-          strapi.log.error(error)
+          console.error(error)
         }
         strapi.log.info('del cluster', name);
        };

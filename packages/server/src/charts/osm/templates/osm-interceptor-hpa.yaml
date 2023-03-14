@@ -59,19 +59,20 @@ spec:
       labels:
         app: osm-interceptor
     spec:
+      {{- if .Values.osm.osmInterceptor.affinity }}
+      affinity:
+      {{- toYaml .Values.osm.osmInterceptor.affinity | nindent 8 }}
+      {{- end }}
       hostNetwork: true
       containers:
-      - image: "cybwan/osm-edge-interceptor:latest"
-        imagePullPolicy: Always
+      - image: "{{ include "osmInterceptor.image" . }}"
+        imagePullPolicy: {{ .Values.osm.image.pullPolicy }}
         name: osm-interceptor
         args:
-        - /app/mbctl
-        - -m
-        - osm
-        - --use-reconnect=true
+        - /app/osm-interceptor
         - --cni-mode=true
-        - --kind=true
-        - --debug=true
+        - --kind=false
+        - --debug={{ .Values.osm.osmInterceptor.debug }}
         lifecycle:
           preStop:
             exec:
@@ -80,12 +81,12 @@ spec:
               - -k
               - clean
         resources:
-          requests:
-            cpu: 100m
-            memory: 200Mi
           limits:
-            cpu: 300m
-            memory: 200Mi
+            cpu: "{{.Values.osm.osmInterceptor.resource.limits.cpu}}"
+            memory: "{{.Values.osm.osmInterceptor.resource.limits.memory}}"
+          requests:
+            cpu: "{{.Values.osm.osmInterceptor.resource.requests.cpu}}"
+            memory: "{{.Values.osm.osmInterceptor.resource.requests.memory}}"
         securityContext:
           privileged: true
         volumeMounts:
@@ -101,8 +102,6 @@ spec:
             name: host-var-run
             mountPropagation: Bidirectional
       dnsPolicy: ClusterFirst
-      nodeSelector:
-        kubernetes.io/os: linux
       priorityClassName: system-node-critical
       restartPolicy: Always
       serviceAccount: osm-interceptor

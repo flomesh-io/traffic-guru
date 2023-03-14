@@ -102,7 +102,7 @@ module.exports = {
       await strapi.service('api::service.service').deployService(service);
       // await strapi.service('api::service.service').deploySidecar(svcId);
     } catch (error) {
-      strapi.log.error(error);
+      console.error(error);
     }
   },
 };  

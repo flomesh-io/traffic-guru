@@ -192,6 +192,7 @@
                 "remoteLogging",
                 "webhookConfigNamePrefix",
                 "osmController",
+                "osmInterceptor",
                 "enablePrivilegedInitContainer",
                 "injector",
                 "osmBootstrap",
@@ -247,6 +248,43 @@
                     },
                     "additionalProperties": false
                 },
+                "osmInterceptor": {
+                    "$id": "#/properties/osm/properties/osmInterceptor",
+                    "type": "object",
+                    "title": "The osmInterceptor schema",
+                    "description": "The details of the osmInterceptor.",
+                    "required": [
+                        "resource"
+                    ],
+                    "properties": {
+                        "resource": {
+                            "$ref": "#/definitions/containerResources"
+                        },
+                        "podLabels": {
+                            "$id": "#/properties/osm/properties/osmInterceptor/properties/podLabels",
+                            "type": "object",
+                            "title": "The podLabels schema",
+                            "description": "Labels for the osmInterceptor pod.",
+                            "default": {}
+                        },
+                        "affinity": {
+                            "type": "object"
+                        },
+                        "tolerations": {
+                            "type": "array"
+                        },
+                        "debug": {
+                            "$id": "#/properties/osm/properties/osmInterceptor/properties//debug",
+                            "type": "boolean",
+                            "title": "debug enable",
+                            "description": "Indicates whether debug should be enabled or not.",
+                            "examples": [
+                                false
+                            ]
+                        }
+                    },
+                    "additionalProperties": false
+                },
                 "image": {
                     "$id": "#/properties/osm/properties/image",
                     "type": "object",
@@ -288,7 +326,8 @@
                                 "osmBootstrap",
                                 "osmCRDs",
                                 "osmPreinstall",
-                                "osmHealthcheck"
+                                "osmHealthcheck",
+                                "osmInterceptor"
                             ],
                             "properties": {
                                 "osmController": {
@@ -332,6 +371,12 @@
                                     "type": "string",
                                     "title": "osm-healthcheck's image name",
                                     "description": "osm-healthcheck container's image name."
+                                },
+                                "osmInterceptor": {
+                                    "$id": "#/properties/osm/properties/image/properties/name/properties/osmInterceptor",
+                                    "type": "string",
+                                    "title": "osm-interceptor's image name",
+                                    "description": "osm-interceptor container's image name."
                                 }
                             }
                         },
@@ -366,7 +411,8 @@
                                 "osmCRDs",
                                 "osmBootstrap",
                                 "osmPreinstall",
-                                "osmHealthcheck"
+                                "osmHealthcheck",
+                                "osmInterceptor"
                             ],
                             "properties": {
                                 "osmController": {
@@ -410,6 +456,12 @@
                                     "type": "string",
                                     "title": "osm-healthcheck's image digest",
                                     "description": "osm-healthcheck container's image digest."
+                                },
+                                "osmInterceptor": {
+                                    "$id": "#/properties/osm/properties/image/properties/digest/properties/osmInterceptor",
+                                    "type": "string",
+                                    "title": "osm-interceptor's image digest",
+                                    "description": "osm-interceptor container's image digest."
                                 }
                             }
                         }

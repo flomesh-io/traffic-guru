@@ -26,14 +26,15 @@ module.exports = createCoreController('api::registry.registry', ({ strapi }) => 
 
   async refresh(ctx, args) {
     await strapi.db.query("api::registry.registry").update({where:{...args}, data: {updated_at: new Date()}})
-    try {
-      ctx.koaContext.request.header.schema_id = args.id;
-      ctx.koaContext.request.header.namespace = '_all';
-      ctx.koaContext.request.header.schema_type = 'k8s';
-      await strapi.service('api::service.service').fetchServices(ctx, args);
-    } catch (error) {
-      strapi.log.error(error)
-    }
+    // already done it at afterUpdate()
+    // try {
+    //   ctx.koaContext.request.header.schema_id = args.id;
+    //   ctx.koaContext.request.header.namespace = '_all';
+    //   ctx.koaContext.request.header.schema_type = 'k8s';
+    //   await strapi.service('api::service.service').fetchServices(ctx, args);
+    // } catch (error) {
+    //   console.error(error)
+    // }
     return true;
   },
 }));

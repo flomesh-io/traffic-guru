@@ -1,0 +1,43 @@
+{
+  "kind": "collectionType",
+  "collectionName": "custom_events",
+  "info": {
+    "singularName": "custom-event",
+    "pluralName": "custom-events",
+    "displayName": "customEvent",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "action": {
+      "type": "string"
+    },
+    "content": {
+      "type": "json"
+    },
+    "organization": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::organization.organization",
+      "inversedBy": "customEvents"
+    },
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "customEvents"
+    },
+    "type": {
+      "type": "string"
+    },
+    "from": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    }
+  }
+}

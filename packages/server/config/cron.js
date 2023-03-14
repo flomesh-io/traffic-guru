@@ -17,7 +17,7 @@ async function syncRegistries () {
     try {
       strapi.service("api::registry.registry").sync(data);
     } catch (err) {
-      strapi.log.error(err.message);
+      console.error(err.message);
     }
   }
 
@@ -78,7 +78,7 @@ async function syncOsm () {
       }
     }
   } catch (error) {
-    strapi.log.error(error);
+    console.error(error);
   }
 }
 

@@ -125,6 +125,12 @@
       "relation": "oneToMany",
       "target": "api::kubectl.kubectl",
       "mappedBy": "user"
+    },
+    "customEvents": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::custom-event.custom-event",
+      "mappedBy": "user"
     }
   }
 }

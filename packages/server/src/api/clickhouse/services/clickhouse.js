@@ -7,7 +7,7 @@
 const { createCoreService } = require('@strapi/strapi').factories;
 
 const axios = require('axios');
-axios.defaults.timeout = 1000
+axios.defaults.timeout = 3000
 const querystring = require('querystring');
 const fs = require('fs');
 
@@ -150,7 +150,7 @@ module.exports = createCoreService('api::clickhouse.clickhouse', {
         }
       }
     } catch (error) {
-      strapi.log.error(error);
+      console.error(error);
     }
   },
 });

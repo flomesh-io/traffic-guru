@@ -81,7 +81,7 @@ module.exports = {
         }
       }
     } catch (error) {
-      strapi.log.error(error);
+      console.error(error);
     }
   },
 };  

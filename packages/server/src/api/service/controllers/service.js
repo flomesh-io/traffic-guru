@@ -21,7 +21,7 @@ module.exports = createCoreController('api::service.service',({ strapi }) => ({
           try {
             await strapi.service('api::service.service').fetchServices(ctx, args, args.id);
           } catch (error) {
-            strapi.log.error(error);
+            console.error(error);
           }
         }
         return await strapi.db.query("api::service.service").findOne({where: {id: args.id}});

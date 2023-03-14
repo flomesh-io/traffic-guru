@@ -45,7 +45,7 @@ module.exports = {
         }
       });
     } catch (error) {
-      strapi.log.error(error);
+      console.error(error);
     }
   },
   beforeCreate: async (event) => {
@@ -100,22 +100,23 @@ module.exports = {
     }
   },
   afterUpdate: async (event) => {
-    const { result, params } = event;
+    const { result } = event;
     if (result.type == 'k8s') {
       try {
         strapi.log.info('fetch k8s namespace');
         await strapi.service('api::registry.registry').fetchK8sNamespace(result);
       } catch (error) {
-        strapi.log.error(error)
+        console.error(error)
       }
-    } else if (result.type == 'eureka') {
-      strapi.service('api::registry.registry').fetchEurekaServices(result.id, params, true);
-    }
+    } 
+    // already done it at beforeUpdate()
+    // else if (result.type == 'eureka') {
+    //   strapi.service('api::registry.registry').fetchEurekaServices(result.id, params, true);
+    // }
   },
   beforeUpdate: async (event) => {
     const { params } = event;
-
-    const data = await strapi.db.query("api::registry.registry").findOne(params.where.id);
+    const data = await strapi.entityService.findOne('api::registry.registry', params.where.id);
     if (data.type == 'k8s') {
       if (data.config) {
         const json = YAML.parse(data.config)
@@ -124,8 +125,7 @@ module.exports = {
         data.address = cluster.cluster.server
       }
     } else if (data.type == 'eureka') {
-      await strapi.service('api::registry.registry').fetchEurekaServices(
-        data, true);
+      await strapi.service('api::registry.registry').fetchEurekaServices(data, true);
     } else {
       strapi.log.info('fetch xxx namespace');
     }

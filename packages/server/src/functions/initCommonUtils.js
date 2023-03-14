@@ -59,7 +59,7 @@ module.exports = {
             .query('api::fleet.fleet')
             .create({data: {name: component,  type: component, content: components[component]}});
         } catch (error) {
-          strapi.log.error(error)
+          console.error(error)
         }
       }
     }

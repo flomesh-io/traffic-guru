@@ -24,7 +24,7 @@ module.exports = (config, { strapi }) => {
               } else if (method && method[0].indexOf("delete") > -1) {
                 //console.log(ctx.response.body)
                 const body = JSON.parse(ctx.response.body)
-                name = body.data[method[0]].data.attributes.name
+                name = body.data[method[0]]?.data?.attributes?.name
                 //organization = body.data[method[0]].data.attributes.organization.data.attributes.id
               }
 
@@ -59,7 +59,7 @@ module.exports = (config, { strapi }) => {
             }});
             }
           } catch (error) {
-            strapi.log.error(error);
+            console.error(error);
           }
       };
   };

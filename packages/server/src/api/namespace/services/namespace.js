@@ -29,7 +29,7 @@ module.exports = createCoreService('api::namespace.namespace',{
         });
       });
     } catch (error) {
-      strapi.log.error(error);
+      console.error(error);
     }
   },
 });

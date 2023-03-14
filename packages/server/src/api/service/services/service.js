@@ -31,7 +31,14 @@ module.exports = createCoreService('api::service.service', {
 
   async fetchServices(ctx, args, id) {
     const schemaType = ctx.koaContext.request.header.schema_type;
-    if (schemaType != 'k8s') {
+    if (schemaType == 'eureka') {
+      strapi.log.info('=========>>> fetchEurekaServices()');
+      const regId = ctx.koaContext.request.header.schema_id;
+      const regData = await strapi.entityService.findOne('api::registry.registry', regId);
+      await strapi.service('api::registry.registry').fetchEurekaServices(regData, true);
+      return true;
+    }
+    else if (schemaType != 'k8s') {
       return true;
     }
     if (id) {
@@ -159,7 +166,7 @@ module.exports = createCoreService('api::service.service', {
           }
         }
       } catch (error) {
-        strapi.log.error(error);
+        console.error(error);
       }
     }
     return serviceDB;
@@ -179,7 +186,7 @@ module.exports = createCoreService('api::service.service', {
       delete args.data.content.metadata.creationTimestamp;
       delete args.data.content.metadata.managedFields;
     } catch (error) {
-      strapi.log.error(error);
+      console.error(error);
     }
     try {
       await k8sApi.createNamespacedService(
@@ -187,7 +194,7 @@ module.exports = createCoreService('api::service.service', {
         args.data.content
       );
     } catch (error) {
-      strapi.log.error(error?.response?.body)
+      console.error(error?.response?.body)
       if (error?.response?.body?.message) {
         throw new Error(error?.response?.body?.message);
       } else {
@@ -225,7 +232,7 @@ module.exports = createCoreService('api::service.service', {
         values.namespace
       );
     } catch (error) {
-      strapi.log.error(error?.response?.body)
+      console.error(error?.response?.body)
     }
 
     return await strapi.db.query("api::" + type + "." + type).delete({where: { id: args.id }});
@@ -260,7 +267,7 @@ module.exports = createCoreService('api::service.service', {
         return header + '.' + payload + '.' + sig;
       }
     } catch (error) {
-      strapi.log.error(error);
+      console.error(error);
     }
   },
 });

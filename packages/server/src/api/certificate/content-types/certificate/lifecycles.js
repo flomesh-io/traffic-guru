@@ -24,7 +24,7 @@ module.exports = {
       const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
       await k8sApi.deleteNamespacedSecret(data.name, data.namespace.name);
     } catch (error) {
-      strapi.log.error(error);
+      console.error(error);
     }
   },
 };  

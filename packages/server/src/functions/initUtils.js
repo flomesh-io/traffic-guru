@@ -62,7 +62,7 @@ module.exports = {
       left join namespaces n
       on n.id = l.namespace_id;`);
     } catch (error) {
-      strapi.log.error(error);
+      console.error(error);
     }
   },
   async init_resource_permissions_free() {

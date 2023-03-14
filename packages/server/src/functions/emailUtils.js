@@ -22,7 +22,7 @@ module.exports = {
       .createTransport(emailConf.content)
       .sendMail(mailOptions, (error) => {
         if (error) {
-          return strapi.log.error(error);
+          return console.error(error);
         }
       });
   },

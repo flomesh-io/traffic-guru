@@ -59,7 +59,7 @@ module.exports = createCoreService('api::service-import.service-import', {
 
           }
         }).catch(function (error) {
-           strapi.log.error(error)
+           console.error(error)
         });
       },
     
@@ -108,7 +108,7 @@ module.exports = createCoreService('api::service-import.service-import', {
             }
           }
         }).catch(function (error) {
-          strapi.log.error(error);
+          console.error(error);
         });
       },
     
@@ -162,7 +162,7 @@ module.exports = createCoreService('api::service-import.service-import', {
             throw new Error(response.data.reason);
           }
         }).catch(function (error) {
-          strapi.log.error("  --->>> " + error);
+          console.error("  --->>> " + error);
         });
       },
     
@@ -176,7 +176,7 @@ module.exports = createCoreService('api::service-import.service-import', {
             throw new Error(response.data.reason);
           }
         }).catch(function (error) { // just log the err
-          strapi.log.error("ErieCanal " + error);
+          console.error("ErieCanal " + error);
         });
       }
 });

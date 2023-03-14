@@ -55,7 +55,7 @@ module.exports = {
       try {
         await strapi.service("api::clickhouse.clickhouse").createTable(event.result);
       } catch (error) {
-        strapi.log.error(error);
+        console.error(error);
       }
     }
   },
@@ -127,7 +127,6 @@ module.exports = {
     try {
       const { result } = event;
 
-
       if (result.type === 'clickhouse') {
         const clickhouses = await strapi.db.query('api::fleet.fleet').findOne({
           where: {
@@ -165,7 +164,7 @@ module.exports = {
         }
       }
     } catch (error) {
-      strapi.log.error(error);
+      console.error(error);
     }
   },
 

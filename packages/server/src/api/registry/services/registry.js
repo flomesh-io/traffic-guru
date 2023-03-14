@@ -57,8 +57,7 @@ async function syncKubernetes (data) {
           }
 
         } catch (error) {
-          strapi.log.error("Sync metrics");
-          strapi.log.error(error);
+          console.error("Sync metrics: ",error.message);
         }
       }
       for (const item of response.data.items) {
@@ -72,8 +71,7 @@ async function syncKubernetes (data) {
       }
 
     } catch (error) {
-      strapi.log.error("Get metrics");
-      strapi.log.error(error)
+      console.error("Sync metrics: ",error.message);
     }
   }
 }
@@ -115,9 +113,9 @@ module.exports = createCoreService('api::registry.registry', {
         status: 1,
       };
     } catch (error) {
-      strapi.log.error(error);
+      console.error(error);
       const errMsg = error.toString();
-      strapi.log.error(errMsg);
+      console.error(errMsg);
       return {
         isOK: false,
         status: -1,
@@ -162,9 +160,9 @@ module.exports = createCoreService('api::registry.registry', {
         };
       }
     } catch (error) {
-      strapi.log.error(error);
+      console.error(error);
       const errMsg = error.toString();
-      strapi.log.error(errMsg);
+      console.error(errMsg);
       return {
         isOK: false,
         status: -1,
@@ -189,7 +187,7 @@ module.exports = createCoreService('api::registry.registry', {
       result.body.items.forEach(async (item) => {
         if (!namespaces.find((n) => n.name == item.metadata.name)) {
           strapi.log.debug('fetch new namespace: ' + item.metadata.name);
-          strapi.entityService.create('api::namespace.namespace', {
+          await strapi.entityService.create('api::namespace.namespace', {
             data: {
               name: item.metadata.name,
               registry: regId,
@@ -200,7 +198,7 @@ module.exports = createCoreService('api::registry.registry', {
         }
       });
     } catch (error) {
-      strapi.log.error(error);
+      console.error(error);
     }
   },
 
@@ -216,8 +214,15 @@ module.exports = createCoreService('api::registry.registry', {
     let ns;
     let oldSvcs;
     if (isSync) {
-      ns = await await strapi.db.query('api::namespace.namespace').findOne({ registry: registry.id });
-      oldSvcs = await strapi.db.query('api::service.service').findMany({ registry: registry.id });
+      ns = await strapi.db.query('api::namespace.namespace').findOne({
+        select: ['id', 'name'],
+        where: { registry: registry.id }
+      });
+      oldSvcs = await strapi.entityService.findMany('api::service.service', {
+        filters: {
+          registry: registry.id
+        }
+      });
       if (oldSvcs) {
       } else {
         isSync = false;
@@ -235,7 +240,6 @@ module.exports = createCoreService('api::registry.registry', {
     // basic token
     const auth = registry.content.credit;
     const buf = Buffer.from(auth, 'ascii');
-
     const eurekaAxios = axios.create({
       baseURL: registry.address,
       headers: {
@@ -243,6 +247,7 @@ module.exports = createCoreService('api::registry.registry', {
         Authorization: 'Basic ' + buf.toString('base64'),
       },
     });
+
     try {
       // Call eureka interface
       const response = await eurekaAxios.get('eureka/apps');
@@ -259,7 +264,7 @@ module.exports = createCoreService('api::registry.registry', {
               name: item.name,
             };
             let isNew = true,
-              isGateway = false;
+            isGateway = false;
             if (
               item.instance[0].port['$'] == gatewayPort &&
               item.instance[0].ipAddr == gatewayPath
@@ -271,10 +276,7 @@ module.exports = createCoreService('api::registry.registry', {
               if (oldSvc.uid === uid) {
                 isNew = false;
                 await strapi.db.query('api::service.service').update({
-                  where: {
-                    id: oldSvc.id,
-                    uid: uid
-                  },
+                  where: { id: oldSvc.id },
                   data: {
                     deleted: false,
                     content: item,
@@ -332,7 +334,7 @@ module.exports = createCoreService('api::registry.registry', {
         }
       }
     } catch (error) {
-      strapi.log.error(error);
+      console.error(error);
     }
   },
 

@@ -41,7 +41,7 @@ module.exports = {
         }
       }
     } catch (error) {
-      strapi.log.error(error.toJSON());
+      console.error(error.toJSON());
     }
 
     return result;

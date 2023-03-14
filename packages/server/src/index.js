@@ -4,7 +4,6 @@ const loginUtils = require("./functions/loginUtils.js");
 const initCommonUtils = require("./functions/initCommonUtils.js");
 const entityUtils = require("./functions/entityUtils.js");
 const gqlUtils = require("./functions/gqlUtils.js");
-
 module.exports = {
   /**
    * An asynchronous register function that runs before
