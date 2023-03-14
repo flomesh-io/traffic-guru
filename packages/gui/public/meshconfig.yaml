@@ -12,7 +12,7 @@ osm:
     # -- Container image pull policy for control plane containers
     pullPolicy: IfNotPresent
     # -- Container image tag for control plane images
-    tag: "1.3.0"
+    tag: "1.3.2"
     # -- Image name defaults
     name:
       # -- osm-controller's image name
@@ -29,6 +29,8 @@ osm:
       osmPreinstall: osm-edge-preinstall
       # -- osm-healthcheck's image name
       osmHealthcheck: osm-edge-healthcheck
+      # -- osm-interceptor's image name
+      osmInterceptor: osm-edge-interceptor
     # -- Image digest (defaults to latest compatible tag)
     digest:
       # -- osm-controller's image digest
@@ -45,7 +47,8 @@ osm:
       osmPreinstall: ""
       # -- osm-healthcheck's image digest
       osmHealthcheck: ""
-
+      # -- osm-interceptor's image digest
+      osmInterceptor: ""
 
   # -- `osm-controller` image pull secret
   imagePullSecrets: [ ]
@@ -57,7 +60,7 @@ osm:
   sidecarDrivers:
     - sidecarName: pipy
       # -- Sidecar image for Linux workloads
-      sidecarImage: flomesh/pipy:0.90.0-18
+      sidecarImage: flomesh/pipy:0.90.0-54
       # -- Remote destination port on which the Discovery Service listens for new connections from Sidecars.
       proxyServerPort: 6060
     - sidecarName: envoy
@@ -73,7 +76,7 @@ osm:
   # -- Pipy RepoServer
   repoServer:
     # -- Image used for Pipy RepoServer
-    image: flomesh/pipy-repo:0.90.0-18
+    image: flomesh/pipy-repo:0.90.0-54
     # -- if false , Pipy RepoServer is installed within osmController pod.
     standalone: false
     # -- ipaddr of host/service where Pipy RepoServer is installed
@@ -201,6 +204,48 @@ osm:
     # The specified tolerations allow pods to schedule onto nodes with matching taints.
     tolerations: [ ]
 
+  #
+  # -- OSM interceptor parameters
+  osmInterceptor:
+    debug: false
+    resource:
+      limits:
+        cpu: "1.5"
+        memory: "1G"
+      requests:
+        cpu: "0.5"
+        memory: "256M"
+    ## Affinity settings for pod assignment
+    ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: kubernetes.io/os
+                  operator: In
+                  values:
+                    - linux
+                - key: kubernetes.io/arch
+                  operator: In
+                  values:
+                    - amd64
+                    - arm64
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - osm-controller
+              topologyKey: kubernetes.io/hostname
+            weight: 100
+
+    # -- Node tolerations applied to control plane pods.
+    # The specified tolerations allow pods to schedule onto nodes with matching taints.
+    tolerations: [ ]
   #
   # -- Prometheus parameters
   prometheus:
