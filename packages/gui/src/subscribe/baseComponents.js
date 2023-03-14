@@ -12,6 +12,7 @@ import BarGroupChart from "@/components/chart/BarGroupChart";
 
 //fsm
 import TopologyChart from "@/components/chart/fsm/TopologyChart";
+import McsTopologyChart from "@/components/chart/fsm/McsTopologyChart";
 import AreaChart from "@/components/chart/fsm/AreaChart";
 import BpsChart from "@/components/chart/fsm/BpsChart";
 import DelayChart from "@/components/chart/fsm/DelayChart";
@@ -23,6 +24,18 @@ const baseComponents = {
   TopologyChart: {
     icon: "icon-component",
     component: TopologyChart,
+    provide: "custom",
+    isOpen: false,
+    callback: `res => {
+    /*TODO*/
+    return {
+			where:''
+    }
+}`,
+  },
+  McsTopologyChart: {
+    icon: "icon-component",
+    component: McsTopologyChart,
     provide: "custom",
     isOpen: false,
     callback: `res => {

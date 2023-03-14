@@ -90,6 +90,7 @@ module.exports = {
         name: "Open API ∣ 开放接口",
         dashboard: { name: "看板" },
         upstreams: { name: "服务提供者" },
+        topology: { name: "拓扑" },
         api: {
           list: { name: "API" },
           detail: { name: "API详情" },
@@ -257,6 +258,9 @@ module.exports = {
           detail: { name: "Profiles Detail" },
           create: { name: "New Profiles" },
         },
+        lbevent: {
+          list: { name: "LB Event" },
+        },
       },
       fsm: {
         name: "Service Mesh",
@@ -301,6 +305,7 @@ module.exports = {
         name: "Open API",
         dashboard: { name: "Dashboard" },
         upstreams: { name: "Providers" },
+        topology: { name: "Topology" },
         api: {
           list: { name: "API" },
           detail: { name: "API Detail" },
@@ -475,6 +480,9 @@ module.exports = {
           detail: { name: "プロファイル詳細" },
           create: { name: "新しい設定" },
         },
+        lbevent: {
+          list: { name: "LB操作履歴" },
+        },
       },
       fsm: {
         name: "FSM | サービスグリッド",
@@ -604,6 +612,7 @@ module.exports = {
         name: "オープンAPI",
         dashboard: { name: "ダッシュボード" },
         upstreams: { name: "サービスプロバイダ" },
+        topology: { name: "トポロジ" },
         api: {
           list: { name: "API" },
           detail: { name: "API詳細" },

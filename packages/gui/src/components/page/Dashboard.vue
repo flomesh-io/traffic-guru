@@ -373,6 +373,7 @@
                 </template>
                 <template #avatar>
                   <svg
+                    v-if="icons[item.tag.name]"
                     class="card-avatar icon svg"
                     aria-hidden="true"
                   >
