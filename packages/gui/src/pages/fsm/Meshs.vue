@@ -256,7 +256,7 @@
                 {{ $t("CPU Requests") }}
               </template>
               <FormItem>
-                <a-input-number
+                <a-input
                   class="width-150"
                   :min="0"
                   :placeholder="$t('unset')"
@@ -271,7 +271,7 @@
                 {{ $t("CPU Limits") }}
               </template>
               <FormItem>
-                <a-input-number
+                <a-input
                   class="width-150"
                   :min="0"
                   :placeholder="$t('unset')"
