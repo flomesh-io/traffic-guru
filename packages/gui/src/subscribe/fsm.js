@@ -3,13 +3,13 @@ import RingStatus from "@/components/chart/RingStatus";
 import TotalChart from "@/components/chart/TotalChart";
 
 //fsm
-import TopologyChart from "@/components/chart/fsm/TopologyChart";
-import McsTopologyChart from "@/components/chart/fsm/McsTopologyChart";
-import AreaChart from "@/components/chart/fsm/AreaChart";
-import BpsChart from "@/components/chart/fsm/BpsChart";
-import DelayChart from "@/components/chart/fsm/DelayChart";
-import QoSSummaryChart from "@/components/chart/fsm/QoSSummaryChart";
-import StatusChart from "@/components/chart/fsm/StatusChart";
+import TopologyChart from "@/components/chart/topo/TopologyChart";
+import McsTopologyChart from "@/components/chart/topo/McsTopologyChart";
+import AreaChart from "@/components/chart/topo/AreaChart";
+import BpsChart from "@/components/chart/topo/BpsChart";
+import DelayChart from "@/components/chart/topo/DelayChart";
+import QoSSummaryChart from "@/components/chart/topo/QoSSummaryChart";
+import StatusChart from "@/components/chart/topo/StatusChart";
 
 import fsm_svc from "@/services/fsm.js";
 import com_svc from "@/services/common.js";

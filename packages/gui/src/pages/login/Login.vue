@@ -17,7 +17,7 @@
             class="logo-tag"
             color="#00adef"
           >
-            {{ version }}
+            {{ version == "free" ? "Community" : version }}
           </a-tag>
         </div>
       </div>

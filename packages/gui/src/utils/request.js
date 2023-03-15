@@ -35,6 +35,12 @@ async function request(url, method, params, config) {
   }
 }
 
+async function mock(d) {
+  return new Promise((resolve) => {
+		resolve(d);
+	});
+}
+
 async function merge(ary) {
   return axios.all(ary).then();
 }
@@ -176,6 +182,7 @@ export {
   request,
   merge,
   spread,
+	mock,
   setAuthorization,
   removeAuthorization,
   checkAuthorization,

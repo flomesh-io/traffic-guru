@@ -21,6 +21,23 @@
         >
       </template>
     </a-result>
+    <div class="iconfont-btn-group">
+      <PartitionOutlined
+        @click="changeLayout('none')"
+        class="iconfont-btn"
+        :class="layout == 'none' ? 'active' : ''"
+      />
+      <DeploymentUnitOutlined
+        @click="changeLayout('circular')"
+        class="iconfont-btn"
+        :class="layout == 'circular' ? 'active' : ''"
+      />
+      <ForkOutlined
+        @click="changeLayout('force')"
+        class="iconfont-btn"
+        :class="layout == 'force' ? 'active' : ''"
+      />
+    </div>
     <div
       v-show="!loading && state > 0"
       ref="main"
@@ -33,10 +50,15 @@
 <script>
 import _ from "lodash";
 import { Empty } from "ant-design-vue";
+import {
+  DeploymentUnitOutlined,
+  PartitionOutlined,
+  ForkOutlined,
+} from "@ant-design/icons-vue";
 export default {
-  name: "McsTopologyChart",
+  name: "TopologyChart",
   i18n: require("@/i18n"),
-  components: { },
+  components: { DeploymentUnitOutlined, PartitionOutlined, ForkOutlined },
   props: {
     where: {
       type: String,
@@ -54,7 +76,7 @@ export default {
         return []
       }
     },
-		
+
     nodes: {
       type: Array,
       default() {
@@ -77,12 +99,20 @@ export default {
         return []
       }
     },
+
+    nodePos: {
+      type: Object,
+      default() {
+        return {}
+      }
+    },
   },
 
   data() {
     return {
       isMounted: false,
       simpleImage: Empty.PRESENTED_IMAGE_SIMPLE,
+      layout: "none",
     };
   },
 
@@ -118,7 +148,7 @@ export default {
       if (params.data.name) {
         this.$emit("destChange", {
           name: params.data.name,
-          type: params.data.type,
+          type: params.data.parent ? "pod" : "service",
         });
       }
     });
@@ -140,12 +170,62 @@ export default {
       this.renderEcharts();
     },
 
+    setPos(_data) {
+      let services = [];
+      (_data || []).forEach((node) => {
+        if (this.nodePos[node.id].type == "service") {
+          services.push(node.id);
+        }
+      });
+      this.setPos2(services, -1, 1);
+    },
+
+    setPos2(ids, _yIndex, level) {
+      let yIndex = _yIndex;
+      if (ids) {
+        ids.forEach((id) => {
+          if ((level == 2 && this.nodePos[id].parent == null) || level != 2) {
+            this.nodePos[id].y = yIndex;
+            this.nodePos[id].x = level;
+            yIndex = this.setPos2(
+              this.nodePos[id].children,
+              yIndex,
+              level + 1,
+            );
+            yIndex++;
+            if (level == 1) {
+              yIndex++;
+            }
+          }
+        });
+      }
+      return yIndex;
+    },
+
     renderEcharts() {
       let dom = this.$refs.main;
       let myChart = this.$echarts.init(dom);
+
       myChart.hideLoading();
       let _data = _.cloneDeep(this.nodes);
-      let legends = this.categories.splice(0,5);
+      this.setPos(_data);
+      (_data || []).forEach((node) => {
+        if (this.layout == "none") {
+          node.x =
+            (this.nodePos[node.id].x ? this.nodePos[node.id].x : 1) * 350;
+          node.y =
+            (this.nodePos[node.id].y ? this.nodePos[node.id].y : 1) * 80;
+        }
+        node.label = {
+          normal: {
+            show: this.layout == "none" ? true : node.symbolSize > 30,
+            width: 100,
+            overflow: "truncate",
+            ellipsis: "...",
+            position: "bottom",
+          },
+        };
+      });
       let option = {
         title: {
           text: "",
@@ -162,26 +242,11 @@ export default {
           {
             type: "scroll",
             orient: "vertical",
-            itemHeight: 15,
-            itemWidth: 15,
-            top: "10px",
-            right: "20px",
+            right: "30px",
             // selectedMode: 'single',
-            data: legends,
-
-            formatter: function (name) {
-              return name.length > 18 ? name.substr(0, 18) + "..." : name;
-            },
-          },
-          {
-            type: "scroll",
-            orient: "vertical",
-            itemHeight: 15,
-            itemWidth: 15,
-            top: "10px",
-            right: "140px",
-            // selectedMode: 'single',
-            data: this.categories,
+            data: (this.categories || []).map(function (a) {
+              return a.name;
+            }),
 
             formatter: function (name) {
               return name.length > 18 ? name.substr(0, 18) + "..." : name;
@@ -195,10 +260,10 @@ export default {
           {
             name: "Les Miserables",
             type: "graph",
-            layout: 'none',
+            layout: this.layout,
             data: _data,
             circular: {
-              rotateLabel: false,
+              rotateLabel: true,
             },
 
             force: {
@@ -209,14 +274,18 @@ export default {
             },
 
             links: this.links,
-            categories: legends.concat(this.categories),
+            categories: this.categories,
             roam: true,
             focusNodeAdjacency: true,
             edgeSymbol: ["circle", "arrow"],
             draggabled: true,
             label: {
-              position: "right",
+              position: "inside",
               formatter: "{b}",
+              borderRadius: [10,10,10,10],
+              textStyle: {
+                color: "#6a7985",
+              },
             },
 
             itemStyle: {
@@ -230,20 +299,19 @@ export default {
 
             tooltip: {
               formatter: function (params) {
-                return params.data && params.data.name || params.name;
+                return "" + params.name + " " + params.value;
               },
             },
 
             lineStyle: {
               type: "solid",
               color: "source",
-              // curveness: 0.3,
+              curveness: this.layout == "none" ? 0 : 0.3,
             },
 
             emphasis: {
               focus: "adjacency",
               lineStyle: {
-                opacity: 1,
                 width: 10,
               },
             },
@@ -303,7 +371,7 @@ export default {
     top: 80px;
   }
   .topology-main {
-    height: calc(100vh - 100px);
-    width: calc(100vw - 50px);
+    height: calc(100vh - 200px);
+    width: calc(100vw - 450px);
   }
 </style>

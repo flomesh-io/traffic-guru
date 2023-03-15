@@ -27,7 +27,7 @@ export const DEFAULT_PROJECT =
   "openapi.dashboard.API_TOTAL,openapi.dashboard.APP_TOTAL,system.common.Space,system.common.Space,fsm.dashboard.QOS,fsm.dashboard.LATENCY,fsm.dashboard.LOAD_STATUS,fsm.dashboard.TPS_ERROR,fsm.dashboard.BPS,openapi.dashboard.API_STATUS,openapi.dashboard.API_METRIC_WEEK,openapi.dashboard.API_METRIC_MONTH";
 
 export const DEFAULT_API_DETAIL =
-  "fsm.dashboard.QOS,fsm.dashboard.LATENCY,fsm.dashboard.LOAD_STATUS,fsm.dashboard.TPS_ERROR,fsm.dashboard.BPS,openapi.dashboard.API_METRIC_WEEK,openapi.dashboard.API_METRIC_MONTH";
+  "fsm.dashboard.TPS_ERROR,fsm.dashboard.BPS,fsm.dashboard.LATENCY,fsm.dashboard.LOAD_STATUS,openapi.dashboard.TOPOLOGY,fsm.dashboard.QOS,openapi.dashboard.API_METRIC_WEEK,openapi.dashboard.API_METRIC_MONTH";
 
 export async function getDashboardById(id) {
   return query(`dashboard(id:${id}){data{id,attributes{name,content,apply}}}`);

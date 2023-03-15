@@ -1,5 +1,5 @@
 import api from "@/services/api";
-import { request, merge, spread, METHOD } from "@/utils/request";
+import { request, merge, spread, METHOD, mock } from "@/utils/request";
 
 export const select_keys = [
   "service.name",
@@ -61,6 +61,142 @@ export async function getTopoData(params) {
   return merge([getServices(params), getPods(params), getPaths(params)]);
 }
 
+export async function getAPITopoData(params,nocurrent) {
+	console.log(params)
+  return mock({
+		services:[
+			{
+				id: 'svc001',
+				type:'service',
+				name:'svc1',
+			},
+			{
+				id: 'svc002',
+				type:'service',
+				name:'svc2',
+			},
+		],
+		apis:[
+			{
+				id: 'api001',
+				service:'svc001',
+				type:'api',
+				name:'/api1',
+				error:false,
+				weight:3,
+				current:!nocurrent
+			},
+			{
+				id: 'api002',
+				service:'svc001',
+				type:'api',
+				name:'/api2',
+				error:true,
+				weight:3,
+			},
+			{
+				id: 'api003',
+				service:'svc001',
+				type:'api',
+				name:'/api3',
+				error:false,
+				weight:3,
+			},
+			{
+				id: 'api004',
+				service:'svc001',
+				type:'api',
+				name:'/api4',
+				error:false,
+				weight:3,
+			},
+			{
+				id: 'api005',
+				service:'svc001',
+				type:'api',
+				name:'/api5',
+				error:false,
+				weight:3,
+			},
+			{
+				id: 'api006',
+				service:'svc001',
+				type:'api',
+				name:'/api6',
+				error:false,
+				weight:3,
+			},
+			{
+				id: 'api007',
+				service:'svc002',
+				type:'api',
+				name:'/api7',
+				error:false,
+				weight:3,
+			},
+			{
+				id: 'api008',
+				service:'svc002',
+				type:'api',
+				name:'/api8',
+				error:false,
+				weight:10,
+			},
+			{
+				id: 'api009',
+				service:'svc002',
+				type:'api',
+				name:'/api9',
+				error:false,
+				weight:10,
+			},
+		],
+		links:[
+			{
+				source:"api001",
+				target:"api002",
+				weight:30,
+				error:true,
+			},
+			{
+				source:"api003",
+				target:"api004",
+				weight:3,
+				error:false,
+			},
+			{
+				source:"api001",
+				target:"api003",
+				weight:20,
+				error:false,
+			},
+			{
+				source:"api005",
+				target:"api006",
+				weight:20,
+				error:false,
+			},
+			{
+				source:"api007",
+				target:"api008",
+				weight:20,
+				error:false,
+			},
+			{
+				source:"api008",
+				target:"api009",
+				weight:20,
+				error:false,
+			},
+			{
+				source:"api001",
+				target:"api008",
+				weight:20,
+				error:false,
+			},
+		]
+	});
+}
 export function checkPodRepeat(nodes, id) {
   for (let i = 0; i < nodes.length; i++) {
     if (nodes[i].id == id) {
@@ -104,7 +240,7 @@ const apiIcon =
 const apiErrorIcon =
   "image://data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/PjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+PHN2ZyB0PSIxNjc4NzY0MzE0Njg5IiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjI0ODgiIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCI+PHBhdGggZD0iTTUxMi44NCA2My41NkwxMjUuMzIgMjg3LjN2NDQ3LjQ3bDM4Ny41MiAyMjMuNzQgMzg3LjUzLTIyMy43NFYyODcuM3oiIGZpbGw9IiNmY2UyZTIiIHAtaWQ9IjI0ODkiPjwvcGF0aD48cGF0aCBkPSJNMzYzLjg2IDcwOC45NmMwIDY2LjQxIDE0LjMzIDEyOS4zNyAzOS42MiAxODYuNDFsMTA5LjM3IDYzLjE0IDM4Ny41Mi0yMjMuNzRWMjg3LjNsLTY2Ljc3LTM4LjU1Yy0zLjA1LTAuMDYtNi0wLjQ2LTkuMDctMC40Ni0yNTQuNDIgMC00NjAuNjcgMjA2LjI1LTQ2MC42NyA0NjAuNjd6IiBmaWxsPSIjZjJjZGNkIiBwLWlkPSIyNDkwIj48L3BhdGg+PHBhdGggZD0iTTg3NS4zNSAyNzIuODZjMS4yIDEzLjUyIDIuMDcgMjcuMTMgMi4wNyA0MC45NiAwIDI1My4zMi0yMDUuMzYgNDU4LjY4LTQ1OC42OCA0NTguNjgtMTExLjYzIDAtMjEzLjg4LTM5Ljk1LTI5My40MS0xMDYuMjR2NjguNTFsMzg3LjUyIDIyMy43NCAzODcuNTItMjIzLjc0VjI4Ny4zbC0yNS4wMi0xNC40NHoiIGZpbGw9IiNmMmNkY2QiIHAtaWQ9IjI0OTEiPjwvcGF0aD48cGF0aCBkPSJNNTEyLjYyIDk1OC41MUwxMjQuODcgNzM0LjY2VjI4Ni45Mkw1MTIuNjIgNjMuMDNsMzg3Ljc1IDIyMy44OXY0NDcuNzRMNTEyLjYyIDk1OC41MXpNMTYwLjY5IDcxMy45OGwzNTEuOTMgMjAzLjE3IDM1MS45My0yMDMuMTdWMzA3LjZMNTEyLjYyIDEwNC4zOSAxNjAuNjkgMzA3LjZ2NDA2LjM4eiIgZmlsbD0iIzhhOGE4YSIgcC1pZD0iMjQ5MiI+PC9wYXRoPjxwYXRoIGQ9Ik03NDcuODUgMzA2Ljg5bC00NC4zIDQzLjkzYzMwLjc5IDQ1LjQzIDI1LjkxIDEwNy4wMS0xMy44OSAxNDcuMThsLTU4Ljk1IDU4Ljk1Yy0xLjEzIDAuNzUtMi4yNSAxLjUtMy4zOCAxLjVzLTIuNjMtMC4zOC0zLjM4LTEuNWwtOTkuNS05OS41LTU4LjItNTcuODJjLTEuNS0xLjg4LTEuNS00Ljg4IDAtNi43Nmw1OS4zMi01OC45NWM5LjM5LTkuMzkgMTkuOS0xNi44OSAzMS4xNi0yMi4xNSAxNS43Ny04LjI2IDMzLjQxLTEyLjAyIDUwLjY5LTEyLjAyIDIzLjI4IDAgNDUuODEgNy4xMyA2NC45NiAxOS45bDQ0LjMtNDMuOTNjMC43NS0xLjEzIDEuODgtMS41IDMuMzgtMS41IDEuMTMgMCAyLjI1IDAuMzggMyAxLjVsMjQuNzggMjQuNDFhNC43NjUgNC43NjUgMCAwIDEgMC4wMSA2Ljc2eiIgZmlsbD0iI2UwNzA3OSIgcC1pZD0iMjQ5MyI+PC9wYXRoPjxwYXRoIGQ9Ik01NzIuNSA1NTguNDVsLTM4LjY3IDM4LjY3IDI1LjE2IDI0Ljc4YzEuNSAxLjg4IDEuNSA0Ljg4IDAgNi43NmwtNTkuMzIgNTguOTVjLTIyLjUzIDIyLjktNTIuMTkgMzQuMTctODEuODUgMzQuMTctNy41MSAwLTE0LjY0LTAuNzUtMjEuNzgtMi4yNS0xNS4zOS0yLjYzLTMwLjA0LTguNjQtNDMuMTgtMTcuNjVsLTQ0LjMxIDQzLjkzYy0wLjc1IDEuMTMtMS44OCAxLjUtMy4zOCAxLjUtMS4xMyAwLTIuMjUtMC4zOC0zLTEuNWwtMjQuNzgtMjQuNDFhNC43NTYgNC43NTYgMCAwIDEgMC02Ljc2bDQ0LjMtNDMuOTNjLTMwLjc5LTQ1LjA2LTI1LjkxLTEwNy4wMSAxMy44OS0xNDcuMThsNTguOTUtNTguOTVjMS4xMy0wLjc1IDIuMjUtMS41IDMuMzgtMS41czIuNjMgMC43NSAzLjM4IDEuNWwyNC43OCAyNC43OCAzOC42Ny0zOC42N2MxLjg4LTEuNSA0Ljg4LTEuNSA2Ljc2IDBsMjEuMDMgMjEuNGMxLjg4IDEuNSAxLjg4IDQuNTEgMCA2LjM4bC0zOC42NyAzOC42NyA1Mi41NyA1Mi41NyAzOC4zLTM4LjY3YTQuNzU2IDQuNzU2IDAgMCAxIDYuNzYgMGwyMS4wMyAyMS4wM2MxLjg2IDEuNSAxLjg2IDQuNTEtMC4wMiA2LjM4eiIgZmlsbD0iI2UwNzA3OSIgcC1pZD0iMjQ5NCI+PC9wYXRoPjxwYXRoIGQ9Ik01NzIuNSA1NTguNDVsLTM4LjY3IDM4LjY3IDI1LjE2IDI0Ljc4YzEuNSAxLjg4IDEuNSA0Ljg4IDAgNi43NmwtNTkuMzIgNTguOTVjLTIyLjUzIDIyLjktNTIuMTkgMzQuMTctODEuODUgMzQuMTctNy41MSAwLTE0LjY0LTAuNzUtMjEuNzgtMi4yNS0xMi4wMi0yOS42Ni0xOC40LTYxLjk1LTE4LjQtOTYuMTIgMC01MS44MSAxNS4wMi0xMDAuMjUgNDEuNjgtMTQwLjhsNi43NiA2Ljc2IDM4LjY3LTM4LjY3YzEuODgtMS41IDQuODgtMS41IDYuNzYgMGwyMS4wMyAyMS40YzEuODggMS41IDEuODggNC41MSAwIDYuMzhsLTM4LjY3IDM4LjY3IDUyLjU3IDUyLjU3IDM4LjMtMzguNjdhNC43NTYgNC43NTYgMCAwIDEgNi43NiAwbDIxLjAzIDIxLjAzYzEuODUgMS40OSAxLjg1IDQuNS0wLjAzIDYuMzd6TTc0Ny44NSAzMDYuODlsLTQ0LjMgNDMuOTNjMzAuNzkgNDUuNDMgMjUuOTEgMTA3LjAxLTEzLjg5IDE0Ny4xOGwtNTguOTUgNTguOTVjLTEuMTMgMC43NS0yLjI1IDEuNS0zLjM4IDEuNXMtMi42My0wLjM4LTMuMzgtMS41bC05OS41LTk5LjVjLTMtMTIuMzktNC41MS0yNS41My00LjUxLTM5LjA1IDAtNDAuMTcgMTMuNTItNzcuMzUgMzYuOC0xMDYuNjMgMTUuNzctOC4yNiAzMy40MS0xMi4wMiA1MC42OS0xMi4wMiAyMy4yOCAwIDQ1LjgxIDcuMTMgNjQuOTYgMTkuOWw0NC4zLTQzLjkzYzAuNzUtMS4xMyAxLjg4LTEuNSAzLjM4LTEuNSAxLjEzIDAgMi4yNSAwLjM4IDMgMS41bDI0Ljc4IDI0LjQxYTQuNzc0IDQuNzc0IDAgMCAxIDAgNi43NnoiIGZpbGw9IiNlYTRlNWEiIHAtaWQ9IjI0OTUiPjwvcGF0aD48L3N2Zz4=";
 
-//const apiSuccessIcon = "image://data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/PjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+PHN2ZyB0PSIxNjc4NzY0MzIyODU4IiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjI2NDgiIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCI+PHBhdGggZD0iTTUxMi44NCA2My41NkwxMjUuMzIgMjg3LjN2NDQ3LjQ3bDM4Ny41MiAyMjMuNzQgMzg3LjUzLTIyMy43NFYyODcuM3oiIGZpbGw9IiNkN2ZkZTAiIHAtaWQ9IjI2NDkiPjwvcGF0aD48cGF0aCBkPSJNMzYzLjg2IDcwOC45NmMwIDY2LjQxIDE0LjMzIDEyOS4zNyAzOS42MiAxODYuNDFsMTA5LjM3IDYzLjE0IDM4Ny41Mi0yMjMuNzRWMjg3LjNsLTY2Ljc3LTM4LjU1Yy0zLjA1LTAuMDYtNi0wLjQ2LTkuMDctMC40Ni0yNTQuNDIgMC00NjAuNjcgMjA2LjI1LTQ2MC42NyA0NjAuNjd6IiBmaWxsPSIjYjNmMmMyIiBwLWlkPSIyNjUwIj48L3BhdGg+PHBhdGggZD0iTTg3NS4zNSAyNzIuODZjMS4yIDEzLjUyIDIuMDcgMjcuMTMgMi4wNyA0MC45NiAwIDI1My4zMi0yMDUuMzYgNDU4LjY4LTQ1OC42OCA0NTguNjgtMTExLjYzIDAtMjEzLjg4LTM5Ljk1LTI5My40MS0xMDYuMjR2NjguNTFsMzg3LjUyIDIyMy43NCAzODcuNTItMjIzLjc0VjI4Ny4zbC0yNS4wMi0xNC40NHoiIGZpbGw9IiNiM2YyYzIiIHAtaWQ9IjI2NTEiPjwvcGF0aD48cGF0aCBkPSJNNTEyLjYyIDk1OC41MUwxMjQuODcgNzM0LjY2VjI4Ni45Mkw1MTIuNjIgNjMuMDNsMzg3Ljc1IDIyMy44OXY0NDcuNzRMNTEyLjYyIDk1OC41MXpNMTYwLjY5IDcxMy45OGwzNTEuOTMgMjAzLjE3IDM1MS45My0yMDMuMTdWMzA3LjZMNTEyLjYyIDEwNC4zOSAxNjAuNjkgMzA3LjZ2NDA2LjM4eiIgZmlsbD0iIzhhOGE4YSIgcC1pZD0iMjY1MiI+PC9wYXRoPjxwYXRoIGQ9Ik03NDcuODUgMzA2Ljg5bC00NC4zIDQzLjkzYzMwLjc5IDQ1LjQzIDI1LjkxIDEwNy4wMS0xMy44OSAxNDcuMThsLTU4Ljk1IDU4Ljk1Yy0xLjEzIDAuNzUtMi4yNSAxLjUtMy4zOCAxLjVzLTIuNjMtMC4zOC0zLjM4LTEuNWwtOTkuNS05OS41LTU4LjItNTcuODJjLTEuNS0xLjg4LTEuNS00Ljg4IDAtNi43Nmw1OS4zMi01OC45NWM5LjM5LTkuMzkgMTkuOS0xNi44OSAzMS4xNi0yMi4xNSAxNS43Ny04LjI2IDMzLjQxLTEyLjAyIDUwLjY5LTEyLjAyIDIzLjI4IDAgNDUuODEgNy4xMyA2NC45NiAxOS45bDQ0LjMtNDMuOTNjMC43NS0xLjEzIDEuODgtMS41IDMuMzgtMS41IDEuMTMgMCAyLjI1IDAuMzggMyAxLjVsMjQuNzggMjQuNDFhNC43NjUgNC43NjUgMCAwIDEgMC4wMSA2Ljc2eiIgZmlsbD0iIzg3YzM4ZiIgcC1pZD0iMjY1MyI+PC9wYXRoPjxwYXRoIGQ9Ik01NzIuNSA1NTguNDVsLTM4LjY3IDM4LjY3IDI1LjE2IDI0Ljc4YzEuNSAxLjg4IDEuNSA0Ljg4IDAgNi43NmwtNTkuMzIgNTguOTVjLTIyLjUzIDIyLjktNTIuMTkgMzQuMTctODEuODUgMzQuMTctNy41MSAwLTE0LjY0LTAuNzUtMjEuNzgtMi4yNS0xNS4zOS0yLjYzLTMwLjA0LTguNjQtNDMuMTgtMTcuNjVsLTQ0LjMxIDQzLjkzYy0wLjc1IDEuMTMtMS44OCAxLjUtMy4zOCAxLjUtMS4xMyAwLTIuMjUtMC4zOC0zLTEuNWwtMjQuNzgtMjQuNDFhNC43NTYgNC43NTYgMCAwIDEgMC02Ljc2bDQ0LjMtNDMuOTNjLTMwLjc5LTQ1LjA2LTI1LjkxLTEwNy4wMSAxMy44OS0xNDcuMThsNTguOTUtNTguOTVjMS4xMy0wLjc1IDIuMjUtMS41IDMuMzgtMS41czIuNjMgMC43NSAzLjM4IDEuNWwyNC43OCAyNC43OCAzOC42Ny0zOC42N2MxLjg4LTEuNSA0Ljg4LTEuNSA2Ljc2IDBsMjEuMDMgMjEuNGMxLjg4IDEuNSAxLjg4IDQuNTEgMCA2LjM4bC0zOC42NyAzOC42NyA1Mi41NyA1Mi41NyAzOC4zLTM4LjY3YTQuNzU2IDQuNzU2IDAgMCAxIDYuNzYgMGwyMS4wMyAyMS4wM2MxLjg2IDEuNSAxLjg2IDQuNTEtMC4wMiA2LjM4eiIgZmlsbD0iIzg3YzM4ZiIgcC1pZD0iMjY1NCI+PC9wYXRoPjxwYXRoIGQ9Ik01NzIuNSA1NTguNDVsLTM4LjY3IDM4LjY3IDI1LjE2IDI0Ljc4YzEuNSAxLjg4IDEuNSA0Ljg4IDAgNi43NmwtNTkuMzIgNTguOTVjLTIyLjUzIDIyLjktNTIuMTkgMzQuMTctODEuODUgMzQuMTctNy41MSAwLTE0LjY0LTAuNzUtMjEuNzgtMi4yNS0xMi4wMi0yOS42Ni0xOC40LTYxLjk1LTE4LjQtOTYuMTIgMC01MS44MSAxNS4wMi0xMDAuMjUgNDEuNjgtMTQwLjhsNi43NiA2Ljc2IDM4LjY3LTM4LjY3YzEuODgtMS41IDQuODgtMS41IDYuNzYgMGwyMS4wMyAyMS40YzEuODggMS41IDEuODggNC41MSAwIDYuMzhsLTM4LjY3IDM4LjY3IDUyLjU3IDUyLjU3IDM4LjMtMzguNjdhNC43NTYgNC43NTYgMCAwIDEgNi43NiAwbDIxLjAzIDIxLjAzYzEuODUgMS40OSAxLjg1IDQuNS0wLjAzIDYuMzd6TTc0Ny44NSAzMDYuODlsLTQ0LjMgNDMuOTNjMzAuNzkgNDUuNDMgMjUuOTEgMTA3LjAxLTEzLjg5IDE0Ny4xOGwtNTguOTUgNTguOTVjLTEuMTMgMC43NS0yLjI1IDEuNS0zLjM4IDEuNXMtMi42My0wLjM4LTMuMzgtMS41bC05OS41LTk5LjVjLTMtMTIuMzktNC41MS0yNS41My00LjUxLTM5LjA1IDAtNDAuMTcgMTMuNTItNzcuMzUgMzYuOC0xMDYuNjMgMTUuNzctOC4yNiAzMy40MS0xMi4wMiA1MC42OS0xMi4wMiAyMy4yOCAwIDQ1LjgxIDcuMTMgNjQuOTYgMTkuOWw0NC4zLTQzLjkzYzAuNzUtMS4xMyAxLjg4LTEuNSAzLjM4LTEuNSAxLjEzIDAgMi4yNSAwLjM4IDMgMS41bDI0Ljc4IDI0LjQxYTQuNzc0IDQuNzc0IDAgMCAxIDAgNi43NnoiIGZpbGw9IiMzNmFiNjAiIHAtaWQ9IjI2NTUiPjwvcGF0aD48L3N2Zz4=";		
+const apiSuccessIcon = "image://data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/PjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+PHN2ZyB0PSIxNjc4NzY0MzIyODU4IiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjI2NDgiIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCI+PHBhdGggZD0iTTUxMi44NCA2My41NkwxMjUuMzIgMjg3LjN2NDQ3LjQ3bDM4Ny41MiAyMjMuNzQgMzg3LjUzLTIyMy43NFYyODcuM3oiIGZpbGw9IiNkN2ZkZTAiIHAtaWQ9IjI2NDkiPjwvcGF0aD48cGF0aCBkPSJNMzYzLjg2IDcwOC45NmMwIDY2LjQxIDE0LjMzIDEyOS4zNyAzOS42MiAxODYuNDFsMTA5LjM3IDYzLjE0IDM4Ny41Mi0yMjMuNzRWMjg3LjNsLTY2Ljc3LTM4LjU1Yy0zLjA1LTAuMDYtNi0wLjQ2LTkuMDctMC40Ni0yNTQuNDIgMC00NjAuNjcgMjA2LjI1LTQ2MC42NyA0NjAuNjd6IiBmaWxsPSIjYjNmMmMyIiBwLWlkPSIyNjUwIj48L3BhdGg+PHBhdGggZD0iTTg3NS4zNSAyNzIuODZjMS4yIDEzLjUyIDIuMDcgMjcuMTMgMi4wNyA0MC45NiAwIDI1My4zMi0yMDUuMzYgNDU4LjY4LTQ1OC42OCA0NTguNjgtMTExLjYzIDAtMjEzLjg4LTM5Ljk1LTI5My40MS0xMDYuMjR2NjguNTFsMzg3LjUyIDIyMy43NCAzODcuNTItMjIzLjc0VjI4Ny4zbC0yNS4wMi0xNC40NHoiIGZpbGw9IiNiM2YyYzIiIHAtaWQ9IjI2NTEiPjwvcGF0aD48cGF0aCBkPSJNNTEyLjYyIDk1OC41MUwxMjQuODcgNzM0LjY2VjI4Ni45Mkw1MTIuNjIgNjMuMDNsMzg3Ljc1IDIyMy44OXY0NDcuNzRMNTEyLjYyIDk1OC41MXpNMTYwLjY5IDcxMy45OGwzNTEuOTMgMjAzLjE3IDM1MS45My0yMDMuMTdWMzA3LjZMNTEyLjYyIDEwNC4zOSAxNjAuNjkgMzA3LjZ2NDA2LjM4eiIgZmlsbD0iIzhhOGE4YSIgcC1pZD0iMjY1MiI+PC9wYXRoPjxwYXRoIGQ9Ik03NDcuODUgMzA2Ljg5bC00NC4zIDQzLjkzYzMwLjc5IDQ1LjQzIDI1LjkxIDEwNy4wMS0xMy44OSAxNDcuMThsLTU4Ljk1IDU4Ljk1Yy0xLjEzIDAuNzUtMi4yNSAxLjUtMy4zOCAxLjVzLTIuNjMtMC4zOC0zLjM4LTEuNWwtOTkuNS05OS41LTU4LjItNTcuODJjLTEuNS0xLjg4LTEuNS00Ljg4IDAtNi43Nmw1OS4zMi01OC45NWM5LjM5LTkuMzkgMTkuOS0xNi44OSAzMS4xNi0yMi4xNSAxNS43Ny04LjI2IDMzLjQxLTEyLjAyIDUwLjY5LTEyLjAyIDIzLjI4IDAgNDUuODEgNy4xMyA2NC45NiAxOS45bDQ0LjMtNDMuOTNjMC43NS0xLjEzIDEuODgtMS41IDMuMzgtMS41IDEuMTMgMCAyLjI1IDAuMzggMyAxLjVsMjQuNzggMjQuNDFhNC43NjUgNC43NjUgMCAwIDEgMC4wMSA2Ljc2eiIgZmlsbD0iIzg3YzM4ZiIgcC1pZD0iMjY1MyI+PC9wYXRoPjxwYXRoIGQ9Ik01NzIuNSA1NTguNDVsLTM4LjY3IDM4LjY3IDI1LjE2IDI0Ljc4YzEuNSAxLjg4IDEuNSA0Ljg4IDAgNi43NmwtNTkuMzIgNTguOTVjLTIyLjUzIDIyLjktNTIuMTkgMzQuMTctODEuODUgMzQuMTctNy41MSAwLTE0LjY0LTAuNzUtMjEuNzgtMi4yNS0xNS4zOS0yLjYzLTMwLjA0LTguNjQtNDMuMTgtMTcuNjVsLTQ0LjMxIDQzLjkzYy0wLjc1IDEuMTMtMS44OCAxLjUtMy4zOCAxLjUtMS4xMyAwLTIuMjUtMC4zOC0zLTEuNWwtMjQuNzgtMjQuNDFhNC43NTYgNC43NTYgMCAwIDEgMC02Ljc2bDQ0LjMtNDMuOTNjLTMwLjc5LTQ1LjA2LTI1LjkxLTEwNy4wMSAxMy44OS0xNDcuMThsNTguOTUtNTguOTVjMS4xMy0wLjc1IDIuMjUtMS41IDMuMzgtMS41czIuNjMgMC43NSAzLjM4IDEuNWwyNC43OCAyNC43OCAzOC42Ny0zOC42N2MxLjg4LTEuNSA0Ljg4LTEuNSA2Ljc2IDBsMjEuMDMgMjEuNGMxLjg4IDEuNSAxLjg4IDQuNTEgMCA2LjM4bC0zOC42NyAzOC42NyA1Mi41NyA1Mi41NyAzOC4zLTM4LjY3YTQuNzU2IDQuNzU2IDAgMCAxIDYuNzYgMGwyMS4wMyAyMS4wM2MxLjg2IDEuNSAxLjg2IDQuNTEtMC4wMiA2LjM4eiIgZmlsbD0iIzg3YzM4ZiIgcC1pZD0iMjY1NCI+PC9wYXRoPjxwYXRoIGQ9Ik01NzIuNSA1NTguNDVsLTM4LjY3IDM4LjY3IDI1LjE2IDI0Ljc4YzEuNSAxLjg4IDEuNSA0Ljg4IDAgNi43NmwtNTkuMzIgNTguOTVjLTIyLjUzIDIyLjktNTIuMTkgMzQuMTctODEuODUgMzQuMTctNy41MSAwLTE0LjY0LTAuNzUtMjEuNzgtMi4yNS0xMi4wMi0yOS42Ni0xOC40LTYxLjk1LTE4LjQtOTYuMTIgMC01MS44MSAxNS4wMi0xMDAuMjUgNDEuNjgtMTQwLjhsNi43NiA2Ljc2IDM4LjY3LTM4LjY3YzEuODgtMS41IDQuODgtMS41IDYuNzYgMGwyMS4wMyAyMS40YzEuODggMS41IDEuODggNC41MSAwIDYuMzhsLTM4LjY3IDM4LjY3IDUyLjU3IDUyLjU3IDM4LjMtMzguNjdhNC43NTYgNC43NTYgMCAwIDEgNi43NiAwbDIxLjAzIDIxLjAzYzEuODUgMS40OSAxLjg1IDQuNS0wLjAzIDYuMzd6TTc0Ny44NSAzMDYuODlsLTQ0LjMgNDMuOTNjMzAuNzkgNDUuNDMgMjUuOTEgMTA3LjAxLTEzLjg5IDE0Ny4xOGwtNTguOTUgNTguOTVjLTEuMTMgMC43NS0yLjI1IDEuNS0zLjM4IDEuNXMtMi42My0wLjM4LTMuMzgtMS41bC05OS41LTk5LjVjLTMtMTIuMzktNC41MS0yNS41My00LjUxLTM5LjA1IDAtNDAuMTcgMTMuNTItNzcuMzUgMzYuOC0xMDYuNjMgMTUuNzctOC4yNiAzMy40MS0xMi4wMiA1MC42OS0xMi4wMiAyMy4yOCAwIDQ1LjgxIDcuMTMgNjQuOTYgMTkuOWw0NC4zLTQzLjkzYzAuNzUtMS4xMyAxLjg4LTEuNSAzLjM4LTEuNSAxLjEzIDAgMi4yNSAwLjM4IDMgMS41bDI0Ljc4IDI0LjQxYTQuNzc0IDQuNzc0IDAgMCAxIDAgNi43NnoiIGZpbGw9IiMzNmFiNjAiIHAtaWQ9IjI2NTUiPjwvcGF0aD48L3N2Zz4=";		
 		
 export function setTopoData() {
   return spread((serviceRes, podRes, pathRes) => {
@@ -237,7 +373,10 @@ export function setTopoData() {
 
 
 export function setAPITopoData() {
-  return (serviceNodes, apiNodes, pathNodes) => {
+  return (res) => {
+		let serviceNodes = res.services || [];
+		let apiNodes = res.apis || [];
+		let pathNodes = res.links || [];
     let categories = [];
     let categoryMap = {};
     let nodes = [];
@@ -295,20 +434,11 @@ export function setAPITopoData() {
           id: node.id,
           name: node.name,
           value: node.weight,
-          symbolSize: calcPodSymbolSize(node.weight) * 3,
-          symbol: node.error?apiErrorIcon:apiIcon,
+          symbolSize: calcPodSymbolSize(node.weight) * 3 + (node.current?10:0),
+          symbol: node.error?apiErrorIcon:(node.current?apiSuccessIcon:apiIcon),
           category: categoryMap[node.service].index,
           isSvc: false,
           parent: node.service,
-					label:{
-						show:true,
-						backgroundColor: "rgba(240,240,240,0.7)",
-						padding: [2, 3, 2, 3],
-						borderRadius: [0,3,3,0],
-						textStyle: {
-						  color: "#6a7985",
-						},
-					}
         };
         nodePos[node.id] = {
           type: "api",
@@ -346,7 +476,7 @@ export function setAPITopoData() {
         let link = {
           source,
           target,
-          value: node[2],
+          value: node.weight,
           label: {
             show: true,
             position: "middle",
@@ -356,6 +486,10 @@ export function setAPITopoData() {
             fontSize: 10,
             color: "#000000",
             formatter: "{@value}",
+          },
+          lineStyle: {
+            color: node.error ? "red":null,
+						width: 1 + node.weight/10
           },
         };
         if (nodePos[source] && nodePos[target]) {
@@ -698,5 +832,6 @@ export default {
   getTopoData,
   setTopoData,
 	setAPITopoData,
+	getAPITopoData,
   getServiceWhere,
 };

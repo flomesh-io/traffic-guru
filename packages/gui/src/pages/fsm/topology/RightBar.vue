@@ -52,11 +52,11 @@
 </template>
 
 <script>
-import AreaChart from "@/components/chart/fsm/AreaChart";
-import BpsChart from "@/components/chart/fsm/BpsChart";
-import DelayChart from "@/components/chart/fsm/DelayChart";
-import QoSSummaryChart from "@/components/chart/fsm/QoSSummaryChart";
-import StatusChart from "@/components/chart/fsm/StatusChart";
+import AreaChart from "@/components/chart/topo/AreaChart";
+import BpsChart from "@/components/chart/topo/BpsChart";
+import DelayChart from "@/components/chart/topo/DelayChart";
+import QoSSummaryChart from "@/components/chart/topo/QoSSummaryChart";
+import StatusChart from "@/components/chart/topo/StatusChart";
 export default {
   name: "RightBar",
   i18n: require("@/i18n"),

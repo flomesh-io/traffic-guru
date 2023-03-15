@@ -2,7 +2,8 @@ import MiniArea from "@/components/chart/MiniArea";
 import RingStatus from "@/components/chart/RingStatus";
 import TotalChart from "@/components/chart/TotalChart";
 import openapi_svc from "@/services/openapi.js";
-import TopologyChart from "@/components/chart/openapi/TopologyChart";
+import clickhouse_svc from "@/services/clickhouse.js";
+import ApiTopologyChart from "@/components/chart/topo/ApiTopologyChart";
 
 const openapi = {
   dashboard: {
@@ -105,12 +106,13 @@ const openapi = {
     },
     TOPOLOGY: {
       title: "Topology",
-      tag: TopologyChart,
+      tag: ApiTopologyChart,
       col: 18,
       timer: 10000,
+      service: clickhouse_svc.getAPITopoData,
       provide: "clickhouse",
       className: "card nopd",
-      data: ()=>{},
+      data: clickhouse_svc.setAPITopoData(),
     },
   },
 };

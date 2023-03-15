@@ -17,7 +17,7 @@ module.exports = {
   cachePage: true,
   hideSetting: false,
   systemName: "Flomesh",
-  copyright: "2021 Flomesh",
+  copyright: "2023 Flomesh",
   asyncRoutes: false,
   showPageTitle: true,
   filterMenu: true,

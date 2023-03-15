@@ -42,7 +42,7 @@
 
 <script>
 import Timeline from "@/components/tool/Timeline";
-import TopologyChart from "@/components/chart/fsm/TopologyChart";
+import TopologyChart from "@/components/chart/topo/TopologyChart";
 import RightBar from "./RightBar.vue";
 import { getSQLWhere, getTopoWhere } from "@/services/clickhouse";
 import clickhouse_svc from "@/services/clickhouse.js";

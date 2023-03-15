@@ -11,13 +11,14 @@ import BarChart from "@/components/chart/BarChart";
 import BarGroupChart from "@/components/chart/BarGroupChart";
 
 //fsm
-import TopologyChart from "@/components/chart/fsm/TopologyChart";
-import McsTopologyChart from "@/components/chart/fsm/McsTopologyChart";
-import AreaChart from "@/components/chart/fsm/AreaChart";
-import BpsChart from "@/components/chart/fsm/BpsChart";
-import DelayChart from "@/components/chart/fsm/DelayChart";
-import QoSSummaryChart from "@/components/chart/fsm/QoSSummaryChart";
-import StatusChart from "@/components/chart/fsm/StatusChart";
+import TopologyChart from "@/components/chart/topo/TopologyChart";
+import McsTopologyChart from "@/components/chart/topo/McsTopologyChart";
+import ApiTopologyChart from "@/components/chart/topo/ApiTopologyChart";
+import AreaChart from "@/components/chart/topo/AreaChart";
+import BpsChart from "@/components/chart/topo/BpsChart";
+import DelayChart from "@/components/chart/topo/DelayChart";
+import QoSSummaryChart from "@/components/chart/topo/QoSSummaryChart";
+import StatusChart from "@/components/chart/topo/StatusChart";
 import Sankey from "@/components/chart/Sankey";
 
 const baseComponents = {
@@ -36,6 +37,18 @@ const baseComponents = {
   McsTopologyChart: {
     icon: "icon-component",
     component: McsTopologyChart,
+    provide: "custom",
+    isOpen: false,
+    callback: `res => {
+    /*TODO*/
+    return {
+			where:''
+    }
+}`,
+  },
+  ApiTopologyChart: {
+    icon: "icon-component",
+    component: ApiTopologyChart,
     provide: "custom",
     isOpen: false,
     callback: `res => {
