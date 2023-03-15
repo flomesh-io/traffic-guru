@@ -76,6 +76,34 @@ async function syncOsm () {
           }
         });
       }
+      const k8sCoreApi = kc.makeApiClient(k8s.CoreV1Api)
+      const allNs = await k8sCoreApi.listNamespace();
+      for (const item of allNs.body.items) {
+        const meshName = item.metadata.labels["openservicemesh.io/monitored-by"];
+        if (!meshName) continue;
+        let ns = await strapi.db
+          .query('api::namespace.namespace')
+          .findOne({ where: { name: item.metadata.name, registry: registry.id }, populate: true});
+        if (!ns) {
+          ns = await strapi.db
+            .query('api::namespace.namespace')
+            .create({ data: { name: item.metadata.name, registry: registry.id }, populate: true });
+        }
+
+        const mesh = await strapi.db.query('api::mesh.mesh').findOne({
+          where: {
+            name: meshName,
+            namespace: registry.namespaces.map((n) => n.id),
+          }, populate: true
+        });
+        if (!mesh) continue;
+        mesh.bindNamespaces = mesh.bindNamespaces.map((n) => n.id)
+        if (mesh.bindNamespaces.indexOf(ns.id) == -1) {
+          mesh.bindNamespaces.push(ns.id);
+          await strapi.db.query('api::mesh.mesh')
+          .update({where: {id: mesh.id}, data: {bindNamespaces: mesh.bindNamespaces}})
+        }
+      }
     }
   } catch (error) {
     console.error(error);
@@ -83,7 +111,7 @@ async function syncOsm () {
 }
 
 module.exports = {
-  '*/40 * * * * *': () => {
+  '40 * * * * *': () => {
     syncOsm()
   },
   '10 * * * * *': () => {

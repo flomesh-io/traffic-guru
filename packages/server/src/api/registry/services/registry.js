@@ -138,6 +138,7 @@ module.exports = createCoreService('api::registry.registry', {
         Authorization: 'Basic ' + buf.toString('base64'),
         Host: url.host
       },
+      timeout: 30000
     });
     try {
       const response = await eurekaAxios.get('/eureka/apps');
@@ -177,7 +178,6 @@ module.exports = createCoreService('api::registry.registry', {
   async fetchK8sNamespace (registry) {
     // strapi.log.debug("  --->>fetchK8sNamespace - registry = " + JSON.stringify(registry));
     const regId = registry.id;
-    strapi.log.debug("  --->>fetchK8sNamespace - regId = " + regId);
     const k8sApi = await this.getK8sApi(registry.config);
     try {
       const result = await k8sApi.listNamespace();
@@ -249,6 +249,7 @@ module.exports = createCoreService('api::registry.registry', {
         'Content-Type': 'application/json',
         Authorization: 'Basic ' + buf.toString('base64'),
       },
+      timeout: 30000
     });
 
     try {
