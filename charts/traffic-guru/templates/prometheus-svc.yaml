@@ -15,5 +15,5 @@ spec:
     protocol: TCP
     targetPort: {{.Values.prometheus.port}}
   selector:
-    app: traffic-guru-prometheus
+    {{- include "traffic-guru.prometheus.labels" . |nindent 4}}
 {{- end }}
