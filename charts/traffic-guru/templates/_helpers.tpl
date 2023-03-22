@@ -139,6 +139,16 @@ Selector labels
 app.kubernetes.io/name: {{ include "traffic-guru.name" . }}
 {{- end }}
 
+{{- define "traffic-guru.prometheus.labels"}}
+helm.sh/chart: {{ include "traffic-guru.chart" . }}
+app.kubernetes.io/name: prometheus
+app.kubernetes.io/component: prometheus
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
 {{- define "traffic-guru.repository" -}}
 {{- if contains "ubi" .Chart.Version -}}
 quay.io/{{ .Values.image.repository }}

@@ -5,20 +5,19 @@ metadata:
   name: traffic-guru-prometheus
   namespace: {{ .Release.Namespace | quote }}
   labels:
-    {{- include "traffic-guru.labels" . | nindent 4 }}
+    {{- include "traffic-guru.prometheus.labels" . | nindent 4 }}
 spec:
   replicas: 1
   strategy:
     type: Recreate
   selector:
     matchLabels:
-      app: traffic-guru-prometheus
+      {{- include "traffic-guru.prometheus.labels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "traffic-guru.labels" . | nindent 8 }}
-        app.kubernetes.io/component: prometheus
-        app: traffic-guru-prometheus
+        {{- include "traffic-guru.prometheus.labels" . | nindent 8 }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       {{- if not (.Capabilities.APIVersions.Has "security.openshift.io/v1") }}
       {{- include "restricted.securityContext" . | nindent 6 }}
