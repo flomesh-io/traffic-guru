@@ -29,163 +29,12 @@
           <span v-else>{{ options_keyset[record.type] }}</span>
         </template>
         <template v-else-if="column.dataIndex === 'a'">
-          <span v-if="record.type<=4">
-            <a-input
-              key="a"
-              type="number"
-              min="0"
-              max="999"
-              v-if="record.editable"
-              class="ipunit"
-              v-model:value="record.a"
-              :placeholder="record.a"
-              @change="handleChange(record.a, record.id, 'a')"
-            />
-            <span v-else>{{ record.a }}</span>
-            <span>.</span>
-            <a-input
-              key="b"
-              type="number"
-              min="0"
-              max="999"
-              v-if="record.editable"
-              class="ipunit"
-              v-model:value="record.b"
-              :placeholder="record.b"
-              @change="handleChange(record.b, record.id, 'b')"
-            />
-            <span v-else>{{ record.b }}</span>
-            <span>.</span>
-            <a-input
-              key="c"
-              type="number"
-              min="0"
-              max="999"
-              v-if="record.editable"
-              class="ipunit"
-              v-model:value="record.c"
-              :placeholder="record.c"
-              @change="handleChange(record.c, record.id, 'c')"
-            />
-            <span v-else>{{ record.c }}</span>
-            <span>.</span>
-          </span>
-          <span v-else> 
-            <a-input
-              key="a"
-              v-if="record.editable"
-              class="ipunit width-200"
-              v-model:value="record.a"
-              :placeholder="record.a"
-              @change="handleChange(record.a, record.id, 'a')"
-            />
-            <span v-else>{{ record.a }}</span>
-          </span>
-          <span v-if="record.type == 1">x</span>
-          <span v-if="record.type == 2">
-            <a-input
-              key="d"
-              type="number"
-              min="0"
-              :max="record.suffix ? record.suffix - 1 : 999"
-              v-if="record.editable"
-              class="ipunit"
-              v-model:value="record.d"
-              :placeholder="record.d"
-              @change="handleChange(record.d, record.id, 'd')"
-            />
-            <span v-if="record.editable">- {{ record.a }} . {{ record.b }} . {{ record.c }} .</span>
-            <a-input
-              key="suffix"
-              type="number"
-              :min="record.d * 1 + 1"
-              max="999"
-              v-if="record.editable"
-              class="ipunit"
-              v-model:value="record.suffix"
-              :placeholder="record.suffix"
-              @change="handleChange(record.suffix, record.id, 'suffix')"
-            />
-            <span v-if="!record.editable">{{ record.d }} - {{ record.a }} . {{ record.b }} . {{ record.c }} . {{ record.suffix }}</span>
-          </span>
-
-          <span v-if="record.type == 3">
-            <a-input
-              key="d"
-              type="number"
-              min="0"
-              max="999"
-              v-if="record.editable"
-              class="ipunit"
-              v-model:value="record.d"
-              :placeholder="record.d"
-              @change="handleChange(record.d, record.id, 'd')"
-            />
-            <span v-if="record.editable">/</span>
-            <a-input
-              key="suffix"
-              type="number"
-              min="0"
-              max="999"
-              v-if="record.editable"
-              class="ipunit"
-              v-model:value="record.suffix"
-              :placeholder="record.suffix"
-              @change="handleChange(record.suffix, record.id, 'suffix')"
-            />
-            <span v-if="!record.editable">{{ record.d }} / {{ record.suffix }}</span>
-          </span>
-          <span v-if="record.type == 4">
-            <a-input
-              key="d"
-              type="number"
-              min="0"
-              max="999"
-              v-if="record.editable"
-              class="ipunit"
-              v-model:value="record.d"
-              :placeholder="record.d"
-              @change="handleChange(record.d, record.id, 'd')"
-            />
-            <span v-if="!record.editable">{{ record.d }}</span>
-          </span>
-          <span v-if="record.type == 5">
-            <span> : </span>
-            <a-input
-              key="d"
-              v-if="record.editable"
-              class="ipunit"
-              v-model:value="record.d"
-              :placeholder="record.d"
-              @change="handleChange(record.d, record.id, 'd')"
-            />
-            <span v-if="record.editable">- {{ record.a }} :</span>
-            <a-input
-              key="suffix"
-              v-if="record.editable"
-              class="ipunit"
-              v-model:value="record.suffix"
-              :placeholder="record.suffix"
-              @change="handleChange(record.suffix, record.id, 'suffix')"
-            />
-            <span v-if="!record.editable">{{ record.d }} - {{ record.a }} : {{ record.suffix }}</span>
-          </span>
-
-          <span v-if="record.type == 6">
-            <span> / </span>
-            <a-input
-              key="suffix"
-              type="number"
-              min="0"
-              max="999"
-              v-if="record.editable"
-              class="ipunit"
-              v-model:value="record.suffix"
-              :placeholder="record.suffix"
-              @change="handleChange(record.suffix, record.id, 'suffix')"
-            />
-            <span v-if="!record.editable">{{ record.suffix }}</span>
-          </span>
+          <IPRange
+            :ip="record"
+            :editable="record.editable"
+            :type="record.type"
+            @handleChange="ip => handleIpChange(ip,record.id)"
+          />
         </template>
         <template v-else-if="column.dataIndex === 'operation'">
           <span v-if="record.editable">
@@ -240,6 +89,8 @@
 
 <script>
 import { PlusOutlined } from '@ant-design/icons-vue';
+import IPRange from "@/components/form/IPRange";
+
 const columns = [
   {
     key: 'Type',
@@ -263,7 +114,7 @@ const columns = [
 export default {
   name: 'IPList',
   i18n: require('@/i18n'),
-  components: { PlusOutlined },
+  components: { PlusOutlined, IPRange },
   props: ['list', 'title', 'fixedType'],
   data() {
     return {
@@ -366,6 +217,20 @@ export default {
       this.$set(this.address, index, target);
     },
 
+    handleIpChange(ip, key) {
+      const newData = [...this.address];
+      const target = newData.filter(item => key === item.id)[0];
+      if (target) {
+        target.a = ip.a;
+        target.b = ip.b;
+        target.c = ip.c;
+        target.d = ip.d;
+        target.suffix = ip.suffix;
+        this.address = newData;
+      }
+      this.$emit('update:list', this.address);
+    },
+		
     handleChange(value, key, column) {
       const newData = [...this.address];
       const target = newData.filter(item => key === item.id)[0];
@@ -418,13 +283,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.ipunit {
-	width: 60px;
-	padding-left: 0;
-	padding-right: 0;
-	text-align: center;
-	display: inline-block;
-}
 .ip-selector {
 	margin: -5px 0;
 }

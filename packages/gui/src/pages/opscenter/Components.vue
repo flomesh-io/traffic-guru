@@ -129,7 +129,7 @@
             <a-card-meta>
               <template #title>
                 <span
-                  v-if="(item?.type || '').toLowerCase() == 'clickhouse' || (item?.type || '').toLowerCase() == 'log'"
+                  v-if="(item?.type || '').toLowerCase() == 'clickhouse' || (item?.type || '').toLowerCase() == 'prometheus' || (item?.type || '').toLowerCase() == 'log'"
                   class="card-span toggle-card-item"
                 >
                   <a-divider type="vertical" />
@@ -153,12 +153,12 @@
                 <div class="mb-3">
                   <a-badge
                     status="processing"
-                    v-if="item.status == 'running' && item.type?.toLowerCase() == 'pipy'"
+                    v-if="item.status == 'running' && (item.type?.toLowerCase() == 'pipy' || item.type?.toLowerCase() == 'clickhouse')"
                   />
                   <a-badge
                     status="processing"
                     color="red"
-                    v-if="item.status != 'running' && item.type?.toLowerCase() == 'pipy'"
+                    v-if="item.status != 'running' && (item.type?.toLowerCase() == 'pipy' || item.type?.toLowerCase() == 'clickhouse')"
                   />{{
                     item.name
                   }}
@@ -188,7 +188,7 @@
       :destroy-on-close="true"
       :title="$t('Component properties')"
       @ok="valid"
-      width="70%"
+      width="90%"
       :ok-text="isEdit ? $t('Save') : $t('create')"
     >
       <a-form
@@ -249,6 +249,29 @@
                   </svg>
                   <font class="capitalize">{{ item }}</font>
                 </span>
+              </a-select-option>
+            </a-select>
+          </a-descriptions-item>
+          <a-descriptions-item
+            v-if="payload.type.toLowerCase() == 'pipy4lb'"
+            :label="$t('Organization')"
+            :span="3"
+          >
+            <a-select
+              :placeholder="$t('unset')"
+              mode="multiple"
+              v-model:value="payload.organizations"
+              class="width-300"
+              ref="select"
+            >
+              <a-select-option
+                :value="org.id"
+                :key="index"
+                v-for="(org, index) in orgs"
+              >
+                {{
+                  org.name
+                }}
               </a-select-option>
             </a-select>
           </a-descriptions-item>
@@ -491,6 +514,39 @@
                   </div>
                   <div
                     class="mt-10"
+                    v-if="payload.type.toLowerCase() == 'pipy'"
+                  >
+                    <label>{{ $t("Connect Timeout") }} : </label>
+                    <a-input
+                      :placeholder="$t('unset')"
+                      v-model:value="payload.json.connectTimeout"
+                      class="width-120"
+                    />
+                  </div>
+                  <div
+                    class="mt-10"
+                    v-if="payload.type.toLowerCase() == 'pipy'"
+                  >
+                    <label>{{ $t("Write Timeout") }} : </label>
+                    <a-input
+                      :placeholder="$t('unset')"
+                      v-model:value="payload.json.writeTimeout"
+                      class="width-120"
+                    />
+                  </div>
+                  <div
+                    class="mt-10"
+                    v-if="payload.type.toLowerCase() == 'sidecar'"
+                  >
+                    <label>{{ $t("Service Port Offset") }} : </label>
+                    <a-input-number
+                      :placeholder="$t('unset')"
+                      v-model:value="payload.json.offset"
+                      class="width-100"
+                    />
+                  </div>
+                  <div
+                    class="mt-10"
                     v-if="payload.type.toLowerCase() == 'pipy4lb'"
                   >
                     <label>{{ $t("Global Max Connections") }} : </label>
@@ -556,6 +612,17 @@
                   </div>
                   <div
                     class="mt-10"
+                    v-if="payload.type.toLowerCase() == 'pipy'"
+                  >
+                    <label>{{ $t("Read Timeout") }} : </label>
+                    <a-input
+                      :placeholder="$t('unset')"
+                      v-model:value="payload.json.readTimeout"
+                      class="width-120"
+                    />
+                  </div>
+                  <div
+                    class="mt-10"
                     v-if="payload.type.toLowerCase() == 'pipy4lb'"
                   >
                     <label>{{ $t("Default Max Connections") }} : </label>
@@ -595,10 +662,13 @@
           <a-descriptions-item
             :label="$t('healthcheck')"
             :span="3"
-            v-if="payload.type.toLowerCase() == 'pipy4lb'"
+            v-if="payload.type.toLowerCase() == 'pipy4lb' && payload.json.healthcheck"
           >
             <div class="flex">
-              <div class="flex-item">
+              <div
+                class="flex-item"
+                v-if="payload.json.healthcheck.host"
+              >
                 <div>
                   <label>{{ $t("Host") }} : </label>
                   <a-input
@@ -608,7 +678,10 @@
                   />
                 </div>
               </div>
-              <div class="flex-item">
+              <div
+                class="flex-item"
+                v-if="payload.json.healthcheck.port"
+              >
                 <div>
                   <label>{{ $t("Port") }} : </label>
                   <a-input-number
@@ -620,7 +693,10 @@
               </div>
             </div>
             <div class="flex">
-              <div class="flex-item">
+              <div
+                class="flex-item"
+                v-if="payload.json.healthcheck.interval"
+              >
                 <div>
                   <label>{{ $t("Interval") }} : </label>
                   <a-input
@@ -630,7 +706,10 @@
                   />
                 </div>
               </div>
-              <div class="flex-item">
+              <div
+                class="flex-item"
+                v-if="payload.json.healthcheck.failures"
+              >
                 <div>
                   <label>{{ $t("Failures") }} : </label>
                   <a-input-number
@@ -663,7 +742,7 @@
               :certificate-size="1"
               mode="certificates"
               v-model:certificates="payload.json.tls"
-              :col="1"
+              :col="2"
               :title="$t('Add Bind')"
             />
           </a-descriptions-item>
@@ -733,6 +812,7 @@ export default {
         json: {},
       },
 
+      orgs:[],
       editorIsCreate: true,
       workload: [],
       projects: [],
@@ -802,6 +882,9 @@ export default {
           port: 80,
           tlsport: 443,
           tls: [],
+          maxConnections: null,
+          readTimeout: null,
+          writeTimeout: null
         },
 
         pipy4lb: {
@@ -829,7 +912,7 @@ export default {
           maxLBs: 20,
           maxConnectionsGlobal: "3000",
           idPrefix: "",
-          bgp: '{\n  \"admin_port\": \"0.0.0.0:8080\",\n  \"bgp_nodes\": [\n    \"192.168.10.31\",\n    \"192.168.10.32\"\n  ],\n  \"debug\": false,\n  \"ipv6\": false,\n  \"asn4\": false,\n  \"afi_safi\": [\n    [\n      1,\n      1\n    ]\n  ],\n  \"bgp_addresses\": [\n    \"192.168.52.147\"\n  ],\n  \"my_asn\": 7675,\n  \"hold_time\": 180,\n  \"bgp_id\": \"192.168.52.148:179\",\n  \"withdrawn_routes\": [],\n  \"origin\": 0,\n  \"as_path\": [\n    [\n      2,\n      [\n        7675\n      ]\n    ]\n  ],\n  \"nexthop\": \"192.168.52.148\",\n  \"prefixes\": []\n}',
+          bgp: '{\n  \"as\": 0,\n  \"id\": \"0.0.0.0\",\n  \"peers\": [],\n  \"ipv4\": {\n    \"nextHop\": \"0.0.0.0\",\n    \"reachable\": [],\n    \"unreachable\": []\n  },\n  \"ipv6\": {\n    \"nextHop\": \"::\",\n    \"reachable\": [],\n    \"unreachable\": []\n  }\n}',
         },
 
         sidecar: {
@@ -1143,6 +1226,7 @@ export default {
           this.payload.content = JSON.stringify(item.content);
           this.payload.json = item.content;
           this.payload.template = item.template;
+          this.payload.organizations = item.organizations;
           this.payload.apply = item.apply;
           this.showModal();
         });
@@ -1158,6 +1242,9 @@ export default {
     },
 
     loaddata() {
+      this.$gql.query(`organizations(pagination:{limit: ${this.$DFT_LIMIT}}){data{id,attributes{name}}}`).then((res) => {
+        this.orgs = res.data;
+      });
       this.$gql
         .query(`fleets(filters:{type:{eq:"log"}}){data{id,attributes{name,apply,content}}}`)
         .then((res) => {
@@ -1189,7 +1276,7 @@ export default {
           this.templates["checkpoint"] = res.data;
         });
       this.$gql
-        .query(`fleets(pagination:{limit: ${this.$DFT_LIMIT}}){data{id,attributes{name,type,content,apply,template{data{id,attributes{name}}}, status}}}`)
+        .query(`fleets(pagination:{limit: ${this.$DFT_LIMIT}}){data{id,attributes{name,type,content,apply,organizations{data{id,attributes{name}}},template{data{id,attributes{name}}}, status}}}`)
         .then((res) => {
           this.tabs.log = [];
           if (this.$isPro) {
@@ -1219,7 +1306,17 @@ export default {
                     interval: "3s",
                     connectTimeout: "1s",
                     readTimeout: "1s",
+                    host: "localhost",
+                    port: 8888,
+                    failures: 3,
                   };
+                }
+                let _organizations = item.organizations;
+                item.organizations = [];
+                if(_organizations){
+                  _organizations.forEach((_org)=>{
+                    item.organizations.push(_org.id)
+                  })
                 }
                 this.tabs[item.type].push(item);
               }

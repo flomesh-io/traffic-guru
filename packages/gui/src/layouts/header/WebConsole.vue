@@ -7,12 +7,18 @@
       class="header-setting pointer"
       @click="search"
     >
-      <svg
-        class="card-avatar icon"
-        aria-hidden="true"
+      <a-tooltip
+        :title="$t('Web Console')"
+        color="#00adef"
+        placement="bottom"
       >
-        <use xlink:href="#icon-fenxi" />
-      </svg>
+        <svg
+          class="card-avatar icon"
+          aria-hidden="true"
+        >
+          <use xlink:href="#icon-fenxi" />
+        </svg>
+      </a-tooltip>
     </div>
     <template #overlay>
       <a-menu>

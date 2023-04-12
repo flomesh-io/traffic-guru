@@ -293,7 +293,7 @@
       v-model:visible="visible"
       :title="$t('Workplace Setting')"
       :footer="null"
-      width="85%"
+      width="95%"
       @cancel="handleOk"
     >
       <a-tabs
@@ -336,6 +336,7 @@
         >
           <CardList
             :loading="loading"
+            :col="3"
             :data-source="tab.data.filter((d) => d.col != -1)"
             type="component"
             :actions="[
@@ -481,7 +482,7 @@ export default {
       prometheusVal: null,
       prometheusList: [],
       name: "",
-      dateVal: [20, 100],
+      dateVal: [60, 100],
       screenWidth: document.body.clientWidth,
       timer: false,
       subscribes: [],

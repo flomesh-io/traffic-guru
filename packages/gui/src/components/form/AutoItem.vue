@@ -106,7 +106,7 @@
       "
       :placeholder="$t('unset')"
       class="form-width"
-      :autosize="{ minRows: 4, maxRows: 6 }"
+      :auto-size="{ minRows: 4, maxRows: 6 }"
     />
     <div
       class="form-tips"
@@ -121,7 +121,7 @@
 import FormItem from "@/components/form/FormItem";
 export default {
   name: "AutoForm",
-  i18n: require("./i18n"),
+  i18n: require("@/i18n"),
   components: {
     FormItem,
   },

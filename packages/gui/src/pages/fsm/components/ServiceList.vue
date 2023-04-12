@@ -75,6 +75,8 @@
     </template>
     <div>
       <a-table
+			
+        :row-key="record=>record.id"
         :pagination="
           embed && embedServices
             ? null
@@ -90,7 +92,7 @@
             }
         "
         :columns="dataColumns"
-        :data-source="embed && embedServices ? embedList : list"
+        :data-source="embed && embedServices !=null ? embedList : list"
         class="bg-white"
       >
         <template
@@ -129,7 +131,13 @@
           <SearchOutlined :style="{ color: filtered ? '#108ee9' : undefined }" />
         </template>
         <template #bodyCell="{ column, record }">
-          <template v-if="column.dataIndex === 't'">
+          <template v-if="column.dataIndex === 'enabled'">
+            <a-checkbox
+              v-model:checked="record.enabled"
+              @change="enabledChange(record)"
+            />
+          </template>
+          <template v-else-if="column.dataIndex === 't'">
             <Status :d="{status:record.t}" />
           </template>
           <template v-else-if="column.dataIndex === 'gatewayPath'">
@@ -269,6 +277,10 @@ import EnvSelector from "@/components/menu/EnvSelector";
 import SyncBar from "@/components/tool/SyncBar";
 import Status from "@/components/tag/Status";
 const regcolumns = [
+  {
+    key: "Enabled",
+    dataIndex: "enabled",
+  },
   {
     key: "Service",
     dataIndex: "name",
@@ -492,7 +504,7 @@ export default {
     if (this.embed && this.embedServices) {
       this.loading = false;
     } else {
-      this.sync(true);
+      this.search();
     }
   },
 
@@ -507,6 +519,10 @@ export default {
     handleReset(clearFilters){
       clearFilters({ confirm: true });
       this.searchText = '';
+    },
+
+    enabledChange(d) {
+      this.$emit("enabledChange",d);
     },
 
     onTabChange(d){
@@ -569,7 +585,8 @@ export default {
           limit: this.pageSize
         };
         let filters = {
-          name: { contains: this.key }
+          name: { contains: this.key },
+          deleted: { eq: false },
         };
         let namespacesName = [];
         if (this.namespaces && this.namespaces.length > 0) {

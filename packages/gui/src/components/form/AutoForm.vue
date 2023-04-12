@@ -1,6 +1,7 @@
 <template>
   <a-row
     class="form-row"
+    :gutter="16"
     v-for="(fieldGroup, index) in fields"
     :key="index"
   >
@@ -32,7 +33,7 @@
 import AutoItem from "@/components/form/AutoItem";
 export default {
   name: "AutoForm",
-  i18n: require("./i18n"),
+  i18n: require("@/i18n"),
   components: {
     AutoItem,
   },

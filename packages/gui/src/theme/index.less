@@ -991,7 +991,7 @@ blockquote {
   margin: 0 8%;
 }
 .result-mask {
-  background: rgba(255, 255, 255, 0.5);
+  background: @hover-bg-color;
   border-radius: 8px;
 }
 .result-chart {
@@ -1178,4 +1178,7 @@ blockquote {
 	z-index: 100;
 	right: 25px;
 	top: 15px;
+}
+.ant-picker-cell-in-view.ant-picker-cell-in-range::before{
+	opacity: 0.5;
 }

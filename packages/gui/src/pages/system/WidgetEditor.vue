@@ -88,7 +88,7 @@
                 <a-descriptions-item
                   v-if="!widgetName"
                   :label="$t('as')"
-                  :span="1"
+                  :span="3"
                 >
                   <FormItem
                     name="id"
@@ -104,7 +104,7 @@
                 </a-descriptions-item>
                 <a-descriptions-item
                   :label="$t('Title')"
-                  :span="2"
+                  :span="3"
                 >
                   <FormItem
                     name="title"
@@ -400,7 +400,7 @@ export default {
         data: ``,
       },
 
-      dateVal: [20, 100],
+      dateVal: [60, 100],
       rightKey: '1',
       readonly: false,
       icons: subscribe.baseComponents,

@@ -159,12 +159,18 @@
       @click="fetchNotice"
       class="header-notice"
     >
-      <a-badge
-        class="notice-badge"
-        dot
+      <a-tooltip
+        :title="$t('Notice')"
+        color="#00adef"
+        placement="bottom"
       >
-        <AlertOutlined :class="['header-notice-icon']" />
-      </a-badge>
+        <a-badge
+          class="notice-badge"
+          dot
+        >
+          <AlertOutlined :class="['header-notice-icon']" />
+        </a-badge>
+      </a-tooltip>
     </span>
   </a-dropdown>
 </template>

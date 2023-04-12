@@ -58,7 +58,7 @@ export default {
   props: {},
   data() {
     return {
-      dateVal: [20, 100],
+      dateVal: [60, 100],
       topoData: {},
       marks: {},
       loading: true,

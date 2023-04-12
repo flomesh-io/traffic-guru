@@ -56,6 +56,7 @@
                 <a-descriptions-item
                   :label="$t('Mobile')"
                   :span="2"
+                  v-if="$isPro"
                 >
                   <div class="userinfo-description">
                     <span v-if="!detail.phone">-</span>

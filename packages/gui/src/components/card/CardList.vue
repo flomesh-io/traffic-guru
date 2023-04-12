@@ -56,8 +56,8 @@
         "
         :grid="
           col
-            ? { gutter: 10, xs: 1, sm: 2, md: col, lg: col, xl: col, xxl: col }
-            : { gutter: 10, xs: 1, sm: 2, md: 4, lg: 4, xl: 4, xxl: 4 }
+            ? { gutter: 10, xs: 1, sm: 2, md: 2, lg: col>3?3:2, xl: col, xxl: col }
+            : { gutter: 10, xs: 1, sm: 2, md: 2, lg: 3, xl: 4, xxl: 4 }
         "
       >
         <template #renderItem="{ item, index }">

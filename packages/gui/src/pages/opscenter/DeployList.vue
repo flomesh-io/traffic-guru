@@ -1,25 +1,18 @@
 <template>
   <div>
     <a-card
-      :title="$t('Operating record')"
+      :title="$t('Pipy Deploy History')"
       class="nopd"
       :loading="loading"
     >
       <template #extra>
         <div>
           <a-input-search
-            v-model:value="keyAction"
-            @search="search()"
-            class="right-search-input"
-            style="width: 200px"
-            :placeholder="$t('search') + ' ' + $t('Action')"
-          />
-          <a-input-search
             v-model:value="key"
             @search="search()"
             class="right-search-input"
             style="width: 200px"
-            :placeholder="$t('search') + ' ' + $t('User')"
+            :placeholder="$t('search') + ' ' + $t('Path')"
           />
         </div>
       </template>
@@ -54,12 +47,7 @@
             </template>
             <template v-else-if="column.dataIndex === 'data'">
               <div>
-                <a @click="detailInterface(record.content)">
-                  {{ $t('Interface') }}
-                </a>
-              </div>
-              <div>
-                <a @click="detail(record.data)">
+                <a @click="detail(record.content)">
                   {{ $t('Data') }}
                 </a>
               </div>
@@ -95,20 +83,16 @@
 import JsonEditor from "@/components/editor/JsonEditor";
 const columns = [
   {
-    key: "user",
-    dataIndex: ["user", "username"],
+    key: "Path",
+    dataIndex: "path",
   },
   {
-    key: "IP",
-    dataIndex: "loginIp",
+    key: "Type",
+    dataIndex: "type",
   },
   {
-    key: "Action",
-    dataIndex: "action",
-  },
-  {
-    key: "as",
-    dataIndex: "name",
+    key: "Version",
+    dataIndex: "version",
   },
   {
     key: "updTime",
@@ -127,7 +111,6 @@ export default {
   data() {
     return {
       key: "",
-      keyAction: "",
       visible:false,
       pageSize: 10,
       pageNo: 1,
@@ -192,11 +175,8 @@ export default {
         limit: this.pageSize
       };
       this.loading = true;
-      const keyAction = this.keyAction.replace(/\s*/g,"")
       let filters = {
-        //loginIp: { contains: this.key },
-        user: {username: { contains: this.key }},
-        action: { contains: keyAction }
+        path: { contains: this.key },
       };
       let order = "updatedAt:desc";
       if (this.sorter && this.sortOrder) {
@@ -206,43 +186,25 @@ export default {
       }
       this.$gql
         .query(
-          `events(filters: $filters, pagination: $pagination, sort: "${order}"){
+          `deployHistories(filters: $filters, pagination: $pagination, sort: "${order}"){
 						data{id,attributes{
 							updatedAt,
-							name,
-							action,
-							data,
-							loginIp,
-              content,
-              from,
-							user{data{id,attributes{username}}}
+							content,
+							version,
+							path,
+							type
 						}},
 						meta{pagination{total}}
 					}`,
           { 
             filters,pagination
           },{
-            filters: "EventFiltersInput",
+            filters: "DeployHistoryFiltersInput",
             pagination: "PaginationArg",
           }
         )
         .then((res) => {
           this.events = res.data;
-          res.data.forEach((evt)=>{
-            evt.actions = [];
-            if(evt.action.indexOf("create") == 0){
-              evt.actions.push("create");
-              evt.actions.push(evt.action.replace(/^create/,""));
-            }else if(evt.action.indexOf("update") == 0){
-              evt.actions.push("update");
-              evt.actions.push(evt.action.replace(/^update/,""));
-            }else if(evt.action.indexOf("delete") == 0){
-              evt.actions.push("delete");
-              evt.actions.push(evt.action.replace(/^delete/,""));
-            }else{
-              evt.actions.push(evt.action);
-            }
-          })
           this.total = res.pagination.total;
           this.loading = false;
         });

@@ -1,8 +1,14 @@
 <template>
-  <CodeOutlined
-    class="font-16"
-    @click="showModal"
-  />
+  <a-tooltip
+    :title="$t('Web Term')"
+    color="#00adef"
+    placement="bottom"
+  >
+    <CodeOutlined
+      class="font-16"
+      @click="showModal"
+    />
+  </a-tooltip>
   <a-modal
     :title="'Web ' + $t('Console')"
     class="web-term-modal"

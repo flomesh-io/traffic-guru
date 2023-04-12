@@ -524,6 +524,7 @@ export default {
 							services(pagination: {limit: 9999 }){data{id,attributes{
 								uid,
 								gatewayPath,
+								deleted,
 								fleet{data{id,attributes{name}}},
 								organization{data{id,attributes{name}}},
 								namespace,
@@ -560,13 +561,16 @@ export default {
             let _find = false;
             this.detail.namespaces.forEach((ns) => {
               ns.organizationId = ns.organization ? ns.organization.id : null;
-              if (ns.services.length > 0 && !_find) {
-                _find = true;
-                this.selectedNS = ns;
+              if (ns.services.length > 0) {
                 ns.services.forEach((s) => {
-                  s.organization = s.organization ? s.organization : {id: null}
+                  s.organization = s.organization ? s.organization : {id: null},
+                  s.enabled = !s.deleted;
                 })
-                this.selectedKeys = ns.id;
+                if(!_find){
+                  _find = true;
+                  this.selectedKeys = ns.id;
+                  this.selectedNS = ns;
+                }
               }
             });
           }

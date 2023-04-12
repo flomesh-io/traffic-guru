@@ -107,46 +107,28 @@ const system = {
       title: "Latency",
       tag: MiniArea,
       col: process.env.VUE_APP_VERSION == "pro" ? 6 : -1,
-      service: common_svc.getLatency,
+      service: pro_svc.getL7Latency(true),
       provide: "prometheus",
       className: "card nopd",
       data: spread((res50, res90, res99) => {
-        let dv = [];
-        if (res50 && res50.data.data && res50.data.data.result) {
-          res50.data.data.result.forEach((item) => {
-            item.values.forEach((value) => {
-              const date = new Date(value[0] * 1000);
-              dv.push({
-                type: "P50",
-                value: isNaN(value[1]) ? 0 : (value[1] * 1).toFixed(2),
-                date: date.toTimeString().substring(0, 5),
-              });
-            });
-          });
+				let fixVal = _v => isNaN(_v) ? 0 : (_v * 1).toFixed(2);
+				let dv50 = pro_svc.mapData([], res50, fixVal);
+				let dv90 = pro_svc.mapData([], res90, fixVal);
+				let dv99 = pro_svc.mapData([], res99, fixVal);
+        if (dv50) {
+					dv50.forEach((item) => {
+						item.type = "P50";
+					});
         }
-        if (res90 && res90.data.data && res90.data.data.result) {
-          res90.data.data.result.forEach((item) => {
-            item.values.forEach((value) => {
-              const date = new Date(value[0] * 1000);
-              dv.push({
-                type: "P90",
-                value: isNaN(value[1]) ? 0 : (value[1] * 1).toFixed(2),
-                date: date.toTimeString().substring(0, 5),
-              });
-            });
-          });
+        if (dv90) {
+					dv90.forEach((item) => {
+						item.type = "P90";
+					});
         }
-        if (res99 && res99.data.data && res99.data.data.result) {
-          res99.data.data.result.forEach((item) => {
-            item.values.forEach((value) => {
-              const date = new Date(value[0] * 1000);
-              dv.push({
-                type: "P99",
-                value: isNaN(value[1]) ? 0 : (value[1] * 1).toFixed(2),
-                date: date.toTimeString().substring(0, 5),
-              });
-            });
-          });
+        if (dv99) {
+					dv99.forEach((item) => {
+						item.type = "P99";
+					});
         }
         return {
           id: "LATENCY",
@@ -156,7 +138,7 @@ const system = {
           axis: false,
           unit: "ms",
           showy: false,
-          dv: dv,
+          dv: dv50.concat(dv90).concat(dv99),
         };
       }),
     },
@@ -192,23 +174,12 @@ const system = {
       title: "QPS",
       tag: MiniArea,
       col: process.env.VUE_APP_VERSION == "pro" ? 6 : -1,
-      service: common_svc.getQPS,
+      service: pro_svc.getL7QPS(true),
       provide: "prometheus",
       className: "card nopd",
       data: (res) => {
-        let dv = [];
-        if (res && res.data.data && res.data.data.result) {
-          res.data.data.result.forEach((item) => {
-            item.values.forEach((value) => {
-              const date = new Date(value[0] * 1000);
-              dv.push({
-                type: item.metric.path,
-                value: isNaN(value[1]) ? 0 : (value[1] * 1).toFixed(2),
-                date: date.toTimeString().substring(0, 5),
-              });
-            });
-          });
-        }
+				let fixVal = _v => isNaN(_v) ? 0 : (_v * 1).toFixed(2);
+				let dv = pro_svc.mapData([], res, fixVal);
         return {
           id: "QPS",
           colors: [
@@ -224,7 +195,7 @@ const system = {
           axis: false,
           unit: "Req/s",
           showy: false,
-          dv: dv,
+          dv,
         };
       },
     },
@@ -232,23 +203,12 @@ const system = {
       title: "errorrate",
       tag: MiniArea,
       col: process.env.VUE_APP_VERSION == "pro" ? 6 : -1,
-      service: common_svc.getErrorrate,
+      service: pro_svc.getL7ER(true),
       provide: "prometheus",
       className: "card nopd",
       data: (res) => {
-        let dv = [];
-        if (res && res.data.data && res.data.data.result) {
-          res.data.data.result.forEach((item) => {
-            item.values.forEach((value) => {
-              const date = new Date(value[0] * 1000);
-              dv.push({
-                type: item.metric.status,
-                value: isNaN(value[1]) ? 0 : (value[1] * 1).toFixed(2),
-                date: date.toTimeString().substring(0, 5),
-              });
-            });
-          });
-        }
+				let fixVal = _v => isNaN(_v) ? 0 : (_v * 1).toFixed(2);
+				let dv = pro_svc.mapData([], res, fixVal);
         return {
           id: "ERROR_RATE",
           colors: ["#8bd4a1", "#fac858", "#fb9690", "#D48BCD"],
@@ -257,7 +217,7 @@ const system = {
           axis: false,
           unit: "%",
           showy: false,
-          dv: dv,
+          dv,
         };
       },
     },

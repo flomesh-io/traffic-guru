@@ -170,93 +170,112 @@ export function enquireScreen(call) {
 }
 
 /**
- * Remove an item from an array.
+ * restruct an item from an array.
  */
 export function restructAddress(data) {
   let _address = [];
   for (let i = 0; i < data.length; i++) {
-    let type = data[i].type;
-    let ip = data[i].ip;
-    let item = {};
-    item.id = i;
-    item.type = type;
-    if (type == 1) {
-      let _ary = ip.split(".");
-      item.a = _ary[0];
-      item.b = _ary[1];
-      item.c = _ary[2];
-      item.d = 0;
-      item.suffix = 0;
-    } else if (type == 2) {
-      let _ary = ip.split("-");
-      let _ary1 = _ary[0].split(".");
-      let _ary2 = _ary[1].split(".");
-      item.a = _ary1[0];
-      item.b = _ary1[1];
-      item.c = _ary1[2];
-      item.d = _ary1[3];
-      item.suffix = _ary2[3];
-    } else if (type == 3) {
-      let _ary = ip.split("/");
-      let _ary1 = _ary[0].split(".");
-      item.a = _ary1[0];
-      item.b = _ary1[1];
-      item.c = _ary1[2];
-      item.d = _ary1[3];
-      item.suffix = _ary[1];
-    } else if (type == 4) {
-      let _ary = ip.split(".");
-      item.a = _ary[0];
-      item.b = _ary[1];
-      item.c = _ary[2];
-      item.d = _ary[3];
-      item.suffix = 0;
-    } else if (type == 5) {
-      let _ary = ip.split("-");
-      let _ary1 = _ary[0].split(":");
-      let _ary2 = _ary[1].split(":");
-      item.d = _ary1.pop();
-      item.a = _ary1.join(":");
-      item.suffix = _ary2.pop();
-    } else if (type == 6) {
-      let _ary = ip.split("/");
-      item.a = _ary[0];
-      item.suffix = _ary[1];
-    }
-    _address.push(item);
+    _address.push(restructAddressItem(data[i], data[i].type));
   }
   return _address;
 }
 
 /**
- * Remove an item from an array.
+ * restruct item 
+ */
+export function restructAddressItem(data, type, index) {
+	let ip = data.ip;
+	let item = {};
+	item.id = index || 0;
+	item.type = type;
+	if (type == 1) {
+		let _ary = ip.split(".");
+		item.a = _ary[0];
+		item.b = _ary[1];
+		item.c = _ary[2];
+		item.d = 0;
+		item.suffix = 0;
+	} else if (type == 2) {
+		let _ary = ip.split("-");
+		let _ary1 = _ary[0].split(".");
+		let _ary2 = _ary[1].split(".");
+		item.a = _ary1[0];
+		item.b = _ary1[1];
+		item.c = _ary1[2];
+		item.d = _ary1[3];
+		item.suffix = _ary2[3];
+	} else if (type == 3) {
+		let _ary = ip.split("/");
+		let _ary1 = _ary[0].split(".");
+		item.a = _ary1[0];
+		item.b = _ary1[1];
+		item.c = _ary1[2];
+		item.d = _ary1[3];
+		item.suffix = _ary[1];
+	} else if (type == 4) {
+		let _ary = ip.split(".");
+		item.a = _ary[0];
+		item.b = _ary[1];
+		item.c = _ary[2];
+		item.d = _ary[3];
+		item.suffix = 0;
+	} else if (type == 5) {
+		let _ary = ip.split("-");
+		let _ary1 = _ary[0].split(":");
+		let _ary2 = _ary[1].split(":");
+		item.d = _ary1.pop();
+		item.a = _ary1.join(":");
+		item.suffix = _ary2.pop();
+	} else if (type == 6) {
+		let _ary = ip.split("/");
+		item.a = _ary[0];
+		item.suffix = _ary[1];
+	}
+  return item;
+}
+
+/**
+ * build an item from an array.
  */
 export function buildAddress(data) {
   let ary = [];
   for (let i = 0; i < data.length; i++) {
-    let d = data[i];
-    if (d.type == 1) {
-      ary.push({ type: d.type, ip: `${d.a}.${d.b}.${d.c}.x` });
-    } else if (d.type == 2) {
-      ary.push({
-        type: d.type,
-        ip: `${d.a}.${d.b}.${d.c}.${d.d}-${d.a}.${d.b}.${d.c}.${d.suffix}`,
-      });
-    } else if (d.type == 3) {
-      ary.push({ type: d.type, ip: `${d.a}.${d.b}.${d.c}.${d.d}/${d.suffix}` });
-    } else if (d.type == 4) {
-      ary.push({ type: d.type, ip: `${d.a}.${d.b}.${d.c}.${d.d}` });
-    } else if (d.type == 5) {
-      ary.push({
-        type: d.type,
-        ip: `${d.a}:${d.d}-${d.a}:${d.suffix}`,
-      });
-    } else if (d.type == 6) {
-      ary.push({ type: d.type, ip: `${d.a}/${d.suffix}` });
-		}
+		ary.push(buildAddressItem(data[i], data[i].type));
   }
   return ary;
 }
+
+/**
+ * build item
+ */
+export function buildAddressItem(d, type) {
+  let item = {};
+	if (type == 1) {
+		item = { type: type, ip: `${d.a}.${d.b}.${d.c}.x` };
+	} else if (type == 2) {
+		item = {
+			type: type,
+			ip: `${d.a}.${d.b}.${d.c}.${d.d}-${d.a}.${d.b}.${d.c}.${d.suffix}`,
+		};
+	} else if (type == 3) {
+    if (!d.a || !d.b || !d.c || !d.d || !d.suffix) {
+      item = { type: type, ip: `0.0.0.0/0` };
+    } else {
+      item = { type: type, ip: `${d.a}.${d.b}.${d.c}.${d.d}/${d.suffix}` };
+    }
+	} else if (type == 4) {
+		item = { type: type, ip: `${d.a}.${d.b}.${d.c}.${d.d}` };
+	} else if (type == 5) {
+		item = {
+			type: type,
+			ip: `${d.a}:${d.d}-${d.a}:${d.suffix}`,
+		};
+	} else if (type == 6) {
+		item = { type: type, ip: `${d.a}/${d.suffix}` };
+	}
+  return item;
+}
+
 
 export function initResources(permissions, defaultResources) {
   let rtnResources = _.cloneDeep(defaultResources);

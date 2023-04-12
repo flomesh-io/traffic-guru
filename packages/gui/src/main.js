@@ -23,6 +23,13 @@ import { createFromIconfontCN } from "@ant-design/icons-vue";
 const IconFont = createFromIconfontCN({
   scriptUrl: require("@/utils/font.js"),
 });
+const getDdClient = () => {
+	if (typeof window !== "undefined") {
+		return window.ddClient;
+	} else {
+		return null;
+	}
+}
 const i18n = initI18n("CN", "US");
 const app = createApp(App);
 app.use(store);
@@ -35,6 +42,7 @@ app.directive("permission", permission);
 app.directive("pro", pro);
 app.directive("free", free);
 app.config.globalProperties.$isPro = process.env.VUE_APP_VERSION == "pro";
+app.config.globalProperties.$isDocker = !!getDdClient();
 app.config.globalProperties.$request = request;
 app.config.globalProperties.$METHOD = METHOD;
 app.config.globalProperties.$DFT_LIMIT = 9999;

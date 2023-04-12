@@ -34,17 +34,33 @@
           {{ $t("Email") }}
         </MdInput>
       </FormItem>
-      <a-form-item
+      <SnsCode
         class="mb-20"
-        name="snscode"
+        ref="snscode"
+        v-model:value="formState.snscode"
+        @validate="validate"
+        :username="formState.name"
+      />
+      <FormItem
+        class="mb-20"
+        name="password"
+        :rules="rules.password"
+        v-if="isPass"
       >
-        <SnsCode
-          ref="snscode"
-          v-model:value="formState.snscode"
-          @validate="validate"
-          :username="formState.name"
-        />
-      </a-form-item>
+        <MdInput
+          type="password"
+          icon="password"
+          ref="password"
+          auto-complete="new-password"
+          size="large"
+          v-model:value="formState.currentPassword"
+          name="title"
+          @pressEnter="passwordfocus"
+          :placeholder="$t('Please input password')"
+        >
+          {{ $t("Old Password") }}
+        </MdInput>
+      </FormItem>
       <FormItem
         class="mb-20"
         name="password"
@@ -114,7 +130,10 @@ export default {
         name: "",
         password: "",
         automatic: true,
+        currentPassword: ""
       },
+
+      isPass: process.env.VUE_APP_LOGIN_CODE == "pass"
     };
   },
 
@@ -141,7 +160,8 @@ export default {
       this.logging = true;
       const name = this.formState.name;
       const password = this.formState.password;
-      forget(name, password, this.formState.snscode).then((res) => {
+      const currentPassword = this.formState.currentPassword;
+      forget(name, password, this.formState.snscode,currentPassword).then((res) => {
         this.afterLogin(res);
         if (call) {
           call(res);

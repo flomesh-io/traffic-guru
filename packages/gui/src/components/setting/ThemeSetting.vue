@@ -1,25 +1,42 @@
 <template>
-  <svg
-    @click="toggleTheme"
+  <a-tooltip
     v-if="themeVal == 'light'"
-    class="icon icon-menu-sm rotate-icon"
+    :title="$t('Light Theme')"
+    color="#ffcc66"
+    placement="bottom"
   >
-    <use xlink:href="#icon-light" />
-  </svg>
-  <svg
-    @click="toggleTheme"
+    <svg
+      @click="toggleTheme"
+      class="icon icon-menu-sm rotate-icon"
+    >
+      <use xlink:href="#icon-light" />
+    </svg>
+  </a-tooltip>
+  <a-tooltip
     v-else-if="themeVal == 'night'"
-    class="icon icon-menu-sm rotate-icon"
+    :title="$t('Night Theme')"
+    color="#00adef"
+    placement="bottom"
   >
-    <use xlink:href="#icon-night" />
-  </svg>
-  <svg
-    @click="toggleTheme"
+    <svg
+      @click="toggleTheme"
+      class="icon icon-menu-sm rotate-icon"
+    >
+      <use xlink:href="#icon-night" />
+    </svg>
+  </a-tooltip>
+  <a-tooltip
     v-else
-    class="icon icon-menu-sm rotate-icon"
+    :title="$t('Auto Theme')"
+    placement="bottom"
   >
-    <use xlink:href="#icon-auto" />
-  </svg>
+    <svg
+      @click="toggleTheme"
+      class="icon icon-menu-sm rotate-icon"
+    >
+      <use xlink:href="#icon-auto" />
+    </svg>
+  </a-tooltip>
   <div
     class="side-setting"
     v-if="false"
@@ -187,7 +204,7 @@ import deepMerge from 'deepmerge'
 
 export default {
   name: 'ThemeSetting',
-  i18n: require('./i18n'),
+  i18n: require('@/i18n'),
   components: {SettingItem},
   data() {
     return {

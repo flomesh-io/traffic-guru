@@ -372,7 +372,7 @@ export default {
       let extend = {
         certificates: [],
         identitys: {},
-        log: { level: "All" },
+        log: { level: "None" },
         plugins: [],
       };
       let detail = {
@@ -549,8 +549,8 @@ export default {
 								namespace
 							}}}
 						}}},
-						whitelistServices{data{id,attributes{name,namespace}}},
-						blacklistServices{data{id,attributes{name,namespace}}},
+						whitelistServices{data{id,attributes{name,namespace,registry{data{id,attributes{type,name}}}}}},
+						blacklistServices{data{id,attributes{name,namespace,registry{data{id,attributes{type,name}}}}}},
 						sidecar{data{id,attributes{name}}}
 					}}}`,
         )
@@ -706,7 +706,7 @@ export default {
             extend.log = {};
           }
           if (!extend.log.level) {
-            extend.log.level = "All";
+            extend.log.level = "None";
           }
           this.$emit("update:contentString", JSON.stringify(detail));
           this.$emit("update:detail", detail);

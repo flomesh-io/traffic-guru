@@ -343,12 +343,12 @@ export default {
   data() {
     return {
       date: "",
+      endDate: "",
       log: "{}",
       arrow: "desc",
       visible: false,
       select_keys,
       WHERE_DATA,
-      endDate: "",
       sortBy: "timestamp",
       prefix: " ",
       filter: "",

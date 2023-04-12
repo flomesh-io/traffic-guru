@@ -338,7 +338,7 @@ export default {
       logLevelVal:null,
       selectedVal:null,
       pipys: [],
-      dateVal: [0, 100],
+      dateVal: [60, 100],
       sqlDateMap: {
         0: "1 month",
         10: "15 day",

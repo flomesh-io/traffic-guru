@@ -248,7 +248,7 @@ export default {
       users: [],
       visible: false,
       viewtypevalue: 0,
-      viewtype: [{ value: 0, label: "All" }],
+      viewtype: [{ value: 0, label: "Default" }],
       payload: {
         id: "",
         username: "",

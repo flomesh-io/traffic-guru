@@ -1,10 +1,16 @@
 <template>
   <div class="header-search">
-    <SearchOutlined
-      v-show="!searchMode"
-      class="search-icon"
-      @click="enterSearchMode"
-    />
+    <a-tooltip
+      :title="$t('Uni Search')"
+      color="#00adef"
+      placement="bottom"
+    >
+      <SearchOutlined
+        v-show="!searchMode"
+        class="search-icon"
+        @click="enterSearchMode"
+      />
+    </a-tooltip>
     <a-input-search
       ref="input"
       size="large"

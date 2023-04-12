@@ -72,36 +72,6 @@ export async function getProjectTotal() {
 	}`);
 }
 
-export async function getLatency() {
-  let end = new Date().getTime() / 1000;
-  let start = new Date().setHours(new Date().getHours() - 1) / 1000;
-  let timeFilter = `&start=${start}&end=${end}`;
-  let SQL50 = `histogram_quantile(0.5, sum by(le) (rate(http_request_latency_bucket[1m])))&step=15${timeFilter}`;
-  let SQL90 = `histogram_quantile(0.9, sum by(le) (rate(http_request_latency_bucket[1m])))&step=15${timeFilter}`;
-  let SQL99 = `histogram_quantile(0.99, sum by(le) (rate(http_request_latency_bucket[1m])))&step=15${timeFilter}`;
-  return merge([
-    request(api.PROMETHEUS.QUERY_RANGE(SQL50), METHOD.GET),
-    request(api.PROMETHEUS.QUERY_RANGE(SQL90), METHOD.GET),
-    request(api.PROMETHEUS.QUERY_RANGE(SQL99), METHOD.GET),
-  ]);
-}
-
-export async function getQPS() {
-  let end = new Date().getTime() / 1000;
-  let start = new Date().setHours(new Date().getHours() - 1) / 1000;
-  let timeFilter = `&start=${start}&end=${end}`;
-  let SQL = `sum(rate(http_requests_count{path!=""} [1m])) by (path)&step=15${timeFilter}`;
-  return request(api.PROMETHEUS.QUERY_RANGE(SQL), METHOD.GET);
-}
-
-export async function getErrorrate() {
-  let end = new Date().getTime() / 1000;
-  let start = new Date().setHours(new Date().getHours() - 1) / 1000;
-  let timeFilter = `&start=${start}&end=${end}`;
-  let SQL = `100*sum(rate(http_requests_count{path!=""}[1m])) by (status) / on() group_left() sum(rate(http_requests_count{path!=""}[1m]))&step=15${timeFilter}`;
-  return request(api.PROMETHEUS.QUERY_RANGE(SQL), METHOD.GET);
-}
-
 export async function getTopUA() {
   let timeFilter = "1=1";
   let SQL = `
@@ -167,9 +137,6 @@ LIMIT 10
 }
 
 export default {
-  getLatency,
-  getQPS,
-  getErrorrate,
   getTopN,
   getTopUA,
   getSchemas,

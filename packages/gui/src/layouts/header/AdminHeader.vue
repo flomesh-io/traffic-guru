@@ -21,35 +21,43 @@
         </div>
         <a-divider
           type="vertical"
-          class="relative"
-          style="top: 25px; margin: 0 3px"
+          class="header-divider relative"
+          v-if="$isPro"
         />
-        <div class="header-item">
+        <div
+          class="header-item"
+          v-if="$isPro"
+        >
           <HeaderNotice />
         </div>
         <a-divider
           type="vertical"
-          class="relative"
-          style="top: 25px; margin: 0 3px"
+          class="header-divider relative"
         />
         <div class="header-item">
           <WebTerm />
         </div>
-        <div class="header-item">
+        <a-divider
+          type="vertical"
+          class="header-divider relative"
+          v-if="!$isDocker"
+        />
+        <div
+          class="header-item"
+          v-if="!$isDocker"
+        >
           <WebConsole />
         </div>
         <a-divider
           type="vertical"
-          class="relative"
-          style="top: 25px; margin: 0 3px"
+          class="header-divider relative"
         />
         <div class="header-item transparent">
           <ThemeSetting />
         </div>
         <a-divider
           type="vertical"
-          class="relative"
-          style="top: 25px; margin: 0 3px"
+          class="header-divider relative"
         />
         <a-dropdown class="header-item lang">
           <div><GlobalOutlined /> {{ langAlias }}</div>
@@ -63,7 +71,7 @@
                 :key="lang.key"
               >
                 {{
-                  lang.key.toLowerCase() + " " + lang.name
+                  lang.name
                 }}
               </a-menu-item>
             </a-menu>
@@ -71,8 +79,7 @@
         </a-dropdown>
         <a-divider
           type="vertical"
-          class="relative"
-          style="top: 25px; margin: 0 3px"
+          class="header-divider relative"
         />
         <div
           class="header-item"

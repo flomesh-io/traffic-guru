@@ -464,6 +464,7 @@ export default {
         "/flb/address/detail/:id",
         "/flb/address/create",
         "/flb/address/list",
+        "/flb/lbevent/list",
       ];
       if (routes) {
         routes.forEach((route, index) => {

@@ -18,7 +18,7 @@ import monacoeditor from "./monacoeditor";
 import "monaco-editor/esm/vs/basic-languages/shell/shell.contribution.js";
 
 export default {
-  name: "JsEditor",
+  name: "ShellEditor",
   components: { monacoeditor },
   props: ["value", "height", "isReadonly", "theme"],
   data() {

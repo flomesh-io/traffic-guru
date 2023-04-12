@@ -270,14 +270,14 @@ export default {
             isLeaf: true,
           });
         });
-        if (defaultChild.length <= 1) {
+        if (defaultChild.length == 0) {
           defaultChild = [
             { label: "all", value: "_all", id: "", isLeaf: true },
           ];
         }
         if (isInit) {
           if (defaultChild.length <= 1) {
-            this.k8svalue[1] = "_all";
+            this.k8svalue[1] = this.noAll?"default":"_all";
             this.k8svalue[2] = "";
           }
           if (this.isFilter) {

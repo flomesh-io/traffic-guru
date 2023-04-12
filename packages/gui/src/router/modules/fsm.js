@@ -30,7 +30,7 @@ const fsm = {
     },
     {
       path: "topology",
-      name: "Topology",
+      name: "FSM Topology",
       meta: {
         icon: DeploymentUnitOutlined,
       },

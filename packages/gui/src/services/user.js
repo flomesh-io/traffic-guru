@@ -46,16 +46,25 @@ export async function login(identifier, password, verificationCode, isPass) {
   );
 }
 
-export async function forget(email, newPassword, verificationCode) {
-  const input = {
-    email,
-    newPassword,
-    verificationCode,
-  };
-  return mutation(
-    `changePasswordByCode(data: $input)`,
-    { input }
-  );
+export async function forget(email, newPassword, verificationCode, currentPassword) {
+  let isPass = process.env.VUE_APP_LOGIN_CODE == "pass";
+  if (!isPass) {
+    const input = {
+      email,
+      newPassword,
+      verificationCode,
+    };
+    return mutation(
+      `changePasswordByCode(data: $input)`,
+      { input },
+      {input: "JSON!"}
+    );
+  } else {
+    return mutation(
+      `changePassword(currentPassword: "${currentPassword}",password: "${newPassword}",passwordConfirmation: "${newPassword}"){jwt}`,
+
+    );
+  }
 }
 
 export async function register(username, email, password, verificationCode) {

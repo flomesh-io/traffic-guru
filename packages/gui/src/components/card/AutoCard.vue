@@ -278,7 +278,16 @@ export default {
             serviceNormalCallback(res, callback);
           })
           .catch(error => {
-            proxy.$message.error(error.toString(), 3);
+            let errorData = error?.response?.data;
+            if (errorData) {
+              if(errorData.error){
+                proxy.$message.error(errorData.error?.message, 3);
+              } else {
+                proxy.$message.error(errorData, 3);
+              }
+            } else {
+              proxy.$message.error(error.toString(), 3);
+            }
             ctx.emit("resp", {type:'normal',error:error.toString()});
           });
       } else {
@@ -426,7 +435,9 @@ export default {
 		border-color: transparent rgba(240, 240, 240, 0.8) rgba(240, 240, 240, 0.8) transparent;
   }
 	.card-content{
-		z-index: 2;
 		background-color: transparent;
+	}
+	.ant-card:hover &:deep(.provide){
+		opacity: 0 !important;
 	}
 </style>

@@ -41,6 +41,12 @@
         :loading="loading"
         :actions="[
           {
+            icon: 'EditOutlined',
+            text: $t('edit'),
+            call: editBind,
+            permission: ['certificate:update'],
+          },
+          {
             icon: 'DisconnectOutlined',
             text: $t('Unbind'),
             call: unbind,
@@ -150,7 +156,7 @@
                   :key="index"
                   v-for="(key, index) in Object.keys(item.content || [])"
                 >
-                  {{ key }}:{{ item.content[key] }}
+                  {{ key }}:********************
                 </div>
               </div>
             </template>
@@ -197,7 +203,10 @@
             :label="$t('Type')"
             :span="payload.type == 'k8s' ? 1 : 3"
           >
-            <a-select v-model:value="payload.type">
+            <a-select
+              v-model:value="payload.type"
+              class="width-180"
+            >
               <a-select-option
                 :value="item.value"
                 :key="index"
@@ -220,15 +229,24 @@
             />
           </a-descriptions-item>
           <a-descriptions-item
-            :label="$t('Private Key')"
+            :key="idx"
+            v-for="(_key,idx) in Object.keys(payload.content)"
+            :label="$t('Certificate') + ` (${_key})`"
             :span="3"
           >
-            <Json2YamlCard
-              class="card nopd"
-              :is-create="editorIsCreate"
-              height="200px"
-              v-model:jsonVal="payload.content"
-              @change="yamlchange"
+            <a-alert
+              type="success"
+              v-if="isEdit && payload.content[_key] && !keyDisplay[_key]"
+              message="********************"
+              banner
+              closable
+              @close="()=>{payload.content[_key] = '';keyDisplay[_key] = true}"
+            />
+            <a-textarea
+              v-if="!isEdit || (keyDisplay[_key] || payload.content[_key] == '')"
+              v-model:value="payload.content[_key]"
+              :placeholder="_key"
+              :rows="4"
             />
           </a-descriptions-item>
         </a-descriptions>
@@ -255,19 +273,6 @@
           :span="3"
         >
           {{ bindTarget.name }}
-        </a-descriptions-item>
-        <a-descriptions-item
-          :label="$t('Content')"
-          :span="3"
-        >
-          <div class="meta-content">
-            <div
-              :key="index"
-              v-for="(key, index) in Object.keys(bindTarget.content || [])"
-            >
-              {{ key }}:{{ bindTarget.content[key] }}
-            </div>
-          </div>
         </a-descriptions-item>
         <a-descriptions-item
           :label="$t('Host')"
@@ -299,7 +304,6 @@
 </template>
 
 <script>
-import Json2YamlCard from "@/components/card/Json2YamlCard";
 import {
   PlusCircleTwoTone,
   FileProtectOutlined,
@@ -319,7 +323,6 @@ export default {
     EnvSelector,
     CardList,
     PlusCircleTwoTone,
-    Json2YamlCard,
     FormItem,
   },
 
@@ -327,12 +330,13 @@ export default {
   props: ["isBind", "col", "bindCertificates", "certificateSize"],
   data() {
     return {
-      tlsMap: { k8s: "K8S Secret", api: "API Secret" },
+      tlsMap: { k8s: "K8S Secret", api: "API/LB Secret" },
       tlsTypes: [
         { value: "k8s", label: "K8S Secret" },
-        { value: "api", label: "API Secret" },
+        { value: "api", label: "API/LB Secret" },
       ],
 
+      keyDisplay:{},
       FileProtectOutlined,
       isEdit: false,
       bindCertificatesVals: [],
@@ -348,7 +352,7 @@ export default {
         port: 0,
         type: "k8s",
         namespaceId: null,
-        content: '{"Public Key":""}',
+        content: {"key":"","cert":""},
       },
 
       bindTarget: {},
@@ -436,7 +440,7 @@ export default {
         id: "",
         type: "k8s",
         namespaceId: null,
-        content: '{"cert": "", "key": ""}',
+        content: {"cert": "", "key": ""},
       };
       this.showModal();
     },
@@ -465,11 +469,13 @@ export default {
         delete this.payload.id;
         delete this.payload.namespaceId;
         delete this.payload.namespace;
-        const p = {
-          content: JSON.parse(this.payload.content),
-          namespace: namespaceId,
+        let p = {
+          content: this.payload.content,
           ...this.payload,
         };
+        if(namespaceId){
+          p.namespace = namespaceId;
+        }
         this.$gql
           .mutation(
             `updateCertificate(id:${whereID}, data: $data){data{id}}`,
@@ -485,10 +491,12 @@ export default {
         delete this.payload.id;
         delete this.payload.namespaceId;
         delete this.payload.namespace;
-        const p = {
-          namespace: namespaceId,
+        let p = {
           ...this.payload,
         };
+        if(namespaceId){
+          p.namespace = namespaceId;
+        }
 
         this.$gql
           .mutation(
@@ -505,6 +513,7 @@ export default {
     },
 
     setting(index, type, item) {
+      this.keyDisplay = {};
       this.payload.namespace = item.namespace;
       this.$gql
         .query(
@@ -520,7 +529,7 @@ export default {
         )
         .then((res) => {
           this.payload = res.data;
-          this.payload.content = JSON.stringify(item.content);
+          this.payload.content = res.data.content;
           this.payload.namespaceId = res.data.namespace?.id;
         });
       this.isEdit = true;
@@ -555,13 +564,21 @@ export default {
         return;
       }
       this.bindCertificatesVals = this.bindCertificates;
-      this.bindCertificatesVals.push({
+      let idx = this.bindCertificatesVals.findIndex((_v)=>_v.id == this.bindTarget.id);
+      let obj = {
         id: this.bindTarget.id,
         name: this.bindTarget.name,
         host: this.bindTarget.host,
+        content:this.bindTarget.content,
+        validity:this.bindTarget.validity,
         start: "" + new Date(this.bindTarget.validity[0]).getTime(),
         end: "" + new Date(this.bindTarget.validity[1]).getTime(),
-      });
+      }
+      if(idx>-1){
+        this.bindCertificatesVals[idx] = obj
+      } else {
+        this.bindCertificatesVals.push(obj);
+      }
       this.bindTarget = {};
       this.visible2 = false;
       this.$message.success(this.$t("Binding succeeded"), 3);
@@ -570,6 +587,12 @@ export default {
     unbind(index) {
       this.bindCertificatesVals = this.bindCertificates;
       this.bindCertificatesVals.splice(index, 1);
+    },
+
+    editBind(index) {
+      this.bindCertificatesVals = this.bindCertificates;
+      this.bindTarget = this.bindCertificatesVals[index];
+      this.showModal2();
     },
 
     bind(index, type, item) {

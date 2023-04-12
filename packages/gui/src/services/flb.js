@@ -7,6 +7,12 @@ export async function ERROR_RATE() {
   return request(api.ERROR_RATE, METHOD.POST, DefaultChartDate);
 }
 
+export async function getUnhealthy() {
+  return query(`getFlbDashboardPageInfo(filters: $filters){
+		health_check_unhealthy{unhealthy, time}
+	}`,{filters:DefaultChartDate});
+}
+
 export async function getAddressPoolUsage() {
   return query(`getFlbDashboardPageInfo(filters: $filters){
 		address_pool_usage{pool_usages{pool_id,pool_name,used_amount,amount},total_used_amount,total_amount}
@@ -33,6 +39,7 @@ export async function getRanking() {
 export default {
   getSummary,
   getAddressPoolUsage,
+	getUnhealthy,
   getRanking,
   ERROR_RATE,
 };

@@ -47,6 +47,7 @@
                 :metric="false"
                 :has-search="false"
                 @nsChange="selectNS"
+                @enabledChange="enabledChange"
               >
                 <template
                   #extra
@@ -83,6 +84,7 @@
                     @change="assignOrganizationByItem(item.id,item.organization.id)"
                     class="width-180"
                     ref="select"
+                    v-if="item.organization"
                   >
                     <a-select-option
                       :value="org.id"
@@ -167,6 +169,18 @@ export default {
   },
 
   methods: {
+    enabledChange(d){
+      this.$gql
+        .mutation(
+          `updateServiceSync(id: ${d.id}, data: $data){data{id}}`,
+          { data: { deleted: !d.enabled } },
+          { data: "ServiceInput!" },
+        )
+        .then(() => {
+          this.$message.success(this.$t("Save successfully"), 3);
+        });
+    },
+
     getDetail(d) {
       this.detail = d.detail;
       this.namespaces = d.namespaces;

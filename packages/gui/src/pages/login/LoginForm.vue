@@ -68,6 +68,7 @@
         />
         {{ $t("Trust device") }}
         <a
+          v-if="loginCode != 'pass'"
           @click="forget"
           class="float-right"
         >{{ $t("Forget") }}
@@ -115,6 +116,7 @@ export default {
   inject: ["last", "next"],
   data() {
     return {
+      loginCode: process.env.VUE_APP_LOGIN_CODE,
       snsloading: false,
       snsstatus: "free",
       snsnum: 0,

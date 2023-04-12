@@ -310,7 +310,7 @@ export default {
       getUserWidgets().then((res) => {
         this.loading = false;
         this.userWidgets = {};
-        res.forEach((widget) => {
+        res.data.forEach((widget) => {
           this.userWidgets[widget.content.id] = {
             ...widget.content,
             uid: widget.id,

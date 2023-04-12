@@ -607,7 +607,7 @@ export default {
 
   methods: {
     select(index, type, item) {
-      this.$emit("selectPlugin", item);
+      this.$emit("selectPlugin", {...item,enable:true});
     },
 
     handleChange(info) {
@@ -753,6 +753,7 @@ export default {
         type: null,
         apply: ["api"],
         content: {
+          script: '',
           fields: [
             {
               name: "",
@@ -887,6 +888,11 @@ export default {
         )
         .then((res) => {
           this.plugins = res.data;
+          this.plugins.forEach(plugin=>{
+            if(!plugin.content.script){
+              plugin.content.script = '';
+            }
+          })
           this.total = res.pagination.total;
           this.loading = false;
         });
@@ -985,12 +991,10 @@ export default {
     width: 100%;
   }
   .template-div-icon {
-    background: rgba(255, 255, 255, 0.5);
     border-radius: 8px;
     margin: 0 8%;
   }
   .template-div-2 {
-    background: rgba(255, 255, 255, 0.5);
     border-radius: 8px;
     margin: 0 8%;
     flex: 2;

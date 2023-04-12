@@ -7,6 +7,7 @@ import {
   FileProtectOutlined,
 } from "@ant-design/icons-vue";
 import RegistrySvg from "@/assets/img/registry.svg";
+import PipySvg from "@/assets/img/pipy.svg";
 
 const opscenter = {
   path: "ops-center",
@@ -68,6 +69,14 @@ const opscenter = {
 				icon: AlertOutlined,
 			},
 			component: () => import("@/pages/opscenter/EventList"),
+		},
+		{
+			path: "deploy",
+			name: "Deploy",
+			meta: {
+				svg: PipySvg,
+			},
+			component: () => import("@/pages/opscenter/DeployList"),
 		},
 		{
 			path: "log",

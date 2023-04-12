@@ -120,14 +120,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-	.col-space .flex-item{
-	}
-  .svg {
-    width: 50px;
-    height: 50px;
-    fill: #00adef;
-    border-radius: 0;
-  }
   .auto-card {
     margin-bottom: 20px;
     margin-left: auto;
@@ -163,13 +155,5 @@ export default {
   }
   .layout-grid.highlight .layout-item {
     background-color: orange;
-  }
-  .select-svg {
-    width: 20px;
-    height: 20px;
-    fill: #00adef;
-    border-radius: 0;
-    position: relative;
-    top: 4px;
   }
 </style>

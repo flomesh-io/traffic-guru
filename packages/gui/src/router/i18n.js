@@ -1,6 +1,8 @@
 module.exports = {
   messages: {
     CN: {
+      Logout: "退出登陆",
+			Collapse: "折叠",
       Zone: "分区",
       Registry: "注册中心",
       Menu: "菜单",
@@ -118,6 +120,7 @@ module.exports = {
         name: "Ops Center ∣ 运维中心",
         log: { name: "日志" },
         events: { name: "操作记录" },
+        deploy: { name: "Pipy推送日志" },
         components: { name: "组件管理" },
         plugins: { name: "插件" },
         registry: {
@@ -135,6 +138,7 @@ module.exports = {
       inspector: {
         name: "Inspector ∣ 检查工具",
         healthcheck: {
+					results: { name: "健康检查-结果" },
           list: { name: "健康检查-配置" },
           detail: { name: "健康检查详情" },
           create: { name: "新建健康检查" },
@@ -224,6 +228,8 @@ module.exports = {
       "router-setting": { name: "动态菜单" },
     },
     US: {
+      Logout: "Logout",
+			Collapse: "Collapse",
       name: "Flomesh",
       home: { name: "Dashboard" },
       login: { name: "Login" },
@@ -333,6 +339,7 @@ module.exports = {
         name: "Ops Center",
         log: { name: "Log" },
         events: { name: "Events" },
+        deploy: { name: "Pipy Deploy History" },
         components: { name: "Components" },
         plugins: { name: "Plugins" },
         registry: {
@@ -390,6 +397,7 @@ module.exports = {
       inspector: {
         name: "Inspector",
         healthcheck: {
+					results: { name: "HC Results" },
           list: { name: "HC Config" },
           detail: { name: "Healthcheck Detail" },
           create: { name: "Create Healthchecks" },
@@ -439,6 +447,8 @@ module.exports = {
       "router-setting": { name: "Router Setting" },
     },
     JP: {
+      Logout: "ログアウト",
+			Collapse: "クラッシュ",
       name: "Flomesh",
       Menu: "メニュー",
       Registry: "レジストリ",
@@ -531,6 +541,7 @@ module.exports = {
         name: "ンテナンスセンター",
         log: { name: "ログ" },
         events: { name: "操作履歴" },
+        deploy: { name: "Pipyプッシュログ" },
         components: { name: "コンポーネント" },
         plugins: { name: "プラグイン" },
         registry: {
@@ -588,6 +599,7 @@ module.exports = {
       inspector: {
         name: "診断ツール",
         healthcheck: {
+					results: { name: "健康診断結果" },
           list: { name: "健康診断設定" },
           detail: { name: "健康診断詳細" },
           create: { name: "新規健康診断" },

@@ -6,7 +6,7 @@ export const DEFAULT_WORKPLACE =
     : "fsm.dashboard.REGISTRY_TOTAL,fsm.dashboard.NAMESPACE_TOTAL,fsm.dashboard.SERVICE_TOTAL,system.common.Space,workload.dashboard.DEPLOYMENT,workload.dashboard.STATEFULSET,workload.dashboard.JOB,workload.dashboard.POD";
 
 export const DEFAULT_FLB =
-  "flb.dashboard.TOTAL,flb.dashboard.TPS,flb.dashboard.ERRORRATE,flb.dashboard.ADDRESSPOOL,flb.dashboard.SANKEY,flb.dashboard.RANKING";
+  "flb.dashboard.TOTAL,flb.dashboard.ADDRESSPOOL,flb.dashboard.BYTES,flb.dashboard.PROCESS_MEMORY,flb.dashboard.CONNECTIONS,flb.dashboard.INACT_CONNECTIONS,flb.dashboard.FAIL_CONNECTIONS,flb.dashboard.TIME_WAIT,flb.dashboard.FREE_CPU,flb.dashboard.PROCESS_CPU,flb.dashboard.FULL_CONN_OVERFLOW_ERROR,flb.dashboard.HALF_CONN_OVERFLOW_ERROR,flb.dashboard.UNHEALTHY_UPSTREAM,flb.dashboard.RANKING,flb.dashboard.SANKEY";
 
 export const DEFAULT_FSM =
   "fsm.dashboard.REGISTRY_TOTAL,fsm.dashboard.NAMESPACE_TOTAL,fsm.dashboard.SERVICE_TOTAL,system.common.Space,fsm.dashboard.SERVICE_HEALTHCHECK,fsm.dashboard.SERVICE_STATUS,fsm.dashboard.INGRESS_STATUS,fsm.dashboard.MCS_TOPOLOGY";

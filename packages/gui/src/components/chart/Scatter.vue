@@ -22,20 +22,19 @@
 <script>
 import { Empty } from "ant-design-vue";
 import { mapState } from "vuex";
+import { getTimeLabel } from "@/utils/util";
 export default {
-  name: "MiniArea",
+  name: "Scatter",
   props: [
     "dv",
     "noEmpty",
     "id",
-    "axis",
     "unit",
     "height",
-    "noStack",
-    "min",
-    "padding",
     "colors",
-    "hideLegend",
+    "min",
+    "hideY",
+    "formatter",
     "ver",
     "isGradient",
   ],
@@ -52,7 +51,7 @@ export default {
   computed: {
     ...mapState("setting", ["lang"]),
   },
-
+	
   watch: {
     lang(newVal) {
       this.$i18n.locale = newVal;
@@ -144,20 +143,26 @@ export default {
         };
       }
       let series = [];
+			
       legend.forEach((n) => {
         let seriesData = [];
         xAxis.forEach((j) => {
-          seriesData.push([j,_data[j][n] || 0]);
+          seriesData.push([new Date(j).getTime(),_data[j][n] || 0,n]);
         });
         series.push({
           name: n,
-          type: "line",
-          stack: this.noStack?"":"Total",
+          type: "effectScatter",
+          stack: "Total",
           smooth: true,
           lineStyle: {
             width: 0,
           },
-          showSymbol: false,
+          label:{
+            show:true,
+            formatter:'{@[2]}',
+          },
+          showSymbol: true,
+          symbolSize: 20,
           areaStyle: this.isGradient ? gradient : {},
           emphasis: {
             focus: "series",
@@ -167,19 +172,20 @@ export default {
       });
       return series;
     },
-
+		
     renderChart() {
       let legend = this.getLegend();
       let xAxis = this.getXAxis();
       let series = this.getSeries(legend, xAxis);
+			
       let chartDom = document.getElementById(this.id + this.id2);
       if (chartDom) {
         // this.$echarts.dispose(chartDom);
       }
-      let _unit = this.$t && this.$t(this.unit||"") || "";
       let myChart = this.$echarts.init(chartDom);
-      myChart.showLoading();
+      let _unit = this.$t && this.$t(this.unit||"") || "";
       let option = {
+        title: {},
         color: this.colors
           ? this.colors
           : [
@@ -190,70 +196,91 @@ export default {
             "rgba(146, 112, 202,0.7)",
           ],
 
+        grid: {
+          left: "0px",
+          right: "0px",
+          top: "45px",
+          bottom: "0px",
+        },
+
         tooltip: {
-          trigger: "axis",
+          // trigger: 'axis',
+          showDelay: 0,
+          formatter: (value) => {
+            if(this.formatter) {
+              return this.formatter(value)
+            }else if (value.color) {
+              return (
+                `<span style="background:${value.color};width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:10px"></span>` +
+                Math.ceil(value.data[1]) +
+                _unit
+              );
+            } else {
+              return `${value.name}: ${Math.ceil(value.value)}${_unit}`;
+            }
+          },
+
           axisPointer: {
+            show: true,
             type: "cross",
-            label: {
-              backgroundColor: "#6a7985",
+            lineStyle: {
+              type: "dashed",
+              width: 1,
             },
           },
         },
 
-        legend: {
-          data: legend,
-          show: !this.hideLegend,
-          orient: "vertical",
-          right: "right",
-          formatter: function (name) {
-            return name.length > 18 ? name.substr(0, 18) + "..." : name;
+        toolbox: {
+          feature: {
+            dataZoom: {},
+            brush: {
+              type: ["rect", "polygon", "clear"],
+            },
           },
         },
 
-        toolbox: {},
-        grid: {
-          left: this.padding ? this.padding[3] : "0%",
-          right: this.padding ? this.padding[1] : "0%",
-          bottom: this.padding ? this.padding[2] : "0",
-          top: this.padding ? this.padding[0] : "",
-          containLabel: true,
-        },
-
+        brush: {},
         xAxis: [
           {
             type: "category",
-            boundaryGap: false,
-            minorSplitLine: {
-              show: true,
-            },
-
-            // data: xAxis,
-            axisLabel: this.axis
-              ? {
-                minInterval: 20,
-              }
-              : {
-                showMinLabel: false,
-                showMaxLabel: false,
-                borderRadius: [3,3,0,0],
-                margin: 0,
-                minInterval: 20,
-                inside: true,
+            scale: true,
+            nameGap: 30,
+            axisPointer: {
+              label: {
                 formatter: (value) => {
-                  let _temp = value.split(" ");
-                  if (_temp.length == 2) {
-                    return _temp[1];
-                  } else {
-                    return value;
-                  }
-                },
-
-                backgroundColor: "rgba(240,240,240,0.7)",
-                padding: [2, 3, 2, 3],
-                textStyle: {
-                  color: "#6a7985",
+                  return getTimeLabel(value.value, this.date);
                 },
               },
+            },
+
+            axisLabel: {
+              showMinLabel: true,
+              showMaxLabel: true,
+              borderRadius: 2,
+              margin: 0,
+              minInterval: 20,
+              inside: true,
+              backgroundColor: "rgba(240,240,240,0.7)",
+              padding: [2, 3, 2, 3],
+              textStyle: {
+                color: "#6a7985",
+              },
+
+              hideOverlap: true,
+              interval: "auto",
+              borderRadius: 2,
+              inside: true,
+              formatter: (value) => {
+                return getTimeLabel(value, this.date);
+              },
+            },
+
+            splitLine: {
+              show: true,
+              lineStyle: {
+                type: 'dashed'
+              }
+            },
 
             axisTick: {
               show: false,
@@ -270,48 +297,53 @@ export default {
         yAxis: [
           {
             type: "value",
-            axisLine: {
-              show: false,
+            scale: true,
+            min: this.min?this.min:0,
+            z: 10,
+            show:this.hideY?false:true,
+            axisLabel: {
+              showMinLabel: false,
+              showMaxLabel: false,
+              inside: true,
+              margin: 0,
+              backgroundColor: "rgba(240,240,240,0.7)",
+              padding: [2, 3, 2, 3],
+              textStyle: {
+                color: "#6a7985",
+              },
+
+              formatter: ("{value} "+ _unit),
+            },
+
+            splitLine: {
+              show: true,
+              lineStyle: {
+                type: 'dashed'
+              }
             },
 
             axisTick: {
               show: false,
             },
 
-            z: 10,
-            splitLine: {
+            axisLine: {
               show: false,
-              lineStyle: { type: "dashed", opacity: 0.4 },
             },
-
-            min: this.min?this.min:0,
-            minInterval: 0.1,
-            axisLabel: this.axis
-              ? {
-                formatter: (value) => {
-                  return "" + value + _unit;
-                },
-              }
-              : {
-                showMinLabel: false,
-                showMaxLabel: false,
-                formatter: (value) => {
-                  return "" + value + _unit;
-                },
-
-                inside: true,
-                borderRadius: [0,3,3,0],
-                margin: 0,
-                backgroundColor: "rgba(240,240,240,0.7)",
-                padding: [2, 3, 2, 3],
-                textStyle: {
-                  color: "#6a7985",
-                },
-              },
           },
         ],
 
-        series: series,
+        series: series.concat([
+          {
+            name: 'line',
+            type: 'line',
+            datasetIndex: 1,
+            symbolSize: 0.1,
+            symbol: 'circle',
+            label: { show: true, fontSize: 16 },
+            labelLayout: { dx: -20 },
+            encode: { label: 2, tooltip: 1 }
+          }
+        ]),
       };
       myChart.setOption(option, {
         lazyUpdate: true,
@@ -323,15 +355,17 @@ export default {
 </script>
 
 <style lang="less" scoped>
-  .mini-chart {
-    position: relative;
-    margin-left: 0px;
-    width: auto;
+  h3 {
+    margin: 40px 0 0;
   }
-  .mini-chart .chart-content {
-    position: relative;
-    top: 0px;
-    right: 0px;
-    width: 100%;
+  ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  li {
+    display: inline-block;
+  }
+  a {
+    color: #42b983;
   }
 </style>

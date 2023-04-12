@@ -16,7 +16,9 @@ const uniqueNameValidate = (n, mode, _where)=>{
 					}else if(_where[_key] == null){
 						filters += `, ${_key}: { id:{null:true} }`;
 					}else if(!isNaN(_where[_key]*1)){
-						filters += `, ${_key}: { id:{eq:"${_where[_key]}"} }`;
+						if(_where[_key]!=""){
+							filters += `, ${_key}: { id:{eq:"${_where[_key]}"} }`;
+						}
 					}else{
 						filters += `, ${_key}: { eq:"${_where[_key]}" }`;
 					}

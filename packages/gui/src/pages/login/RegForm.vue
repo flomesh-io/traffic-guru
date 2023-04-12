@@ -46,18 +46,13 @@
           {{ $t("Email") }}
         </MdInput>
       </FormItem>
-      <FormItem
+      <SnsCode
         class="mb-20"
-        name="snscode"
-        :rules="rules.required"
-      >
-        <SnsCode
-          ref="snscode"
-          v-model:value="formState.snscode"
-          @validate="validate"
-          :username="formState.email"
-        />
-      </FormItem>
+        ref="snscode"
+        v-model:value="formState.snscode"
+        @validate="validate"
+        :username="formState.email"
+      />
       <FormItem
         class="mb-20"
         name="password"
