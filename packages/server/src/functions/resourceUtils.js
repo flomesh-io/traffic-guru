@@ -4,7 +4,7 @@ const gqlUtils = require('./gqlUtils.js');
 const entityUtils = require("./entityUtils.js");
 
 module.exports = {
-  async myOrgResources(args, ctx, type) {
+  async myOrgResources(args, ctx, type, isMultiple) {
     const model = 'api::' + type + '.' + type;
     const transformedArgs = await gqlUtils.transformArgs(
       args,
@@ -20,8 +20,13 @@ module.exports = {
         });
       const ids = organizations.map((item) => item.id);
       if (!transformedArgs.filters) transformedArgs.filters = {};
-      if (!transformedArgs.filters.organization) transformedArgs.filters.organization = {};
-      transformedArgs.filters.organization.id = { $in: ids };
+      if (isMultiple) {
+        if (!transformedArgs.filters.organizations) transformedArgs.filters.organizations = {};
+        transformedArgs.filters.organizations.id = { $in: ids };
+      } else {
+        if (!transformedArgs.filters.organization) transformedArgs.filters.organization = {};
+        transformedArgs.filters.organization.id = { $in: ids };
+      }
     }
     const results = strapi.entityService.findMany(model,transformedArgs);
     return entityUtils.toEntityResponseCollection(

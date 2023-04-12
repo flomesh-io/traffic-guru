@@ -61,6 +61,12 @@
       "relation": "oneToMany",
       "target": "api::service.service",
       "mappedBy": "fleet"
+    },
+    "organizations": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::organization.organization",
+      "inversedBy": "fleets"
     }
   }
 }

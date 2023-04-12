@@ -51,5 +51,12 @@ module.exports = {
       Object.fromEntries([[result.path, result.content]]),
       template.version + 1
     );
+
   },
+  beforeUpdate: async (event) => {
+    if (event.params?.data?.content && event.params?.where?.id) {
+      strapi.db.query("api::operation-history.operation-history")
+        .create({data: {content: event.params.data.content,templatefile: event.params.where.id, updatedBy:event.params.data.updatedBy}})
+    }
+  }
 };  

@@ -26,11 +26,29 @@ module.exports = createCoreService('api::trafficlog.trafficlog',{
   /**
    * save logs
    */
-  async logs2Clickhouse(reqBody) {
+  async logs2Clickhouse(reqBody, dbConf) {
     const logs = reqBody.split('\n');
+    const baseSql = `
+    INSERT INTO logs (message)  VALUES 
+     `
+    let valueSql = '';
+    for (let index = 0; index < logs.length; index++) {
+      if(index>0){
+        valueSql += ',';
+      }
+      if(logs[index]){
+        valueSql += `
+        ('${logs[index]}')
+        `;
+      }
+    }
+    const queryRes = await dbQuery4Clickhouse(dbConf, baseSql + valueSql);
     return {
-      "data": logs
+      "data": queryRes.data
     };
+    // return {
+    //   "data": logs
+    // };
   },
   async logs2Postgresql(reqBody, dbConf) {
     const logs = reqBody.split('\n');
@@ -63,7 +81,6 @@ module.exports = createCoreService('api::trafficlog.trafficlog',{
         `;
       }
     }
-    console.debug(baseSql + valueSql);
     await pgClient.query(baseSql + valueSql)
       .then(() => pgClient.end());
     return {msg: 'ok'}
@@ -86,10 +103,10 @@ module.exports = createCoreService('api::trafficlog.trafficlog',{
       baseSql += " AND (" + reqBody.customQuery + ") ";
     }
     if (reqBody?.reqTimeFrom) {
-      baseSql += " AND reqTime > " + reqBody.reqTimeFrom;
+      baseSql += " AND reqTime / 1000 > " + reqBody.reqTimeFrom;
     }
     if (reqBody?.reqTimeTo) {
-      baseSql += " AND reqTime < " + reqBody.reqTimeTo;
+      baseSql += " AND reqTime / 1000 < " + reqBody.reqTimeTo;
     }
     let orderByField = "resTime";
     if (reqBody?.orderByField) {
@@ -131,10 +148,10 @@ module.exports = createCoreService('api::trafficlog.trafficlog',{
       baseSql += " AND (" + reqBody.customQuery + ") ";
     }
     if (reqBody?.reqTimeFrom) {
-      baseSql += " AND req_time > " + reqBody.reqTimeFrom;
+      baseSql += " AND reqTime / 1000 > " + reqBody.reqTimeFrom;
     }
     if (reqBody?.reqTimeTo) {
-      baseSql += " AND req_time < " + reqBody.reqTimeTo;
+      baseSql += " AND reqTime / 1000 < " + reqBody.reqTimeTo;
     }
     const countSql = `SELECT count(1) AS total FROM (${baseSql}) abc`;
     await pgClient.query(countSql)
@@ -368,6 +385,12 @@ module.exports = createCoreService('api::trafficlog.trafficlog',{
     return resData;
   },
   
+  /**
+   * get error status alams
+   * 
+   * @param {*} scaleTime 
+   * @returns 
+   */
   async getErrStatusAlarms(scaleTime) {
     const alarms = [];
     const errStatusLogs = await strapi.service("api::clickhouse.clickhouse").query(`
@@ -398,7 +421,170 @@ module.exports = createCoreService('api::trafficlog.trafficlog',{
     }
     return alarms;
   },
+
+  /**
+   * get trace list
+   */
+  async traceList2Clickhouse(reqBody, dbConf) {
+    let whereSql = '';
+    if (reqBody?.keyWord) {
+      whereSql += ` 
+        AND trace.id IN (
+          SELECT trace.id FROM	log WHERE trace.id = '${reqBody.keyWord}' or trace.span = '${reqBody.keyWord}'
+            or service.name = '${reqBody.keyWord}' or pod.name = '${reqBody.keyWord}' or pod.ip = '${reqBody.keyWord}'
+        )
+      `;
+    }
+    if (reqBody?.reqTimeFrom) {
+      whereSql += ` 
+        AND reqTime / 1000 > ${reqBody.reqTimeFrom} 
+      `;
+    }
+    if (reqBody?.reqTimeTo) {
+      whereSql += ` 
+        AND reqTime / 1000 < ${reqBody.reqTimeTo} 
+      `;
+    }
+    let limitSize = 10
+    if (reqBody?.pageSize) {
+      limitSize = reqBody.pageSize;
+    }
+    let limitStart = 0;
+    if (reqBody?.pageNo) {
+      limitStart = reqBody.pageNo * limitSize;
+    }
+    const querySql = `
+    SELECT traceId, COUNT(1) spanCount, (MAX(maxResTime1) - MIN(minReqTime1)) as duration, MIN(minReqTime1) as minReqTime,
+      MAX(maxResTime1) as maxResTime, groupUniqArray(serviceName) as serviceName, groupUniqArray(podName) as podName
+    FROM (
+        SELECT trace.id as traceId, MIN(reqTime) as minReqTime1, MAX(resTime) as maxResTime1, 
+          service.name as serviceName, MIN(pod.name) as podName
+        FROM log
+        WHERE trace.id != '' ${whereSql}
+        GROUP BY serviceName, traceId
+      )
+    GROUP BY traceId
+    ORDER BY minReqTime DESC LIMIT ${limitStart}, ${limitSize}  format JSON
+    `; 
+    const queryRes = await dbQuery4Clickhouse(dbConf, querySql);
+    // console.debug(querySql)
+    return {
+      "data": queryRes.data.data,
+      "total": queryRes.data.rows_before_limit_at_least
+    };
+  },
+
+  /** 
+   * get trace detail 
+   */
+  async traceDetail2Clickhouse(reqBody, dbConf) {
+    // const querySql = `
+    // SELECT trace.span as traceSpan, max(trace.parent) as traceParent, groupArray(service.name) as serviceName,
+    // groupArray(pod.name) as podName, (max(resTime) - min(reqTime)) as duration, min(reqTime) as minReqTime, max(resTime) as maxResTime
+    // FROM log
+    // WHERE trace.id = '${reqBody.traceId}'
+    // GROUP BY traceSpan
+    // ORDER BY minReqTime ASC  format JSON
+    // `; 
+    const querySql = `
+    SELECT trace.span as traceSpan, trace.parent as traceParent, service.name as serviceName,
+      pod.name as podName, (resTime - reqTime) as duration, reqTime, resTime, bondType as boundType
+    FROM log
+    WHERE trace.id = '${reqBody.traceId}'
+    ORDER BY reqTime ASC  format JSON
+    `;
+    const queryRes = await dbQuery4Clickhouse(dbConf, querySql);
+    //all inbound spans + a outbond span which(parentId=traceId)
+    const resultData = queryRes.data.data.filter((element) => 
+      element.boundType !== 'outbound' || element.traceParent == reqBody.traceId)
+    return {
+      "data": resultData,
+      "rows": resultData.length
+    };
+  },
+
+  /** 
+   * get trace DAT
+   */
+  async traceDag2Clickhouse(reqBody, dbConf) {
+    let whereSql = '';
+    // if (reqBody?.reqTimeFrom) {
+    //   whereSql += ` 
+    //     AND reqTime > ${reqBody.reqTimeFrom} 
+    //   `;
+    // }
+    // if (reqBody?.reqTimeTo) {
+    //   whereSql += ` 
+    //     AND reqTime < ${reqBody.reqTimeTo} 
+    //   `;
+    // }
+    if (reqBody?.reqTimeFrom) {//e.g. reqTimeFrom=15 day
+      whereSql += " AND toDateTime(reqTime / 1000) > (now() - interval " + reqBody.reqTimeFrom + ") ";
+    }
+    if (reqBody?.reqTimeTo) { //e.g. reqTimeTo=1 second
+      whereSql += " AND toDateTime(reqTime / 1000) < (now() - interval " + reqBody.reqTimeTo + ") ";
+    }
+    const querySql = `
+    SELECT COUNT(1) weight, serviceName
+    FROM 
+      ( SELECT trace.span as traceSpan, groupArray(service.name) as serviceName
+        FROM
+          (SELECT trace.span, service.name, reqTime, bondType
+            FROM log
+            WHERE bondType <> '' 
+            AND  trace.id != '' ${whereSql}
+            ORDER BY reqTime ASC, bondType DESC )
+        GROUP BY traceSpan ) 
+    GROUP BY serviceName  format JSON
+    `; 
+    // console.debug(querySql)
+    const queryRes = await dbQuery4Clickhouse(dbConf, querySql);
+    // get svc list
+    const svcList = await strapi.entityService.findMany('api::service.service', {
+      fields: ['id', 'name', 'namespace'],
+      populate: {
+        registry: {
+          fields: ['id', 'name']
+        },
+      },
+      filters: {
+        deleted: false
+      }
+    });
+    // get pods name for services
+    const queryPodSql = `
+    SELECT service.name as serviceName, groupUniqArray(pod.name) as podName
+    FROM log
+    WHERE bondType <> '' AND pod.name <> '' ${whereSql}
+    GROUP BY serviceName format JSON
+    `
+    const queryPodRes = await dbQuery4Clickhouse(dbConf, queryPodSql);
+    // match svc with trace logs
+    const links = [];
+    for (let index = 0; index < queryRes.data.data.length; index++) {
+      const element = queryRes.data.data[index];
+      //TODO:: error flag should get from health-check
+      const linkItem = {
+        'error': false
+      };
+      linkItem.weight = element.weight;
+      linkItem.source = svcList.find((svc) => svc.name === element.serviceName[0])?.id;
+      linkItem.target = svcList.find((svc) => svc.name === element.serviceName[1])?.id;
+      links.push(linkItem);
+    }
+    for (let index = 0; index < svcList.length; index++) { 
+      svcList[index].pods = (queryPodRes.data.data?.find((svc) => svc.serviceName === svcList[index].name))?.podName;
+    }
+    return {
+      "services": svcList,
+      "links": links
+    };
+  },
+
+
 });
+
+
 
 function buildWhereSql4Postgresql(reqBody) {
   let whereSql = '';

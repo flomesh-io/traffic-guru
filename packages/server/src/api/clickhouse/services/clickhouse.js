@@ -12,6 +12,38 @@ const querystring = require('querystring');
 const fs = require('fs');
 
 module.exports = createCoreService('api::clickhouse.clickhouse', {
+  async ping (id) {
+    const fleet = await strapi.db.query('api::fleet.fleet').findOne({ where: { id } });
+    const config = fleet.content;
+    const queryStr = "select count() from system.tables";
+    const url = `http://${config.host}:${config.port}/?database=${config.database}&query=${queryStr}`;
+
+    let response;
+    try {
+      if (config.user) {
+        const base64Str = new Buffer.from(
+          config.user + ':' + config.password
+        ).toString('base64');
+        response = await axios({
+          method: "get",
+          url: url,
+          headers: { Authorization: 'Basic ' + base64Str },
+          timeout: 3000,
+        });
+      } else {
+        response = await axios({
+          method: "get",
+          url: url,
+        });
+      }
+      if (response.status == 200) {
+        return "running"
+      }
+      return "error"
+    } catch (error) {
+      return "error"
+    }
+  },
   async proxy (ctx) {
     const log = await strapi.db.query('api::fleet.fleet').findOne({ where: { type: 'log', apply: true } });
     let fleet = null
@@ -54,25 +86,29 @@ module.exports = createCoreService('api::clickhouse.clickhouse', {
     const url = `http://${config.host}:${config.port}/?database=${config.database}&query=${queryStr}`;
 
     let response;
-    if (config.user) {
-      const base64Str = new Buffer.from(
-        config.user + ':' + config.password
-      ).toString('base64');
-      response = await axios({
-        method: method,
-        url: url,
-        headers: { Authorization: 'Basic ' + base64Str },
-        timeout: 30000,
-      });
-    } else {
-      response = await axios({
-        method: method,
-        url: url,
-      });
+    try {
+      if (config.user) {
+        const base64Str = new Buffer.from(
+          config.user + ':' + config.password
+        ).toString('base64');
+        response = await axios({
+          method: method,
+          url: url,
+          headers: { Authorization: 'Basic ' + base64Str },
+          timeout: 3000,
+        });
+      } else {
+        response = await axios({
+          method: method,
+          url: url,
+        });
+      }
+      ctx.response.status = response.status;
+      ctx.response.body = response.data;
+    } catch (error) {
+      ctx.response.status = 504;
+      ctx.response.message = "Unable to connect to clickhouse: " + error.message;
     }
-
-    ctx.response.status = response.status;
-    ctx.response.body = response.data;
   },
   async query (sql, method) {
     if (!method) method = 'GET';
@@ -116,12 +152,13 @@ module.exports = createCoreService('api::clickhouse.clickhouse', {
           method: method,
           url: urlQueryTable,
           headers: { Authorization: 'Basic ' + base64Str },
-          timeout: 1000,
+          timeout: 3000,
         });
       } else {
         response = await axios({
           method: method,
           url: urlQueryTable,
+          timeout: 3000,
         });
       }
       
@@ -140,17 +177,17 @@ module.exports = createCoreService('api::clickhouse.clickhouse', {
             method: method,
             url: urlCreateTable,
             headers: { Authorization: 'Basic ' + base64Str },
-            timeout: 1000,
+            timeout: 3000,
           });
         } else {
           response = await axios({
             method: method,
             url: urlCreateTable,
+            timeout: 3000,
           });
         }
       }
     } catch (error) {
-      console.error(error);
     }
   },
 });

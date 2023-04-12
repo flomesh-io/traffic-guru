@@ -1,0 +1,28 @@
+{
+  "kind": "collectionType",
+  "collectionName": "operation_histories",
+  "info": {
+    "singularName": "operation-history",
+    "pluralName": "operation-histories",
+    "displayName": "operationHistory",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "templatefile": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::templatefile.templatefile",
+      "inversedBy": "operationHistories"
+    },
+    "content": {
+      "type": "richtext"
+    },
+    "type": {
+      "type": "string"
+    }
+  }
+}

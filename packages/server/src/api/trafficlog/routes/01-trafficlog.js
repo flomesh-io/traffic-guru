@@ -41,6 +41,21 @@ module.exports = {
       method: 'POST',
       path: '/log4pipy/totaltps', 
       handler: 'trafficlog.totaltps',
+    },
+    { 
+      method: 'POST',
+      path: '/log4pipy/tracelist', 
+      handler: 'trafficlog.traceList',
+    },
+    { 
+      method: 'POST',
+      path: '/log4pipy/tracedetail', 
+      handler: 'trafficlog.traceDetail',
+    },
+    { 
+      method: 'POST',
+      path: '/log4pipy/tracedag', 
+      handler: 'trafficlog.traceDag',
     }
   ]
 

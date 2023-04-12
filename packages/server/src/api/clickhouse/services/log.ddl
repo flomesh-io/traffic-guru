@@ -52,9 +52,6 @@ CREATE TABLE default.log
     `req.body` String DEFAULT JSONExtractString(req,
  'body'),
 
-    `req.arguments` Array(String) DEFAULT JSONExtractArrayRaw(req,
- 'arguments'),
-
     `res` String DEFAULT JSONExtractRaw(message,
  'res'),
 
@@ -202,7 +199,8 @@ CREATE TABLE default.log
 
     `message` String,
 
-    `userAgent` String
+    `userAgent` String DEFAULT JSONExtractString(req.headers,
+ 'user-agent')
 )
 ENGINE = MergeTree
 PARTITION BY (toYYYYMM(toDateTime(reqTime / 1000)))

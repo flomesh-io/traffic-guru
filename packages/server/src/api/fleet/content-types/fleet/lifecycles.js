@@ -13,42 +13,24 @@ module.exports = {
     if (!event || !event.result.type) return;
     
 
-    if (event.result.type === 'clickhouse' && event.result.apply) {
-      const clickhouses = await strapi.db.query('api::fleet.fleet').findMany({
+    if ((event.result.type === 'clickhouse' || event.result.type === 'log' || event.result.type === 'prometheus') && event.result.apply) {
+      const fleets = await strapi.db.query('api::fleet.fleet').findMany({
         where: {
-          type: 'clickhouse',
+          type: event.result.type,
           apply: true,
           id: { $ne: event.result.id },
         }, limit: 99999
       });
 
-      for (const clickhouse of clickhouses) {
-        strapi.db.query('api::fleet.fleet').update({ id: clickhouse.id }, { apply: false });
+      for (const fleet of fleets) {
+        strapi.db.query('api::fleet.fleet').update({ id: fleet.id }, { apply: false });
       }
     }
-    if (event.result.type === 'clickhouse' && !event.result.apply) {
-      const clickhouses = await strapi.db.query('api::fleet.fleet').findMany({ where: { type: 'clickhouse' } });
-      if (clickhouses.length == 1) {
-        strapi.db.query('api::fleet.fleet').update({ id: clickhouses[0].id }, { apply: false });
-      }
-    }
-    if (event.result.type === 'log' && event.result.apply) {
-      const logs = await strapi.db.query('api::fleet.fleet').findMany({
-        where: {
-          type: 'log',
-          apply: true,
-          id: { $ne: event.result.id },
-        }, limit: 99999
-      });
 
-      for (const log of logs) {
-        strapi.db.query('api::fleet.fleet').update({ id: log.id }, { apply: false });
-      }
-    }
-    if (event.result.type === 'log' && !event.result.apply) {
-      const logs = await strapi.db.query('api::fleet.fleet').findMany({ where: { type: 'log' } });
-      if (logs.length == 1) {
-        strapi.db.query('api::fleet.fleet').update({ id: logs[0].id }, { apply: false });
+    if ((event.result.type === 'clickhouse' || event.result.type === 'log' || event.result.type === 'prometheus') && !event.result.apply) {
+      const fleets = await strapi.db.query('api::fleet.fleet').findMany({ where: { type: event.result.type } });
+      if (fleets.length == 1) {
+        strapi.db.query('api::fleet.fleet').update({where: { id: fleets[0].id }, data: { apply: false }});
       }
     }
     if (event.result.type === 'log' || event.result.type === 'clickhouse') {
@@ -61,33 +43,6 @@ module.exports = {
   },
   afterUpdate: async (event) => {
     if (!event || !event.result.type) return;
-
-    if (event.result.type === 'clickhouse' && event.result.apply && !event.params?.data?.unhealthy) {
-      const clickhouses = await strapi.db.query('api::fleet.fleet').findMany({
-        where: {
-          type: 'clickhouse',
-          apply: true,
-          id: { $ne: event.result.id },
-        }, limit: 99999
-      });
-
-      for (const clickhouse of clickhouses) {
-        strapi.db.query('api::fleet.fleet').update({ where: { id: clickhouse.id }, data: { apply: false } });
-      }
-    }
-    if (event.result.type === 'log' && event.result.apply) {
-      const logs = await strapi.db.query('api::fleet.fleet').findMany({
-        where: {
-          type: 'log',
-          apply: true,
-          id: { $ne: event.result.id },
-        }, limit: 99999
-      });
-
-      for (const log of logs) {
-        strapi.db.query('api::fleet.fleet').update({ where: { id: log.id }, data: { apply: false } });
-      }
-    }
 
     // remove config cache file
     if (event.result.type === 'kubernetes') {
@@ -107,19 +62,6 @@ module.exports = {
         strapi.log.debug(kubeconfigPath);
       } catch (err) { }
     }
-    // if (event.result.type === 'pipy') {
-    //   const apis = await strapi.db
-    //     .query('api::api.api')
-    //     .findMany({ where: { pipy: event.result.id }, limit: 99999 });
-    //   strapi.log.info('deploy all api ', apis.length);
-    //   if (apis.length > 0) {
-    //     for (const api of apis) {
-    //       if (api.step === 2) {
-    //         await strapi.service("api::api.api").deploy(api);
-    //       }
-    //     }
-    //   }
-    // }
 
 
   },

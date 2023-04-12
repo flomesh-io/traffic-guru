@@ -56,7 +56,6 @@ module.exports = createCoreController('api::trafficlog.trafficlog',{
     try {
       const fleet = await strapi.service('api::trafficlog.trafficlog').getLogFleet();
       const reqBody = ctx.request.body;
-      strapi.log.debug('xxxxxxxxxxxxxx');
       if(fleet.type === 'clickhouse'){
         return await strapi.service('api::trafficlog.trafficlog').logs2Clickhouse(reqBody, fleet.content);
       }
@@ -66,7 +65,8 @@ module.exports = createCoreController('api::trafficlog.trafficlog',{
       //error return
       return {error: fleet.type + ' not supported'};
     } catch (error) {
-      return {error: error};
+      strapi.log.error(error);
+      return {error: error.toString()};
     }
   },
 
@@ -85,7 +85,8 @@ module.exports = createCoreController('api::trafficlog.trafficlog',{
       //error return
       return {error: fleet.type + ' not supported'};
     } catch (error) {
-      return {error: error};
+      strapi.log.error(error);
+      return {error: error.toString()};
     }
   },
 
@@ -103,7 +104,8 @@ module.exports = createCoreController('api::trafficlog.trafficlog',{
       //error return
       return {error: fleet.type + ' not supported'};
     } catch (error) {
-      return {error: error};
+      strapi.log.error(error);
+      return {error: error.toString()};
     }
   },
 
@@ -121,7 +123,8 @@ module.exports = createCoreController('api::trafficlog.trafficlog',{
       //error return
       return {error: fleet.type + ' not supported'};
     } catch (error) {
-      return {error: error};
+      strapi.log.error(error);
+      return {error: error.toString()};
     }
   },
 
@@ -139,7 +142,8 @@ module.exports = createCoreController('api::trafficlog.trafficlog',{
       //error return
       return {error: fleet.type + ' not supported'};
     } catch (error) {
-      return {error: error};
+      strapi.log.error(error);
+      return {error: error.toString()};
     }
   },
 
@@ -157,7 +161,8 @@ module.exports = createCoreController('api::trafficlog.trafficlog',{
       //error return
       return {error: fleet.type + ' not supported'};
     } catch (error) {
-      return {error: error};
+      strapi.log.error(error);
+      return {error: error.toString()};
     }
   },
 
@@ -175,7 +180,66 @@ module.exports = createCoreController('api::trafficlog.trafficlog',{
       //error return
       return {error: fleet.type + ' not supported'};
     } catch (error) {
-      return {error: error};
+      strapi.log.error(error);
+      return {error: error.toString()};
+    }
+  },
+
+
+  async traceList(ctx) {
+    try {
+      const fleet = await strapi.service('api::trafficlog.trafficlog').getLogFleet();
+      const reqBody = ctx.request.body;
+      //strapi.log.debug(JSON.stringify(reqBody));
+      if(fleet.type === 'clickhouse'){
+        return await strapi.service('api::trafficlog.trafficlog').traceList2Clickhouse(reqBody, fleet.content);
+      }
+      // else if(fleet.type === 'postgresql'){
+      //   return await strapi.service('api::trafficlog.trafficlog').traceList2Postgresql(reqBody, fleet.content);
+      // } 
+      //error return
+      return {error: fleet.type + ' not supported'};
+    } catch (error) {
+      strapi.log.error(error);
+      return {error: error.toString()};
+    }
+  },
+
+  async traceDetail(ctx) {
+    try {
+      const fleet = await strapi.service('api::trafficlog.trafficlog').getLogFleet();
+      const reqBody = ctx.request.body;
+      //strapi.log.debug(JSON.stringify(reqBody));
+      if(fleet.type === 'clickhouse'){
+        return await strapi.service('api::trafficlog.trafficlog').traceDetail2Clickhouse(reqBody, fleet.content);
+      }
+      // else if(fleet.type === 'postgresql'){
+      //   return await strapi.service('api::trafficlog.trafficlog').traceDetail2Postgresql(reqBody, fleet.content);
+      // } 
+      //error return
+      return {error: fleet.type + ' not supported'};
+    } catch (error) {
+      strapi.log.error(error);
+      return {error: error.toString()};
+    }
+  },
+  
+  async traceDag(ctx) {
+    try {
+      const fleet = await strapi.service('api::trafficlog.trafficlog').getLogFleet();
+      const reqBody = ctx.request.body;
+      //strapi.log.debug(JSON.stringify(reqBody));
+      if(fleet.type === 'clickhouse'){
+        return await strapi.service('api::trafficlog.trafficlog').traceDag2Clickhouse(reqBody, fleet.content);
+      }
+      // else if(fleet.type === 'postgresql'){
+      //   return await strapi.service('api::trafficlog.trafficlog').traceDetail2Postgresql(reqBody, fleet.content);
+      // } 
+      //error return
+      return {error: fleet.type + ' not supported'};
+    } catch (error) {
+      strapi.log.error(error);
+      return {error: error.toString()};
     }
   }
 

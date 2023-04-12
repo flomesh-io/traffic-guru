@@ -10,7 +10,7 @@ module.exports = {
       .findOne({where: { type: 'EmailConf' }});
     if (emailConf === null || emailConf.content === null) {
       strapi.log.info('You have not configure your email in SystemSetting!');
-      return;
+      throw new Error("You have not configure your email in SystemSetting!");
     }
     const mailOptions = {
       from: emailConf.content.auth.user,

@@ -18,6 +18,12 @@ module.exports = {
 
     const rolePublic = await strapi.plugin('users-permissions').service('role').findOne(publicRoleId);
     rolePublic.permissions["api::router-setting"].controllers["router-setting"]["find"].enabled = true;
+    if (rolePublic.permissions["api::resource"]) {
+      rolePublic.permissions["api::resource"].controllers["resource"]["sd"].enabled = true;
+    }
+    if (rolePublic.permissions["api::alarm"]) {
+      rolePublic.permissions["api::alarm"].controllers["alarm"]["alert"].enabled = true;
+    }
     await strapi.plugin('users-permissions').service('role').updateRole(publicRoleId, rolePublic);
 
     // add admin user
@@ -75,7 +81,6 @@ module.exports = {
         port: 465,
         service: 'QQex',
         secureConnection: true,
-        enabled: true
       };
       await strapi.db.query('api::system-setting.system-setting').create({
         data: {

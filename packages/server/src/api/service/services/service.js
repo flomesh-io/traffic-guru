@@ -12,15 +12,15 @@ const type = 'service';
 const kubeUtils = require("../../../functions/kubeUtils.js");
 
 module.exports = createCoreService('api::service.service', {
-  async getServices(ctx, args) {
+  async getServices (ctx, args) {
     if (ctx.state.user.role.id != 1 && !args.filters.organization) {
-      const orgs = await strapi.db.query("api::organization.organization").findMany({where:{users:{id: {$ne: ctx.state.user.id}}}})
-      args.filters["$or"] = [{organization: {id:{$null: true}}}, {organization:{id: {$notIn: orgs.map((o) => o.id)}}}]
+      const orgs = await strapi.db.query("api::organization.organization").findMany({ where: { users: { id: { $ne: ctx.state.user.id } } } })
+      args.filters["$or"] = [{ organization: { id: { $null: true } } }, { organization: { id: { $notIn: orgs.map((o) => o.id) } } }]
     }
     return await kubeUtils.getKubeEntitys(ctx, type, args);
   },
   // eslint-disable-next-line no-unused-vars
-  async getAllServices(ctx) {
+  async getAllServices (ctx) {
     // const input = sqlUtils.queryInput(ctx);
     // const { results, pagination } = await super.find(input);
     // results.forEach((result) => {
@@ -29,7 +29,7 @@ module.exports = createCoreService('api::service.service', {
     // return { results, pagination };
   },
 
-  async fetchServices(ctx, args, id) {
+  async fetchServices (ctx, args, id) {
     const schemaType = ctx.koaContext.request.header.schema_type;
     if (schemaType == 'eureka') {
       strapi.log.info('=========>>> fetchEurekaServices()');
@@ -86,7 +86,7 @@ module.exports = createCoreService('api::service.service', {
       id
     );
   },
-  async fetchAllServices(args, ctx) {
+  async fetchAllServices (args, ctx) {
     const registries = await strapi.db.query('registry').find({ type: 'k8s' });
 
     for (const registry of registries) {
@@ -172,8 +172,8 @@ module.exports = createCoreService('api::service.service', {
     return serviceDB;
   },
 
-  async createServiceSync(args, ctx) {
-    const k8s_cluster_id = args.data.registry ||  ctx.koaContext.request.header.schema_id || '';
+  async createServiceSync (args, ctx) {
+    const k8s_cluster_id = args.data.registry || ctx.koaContext.request.header.schema_id || '';
     const k8s_cluster_ns = args.data.namespace || ctx.koaContext.request.header.namespace || '';
     const k8s_cluster_type = ctx.koaContext.request.header.schema_type || '';
 
@@ -201,7 +201,7 @@ module.exports = createCoreService('api::service.service', {
         throw new Error("Failed to deploy to k8s");
       }
     }
-    
+
     const res = await k8sApi.readNamespacedService(
       args.data.content.metadata.name,
       args.data.content.metadata.namespace
@@ -209,14 +209,14 @@ module.exports = createCoreService('api::service.service', {
     args.data.content = res.body;
     const ns = await strapi.db
       .query('api::namespace.namespace')
-      .findOne({where: { registry: k8s_cluster_id, name: k8s_cluster_ns }});
+      .findOne({ where: { registry: k8s_cluster_id, name: k8s_cluster_ns } });
     args.data.ns = ns?.id;
     args.data.uid = res.body?.metadata?.uid;
     return await strapi.db.query("api::" + type + "." + type).create(args);
   },
 
   async deleteServiceSync (args, ctx) {
-    const values = await strapi.db.query("api::" + type + "." + type).findOne({where: { id: args.id }, populate:true});
+    const values = await strapi.db.query("api::" + type + "." + type).findOne({ where: { id: args.id }, populate: true });
     const k8s_cluster_id = ctx.koaContext.request.header.schema_id || '';
     const k8s_cluster_type = ctx.koaContext.request.header.schema_type || '';
 
@@ -235,7 +235,7 @@ module.exports = createCoreService('api::service.service', {
       console.error(error?.response?.body)
     }
 
-    return await strapi.db.query("api::" + type + "." + type).delete({where: { id: args.id }});
+    return await strapi.db.query("api::" + type + "." + type).delete({ where: { id: args.id } });
   },
 
   async deployService() {

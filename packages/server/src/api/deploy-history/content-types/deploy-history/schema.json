@@ -1,0 +1,28 @@
+{
+  "kind": "collectionType",
+  "collectionName": "deploy_histories",
+  "info": {
+    "singularName": "deploy-history",
+    "pluralName": "deploy-histories",
+    "displayName": "deployHistory",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "path": {
+      "type": "string"
+    },
+    "content": {
+      "type": "json"
+    },
+    "version": {
+      "type": "integer"
+    },
+    "type": {
+      "type": "string"
+    }
+  }
+}

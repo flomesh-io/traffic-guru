@@ -28,6 +28,12 @@
       "relation": "manyToOne",
       "target": "api::template.template",
       "inversedBy": "templatefiles"
+    },
+    "operationHistories": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::operation-history.operation-history",
+      "mappedBy": "templatefile"
     }
   }
 }

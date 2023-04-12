@@ -9,9 +9,14 @@ const axios = require('axios');
 
 module.exports = createCoreService('api::prometheus.prometheus', {
     async proxy(ctx) {
-        const fleet = await strapi.db.query('api::fleet.fleet').findOne({where: { type: 'prometheus' }});
-        if (fleet == null || fleet.length == 0) {
-          return;
+        let fleet = await strapi.db.query('api::fleet.fleet').findOne({where: { type: 'prometheus', apply: true }});
+        if (fleet == null) {
+          fleet = await strapi.db.query('api::fleet.fleet').findOne({where: { type: 'prometheus' }});
+          if (fleet == null) {
+            ctx.response.status = 404;
+            ctx.response.message = 'Please add prometheus to the component first';
+            return;
+          }
         }
     
         const host = fleet.content.host;
@@ -28,13 +33,19 @@ module.exports = createCoreService('api::prometheus.prometheus', {
           url = `${url}?${queryStr}`;
         }
         strapi.log.info(url)
-        const response = await axios({
-          method: method,
-          url: url,
-        });
-    
-        ctx.response.status = response.status;
-        ctx.response.body = response.data;
+        try {
+          const response = await axios({
+            method: method,
+            url: url,
+            timeout: 3000
+          });
+      
+          ctx.response.status = response.status;
+          ctx.response.body = response.data;
+        } catch (error) {
+          ctx.response.status = 504;
+          ctx.response.message = "Unable to connect to prometheus: " + error.message;
+        }
       },
     
       async proxymesh(ctx) {
@@ -56,13 +67,19 @@ module.exports = createCoreService('api::prometheus.prometheus', {
         if (queryStr) {
           url = `${url}?${queryStr}`;
         }
-        const response = await axios({
-          method: method,
-          url: url,
-        });
-    
-        ctx.response.status = response.status;
-        ctx.response.body = response.data;
+        try {
+          const response = await axios({
+            method: method,
+            url: url,
+            timeout: 3000
+          });
+      
+          ctx.response.status = response.status;
+          ctx.response.body = response.data;
+        } catch (error) {
+          ctx.response.status = 504;
+          ctx.response.message = "Unable to connect to prometheus: " + error.message;
+        }
       },
       async proxynamespace(ctx) {
         const ns = await strapi.db.query('api::namespace.namespace').findOne({where: { id: ctx.params.id }});
@@ -86,12 +103,18 @@ module.exports = createCoreService('api::prometheus.prometheus', {
         if (queryStr) {
           url = `${url}?${queryStr}`;
         }
-        const response = await axios({
-          method: method,
-          url: url,
-        });
-    
-        ctx.response.status = response.status;
-        ctx.response.body = response.data;
+        try {
+          const response = await axios({
+            method: method,
+            url: url,
+            timeout: 3000
+          });
+      
+          ctx.response.status = response.status;
+          ctx.response.body = response.data;
+        } catch (error) {
+          ctx.response.status = 504;
+          ctx.response.message = "Unable to connect to prometheus: " + error.message;
+        }
       },
 });

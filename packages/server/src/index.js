@@ -54,9 +54,14 @@ module.exports = {
           total_amount  : Int!
           status        : Int!
         }
+        type HealthCheckUnhealthy {
+          unhealthy  : [String]!
+          time       : DateTime!
+        }
         type DashboardPageInfo {
           loadbalancer_summary                : LoadBalancerSummary!
           address_pool_usage                  : AddressPoolUsage!,
+          health_check_unhealthy              : [HealthCheckUnhealthy]!,
           layer7_loadbalancer_connections_top : [LoadBalancerTopItem]!,
           layer4_loadbalancer_connections_top : [LoadBalancerTopItem]!,
           layer7_loadbalancer_tps_top         : [LoadBalancerTopItem]!,
@@ -163,6 +168,96 @@ module.exports = {
           api_month      : JSON
         }
 
+        type LogVOList {
+          data : [LogVO]
+          total: Int
+        }
+        type LogVO {
+          serviceName    : String
+          podName     : String
+          reqPath     : String
+          reqMethod   : String
+          reqProtocol : String
+          resTime     : String
+          reqTime     : String
+          resStatus   : Int
+          resSize     : String
+          remoteAddr  : String
+          remotePort  : Int
+          localAddr   : String
+          localPort   : Int
+          createdAt   : String
+          reqHeaders  : JSON
+          message     : JSON
+        }
+        input LogFilters {
+          customQuery  : String
+          orderByField : String
+          orderByType  : String
+          reqTimeFrom  : Int
+          reqTimeTo    : Int
+          pageSize     : Int
+          pageNo       : Int
+        }
+        input TraceFilters {
+          keyWord      : String
+          reqTimeFrom  : Int
+          reqTimeTo    : Int
+          pageSize     : Int
+          pageNo       : Int
+        }
+        type TraceVO {
+          traceId     : String
+          spanCount   : String
+          duration    : String
+          minReqTime  : String
+          maxResTime  : String
+          serviceName : [String]
+          podName     : [String]
+        }
+        type TraceVOList {
+          data : [TraceVO]
+          total: Int
+        }
+        type TraceSpanVO {
+          traceSpan   : String
+          traceParent : String
+          serviceName : String
+          podName     : String
+          duration    : String
+          reqTime     : String
+          resTime     : String
+        }
+        type TraceDetailVO {
+          data : [TraceSpanVO]
+          rows : Int
+        }
+        input TraceDAGFilters {
+          reqTimeFrom  : String
+          reqTimeTo    : String
+        }
+        type TraceDAGRegistryVO {
+          id   : Int
+          name : String
+        }
+        type TraceDAGServiceVO {
+          id        : Int
+          name      : String
+          pods      : [String]
+          namespace : String
+          registry  : TraceDAGRegistryVO
+        }
+        type TraceDAGLinkVO {
+          error  : Boolean
+          weight : String
+          source : Int
+          target : Int
+        }
+        type TraceDAGVO {
+          services : [TraceDAGServiceVO]
+          links    : [TraceDAGLinkVO]
+        }
+
         type Query {
           uniSearch(filters: JSON, pagination: PaginationArg = {}, sort: [String] = []): JSON
 
@@ -218,7 +313,10 @@ module.exports = {
 
           pingRegistry(data: RegistryInput): JSON
           refreshRegistry(id: Int): Boolean
+
         }
+
+        
       `,
       resolvers: {
         Query: {
@@ -328,7 +426,7 @@ module.exports = {
           myMessages: {
             async resolve (obj, args, ctx) {
               const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('api::message.message'), true)
-              const { results } = await strapi.service('api::message.message').myMessages(transformedArgs, ctx);
+              const results = await strapi.service('api::message.message').myMessages(transformedArgs, ctx);
               return entityUtils.toEntityResponseCollection(transformedArgs, 'api::message.message', results);
             }
           },

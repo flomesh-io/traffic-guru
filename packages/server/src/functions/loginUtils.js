@@ -38,7 +38,7 @@ async function checkCode(identifier, verificationCode) {
     .query('api::system-setting.system-setting')
     .findOne({ where: { type: 'EmailConf' } });
   let code = null;
-  if (emailConf?.content?.service && emailConf?.content?.enabled) {
+  if (emailConf?.content?.service) {
     const date = new Date(new Date().getTime() - 5 * 60 * 1000).toISOString();
     code = await strapi.db
       .query('api::verification-code.verification-code')
@@ -57,9 +57,11 @@ async function checkCode(identifier, verificationCode) {
     if (!code || code.code != verificationCode || code.isUsed) {
       throw new Error('The verification code is incorrect or has expired');
     }
+  } else {
+    throw new Error("You have not configure your email in SystemSetting!")
   }
   return {emailConf, code}
-}
+} 
 
 module.exports = {
   async loginByCode(obj, args, context) {
@@ -111,7 +113,7 @@ module.exports = {
     checkBadRequest(output);
 
     if (
-      emailConf?.content?.service &&
+      emailConf?.content?.service && 
       _.get(output, 'statusCode', 200) === 200
     ) {
       await strapi.db

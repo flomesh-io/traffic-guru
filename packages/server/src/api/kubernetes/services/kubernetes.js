@@ -12,7 +12,15 @@ const https = require('https');
 const YAML = require('yaml');
 
 module.exports = createCoreService('api::kubernetes.kubernetes', {
-    
+      async pingK8s(ctx) {
+        const clusterId = ctx.request.headers.schema_id || '';
+        const registry = await strapi.db.query("api::registry.registry").findOne({where: {id: clusterId}})
+        
+        if (registry) {
+          const k8sAxios = this.getK8sAxios(registry, 3000);
+          await k8sAxios.get('/')
+        }
+      },
       async getKubeConfig(clusterId) {
         const registry = await strapi.db.query("api::registry.registry").findOne({where: {id: clusterId}})
         if (!registry) throw new Error("Please set and select a registry");
@@ -425,7 +433,7 @@ module.exports = createCoreService('api::kubernetes.kubernetes', {
     
         ctx.response.body = {countPage, logs: lines.join("\n")}
       },
-      getK8sAxios(reg) {
+      getK8sAxios(reg, timeout) {
         if (!reg?.address?.length) {
           throw new Error("The cluster is not registered.");
         }
@@ -443,6 +451,7 @@ module.exports = createCoreService('api::kubernetes.kubernetes', {
               "Content-Type": "application/json",
               Authorization: "Bearer " + user.user.token,
             },
+            timeout: timeout ? timeout: undefined
           });
         } else {
           const cert = new Buffer.from(user.user["client-certificate-data"], "base64").toString() ;
@@ -454,6 +463,7 @@ module.exports = createCoreService('api::kubernetes.kubernetes', {
             headers: {
               "Content-Type": "application/json"
             },
+            timeout: timeout ? timeout: undefined
           });
         }
     
