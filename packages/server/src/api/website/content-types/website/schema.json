@@ -1,0 +1,51 @@
+{
+  "kind": "collectionType",
+  "collectionName": "websites",
+  "info": {
+    "singularName": "website",
+    "pluralName": "websites",
+    "displayName": "website",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "domain": {
+      "type": "string"
+    },
+    "port": {
+      "type": "integer"
+    },
+    "mimeType": {
+      "type": "json"
+    },
+    "tlsEnabled": {
+      "type": "boolean"
+    },
+    "tlsPort": {
+      "type": "integer"
+    },
+    "certificate": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::certificate.certificate",
+      "inversedBy": "webSites"
+    },
+    "providers": {
+      "type": "json"
+    },
+    "resource": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
+    }
+  }
+}

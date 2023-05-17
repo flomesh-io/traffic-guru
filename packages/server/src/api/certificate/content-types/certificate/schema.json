@@ -32,6 +32,12 @@
       "relation": "manyToOne",
       "target": "api::namespace.namespace",
       "inversedBy": "certificates"
+    },
+    "webSites": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::website.website",
+      "mappedBy": "certificate"
     }
   }
 }

@@ -124,15 +124,30 @@ module.exports = createCoreService('api::clickhouse.clickhouse', {
     return 0;
   },
 
-  async createTable (result) {
+  async createTable (result, type) {
     let db = null;
     let tableName = null;
+    let ddlName = "log.ddl";
+
     if (result.type == "log" && result.content.type == "clickhouse") {
       db = await strapi.db.query("api::fleet.fleet").findOne({where: {id: result.content.bind.id}})
-      tableName = result.content.table
     } else if (result.type == "clickhouse") {
       db = result
-      tableName = "log"
+    }
+
+    if (!type || type == "log") {
+      if (result.type == "log" && result.content.type == "clickhouse") {
+        tableName = result.content.table
+      } else if (result.type == "clickhouse") {
+        tableName = "log"
+      }
+      ddlName = "log.ddl";
+    } else if (type == "healthcheckLog") {
+      tableName = "healthcheckLog"
+      ddlName = "healthcheckLog.ddl";
+    } else if (type == "bgpLog") {
+      tableName = "bgpLog"
+      ddlName = "bgpLog.ddl";
     }
 
     const config = db.content;
@@ -163,7 +178,7 @@ module.exports = createCoreService('api::clickhouse.clickhouse', {
       }
       
       if (response.data == 0) {
-        const ddl = fs.readFileSync(`${__dirname}/log.ddl`, 'utf8');
+        const ddl = fs.readFileSync(`${__dirname}/${ddlName}`, 'utf8');
 
         let createTable = ddl.replace('default.log', tableName);
         createTable = querystring.escape(createTable);

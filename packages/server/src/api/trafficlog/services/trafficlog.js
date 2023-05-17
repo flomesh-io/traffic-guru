@@ -91,23 +91,16 @@ module.exports = createCoreService('api::trafficlog.trafficlog',{
    */
   async queryLogs2Clickhouse(reqBody, dbConf) {
     let baseSql = `
-        SELECT service.name as serviceName, pod.name as podName, 
-            req.path as reqPath, req.method as reqMethod, req.protocol as reqProtocol,
-            resTime, reqTime, res.status as resStatus, resSize,
-            remoteAddr, remotePort, localAddr, localPort,
-            timestamp as createdAt, req.headers as reqHeaders, message
-        FROM log
-        WHERE  bondType != 'outbound'
-        `;
-    if (reqBody?.customQuery) {
-      baseSql += " AND (" + reqBody.customQuery + ") ";
-    }
-    if (reqBody?.reqTimeFrom) {
-      baseSql += " AND reqTime / 1000 > " + reqBody.reqTimeFrom;
-    }
-    if (reqBody?.reqTimeTo) {
-      baseSql += " AND reqTime / 1000 < " + reqBody.reqTimeTo;
-    }
+      SELECT service.name as serviceName, pod.name as podName, 
+        req.path as reqPath, req.method as reqMethod, req.protocol as reqProtocol,
+        resTime, reqTime, res.status as resStatus, resSize,
+        remoteAddr, remotePort, localAddr, localPort,
+        timestamp as createdAt, req.headers as reqHeaders, message
+      FROM log
+      WHERE  bondType != 'outbound'
+    `;
+    baseSql += buildLogQuery4Clickhouse(reqBody);
+
     let orderByField = "resTime";
     if (reqBody?.orderByField) {
       orderByField = reqBody.orderByField;
@@ -121,10 +114,11 @@ module.exports = createCoreService('api::trafficlog.trafficlog',{
       limitSize = reqBody.pageSize;
     }
     let limitStart = 0;
-    if (reqBody?.pageNo) {
-      limitStart = reqBody.pageNo * limitSize;
+    if (reqBody?.pageNo > 0) { // 第一页 pageNo = 1
+      limitStart = (reqBody.pageNo - 1) * limitSize;
     }
     const querySql = `${baseSql} ORDER BY ${orderByField} ${orderByType} LIMIT ${limitStart}, ${limitSize}  format JSON`;
+    strapi.log.debug(querySql);
     const queryRes = await dbQuery4Clickhouse(dbConf, querySql);
     return {
       "data": queryRes.data.data,
@@ -148,10 +142,10 @@ module.exports = createCoreService('api::trafficlog.trafficlog',{
       baseSql += " AND (" + reqBody.customQuery + ") ";
     }
     if (reqBody?.reqTimeFrom) {
-      baseSql += " AND reqTime / 1000 > " + reqBody.reqTimeFrom;
+      baseSql += " AND reqTime > " + reqBody.reqTimeFrom.getTime();
     }
     if (reqBody?.reqTimeTo) {
-      baseSql += " AND reqTime / 1000 < " + reqBody.reqTimeTo;
+      baseSql += " AND reqTime < " + reqBody.reqTimeTo.getTime();
     }
     const countSql = `SELECT count(1) AS total FROM (${baseSql}) abc`;
     await pgClient.query(countSql)
@@ -170,8 +164,8 @@ module.exports = createCoreService('api::trafficlog.trafficlog',{
       limitSize = reqBody.pageSize;
     }
     let limitStart = 0;
-    if (reqBody?.pageNo) {
-      limitStart = reqBody.pageNo * limitSize;
+    if (reqBody?.pageNo > 0) { // 第一页 pageNo = 1
+      limitStart = (reqBody.pageNo - 1) * limitSize;
     }
     const querySql = `${baseSql} ORDER BY ${orderByField} ${orderByType} LIMIT ${limitSize} OFFSET ${limitStart} `;
     //console.debug(querySql)
@@ -200,8 +194,8 @@ module.exports = createCoreService('api::trafficlog.trafficlog',{
       limitSize = reqBody.pageSize;
     }
     let limitStart = 0;
-    if (reqBody?.pageNo) {
-      limitStart = reqBody.pageNo * limitSize;
+    if (reqBody?.pageNo > 0) { // 第一页 pageNo = 1
+      limitStart = (reqBody.pageNo - 1) * limitSize;
     }
     const querySql = `${baseSql} ORDER BY resTime desc LIMIT ${limitStart}, ${limitSize}  format JSON`;
     const queryRes = await dbQuery4Clickhouse(dbConf, querySql);
@@ -233,8 +227,8 @@ module.exports = createCoreService('api::trafficlog.trafficlog',{
       limitSize = reqBody.pageSize;
     }
     let limitStart = 0;
-    if (reqBody?.pageNo) {
-      limitStart = reqBody.pageNo * limitSize;
+    if (reqBody?.pageNo > 0) { // 第一页 pageNo = 1
+      limitStart = (reqBody.pageNo - 1) * limitSize;
     }
     const querySql = `${baseSql} ORDER BY res_time desc LIMIT ${limitSize} OFFSET ${limitStart} `;
     await pgClient.query(querySql)
@@ -252,7 +246,8 @@ module.exports = createCoreService('api::trafficlog.trafficlog',{
     FROM log
     WHERE bondType != 'outbound'
     `;
-    baseSql += buildWhereSql4Clickhouse(reqBody);
+    // baseSql += buildWhereSql4Clickhouse(reqBody);
+    baseSql += buildLogQuery4Clickhouse(reqBody);
     const querySql = `${baseSql}  GROUP BY latency ORDER BY latency format JSON`;
     // console.debug(querySql)
     const queryRes = await dbQuery4Clickhouse(dbConf, querySql);
@@ -288,7 +283,8 @@ module.exports = createCoreService('api::trafficlog.trafficlog',{
     FROM log
     WHERE bondType != 'outbound'
     `;
-    baseSql += buildWhereSql4Clickhouse(reqBody);
+    // baseSql += buildWhereSql4Clickhouse(reqBody);
+    baseSql += buildLogQuery4Clickhouse(reqBody);
     const querySql = `${baseSql}  AND status > '0' GROUP BY status ORDER BY status format JSON`;
     const queryRes = await dbQuery4Clickhouse(dbConf, querySql);
     return {
@@ -319,12 +315,13 @@ module.exports = createCoreService('api::trafficlog.trafficlog',{
    */
   async countTps2Clickhouse(reqBody, dbConf) {
     let baseSql = `
-    SELECT COUNT(1) AS tps,
+    SELECT COUNT(1) AS count,
       toStartOfInterval(toDateTime(resTime / 1000), interval 1 minute) as minute
     FROM log
     WHERE bondType != 'outbound'
     `;
-    baseSql += buildWhereSql4Clickhouse(reqBody);
+    // baseSql += buildWhereSql4Clickhouse(reqBody);
+    baseSql += buildLogQuery4Clickhouse(reqBody);
     const querySql = `${baseSql} GROUP BY minute ORDER BY minute ASC format JSON`;
     const queryRes = await dbQuery4Clickhouse(dbConf, querySql);
     return {
@@ -337,7 +334,7 @@ module.exports = createCoreService('api::trafficlog.trafficlog',{
     pgClient.connect();
     const resData = {};
     let baseSql = `
-    SELECT COUNT(1) AS tps,
+    SELECT COUNT(1) AS count,
       to_char(to_timestamp("res_time" / 1000), 'yyyy-MM-dd hh24:MI:00') as minute
     FROM trafficlogs
     WHERE bond_type != 'outbound'    
@@ -360,7 +357,8 @@ module.exports = createCoreService('api::trafficlog.trafficlog',{
     FROM log
     WHERE bondType != 'outbound'
     `;
-    baseSql += buildWhereSql4Clickhouse(reqBody);
+    // baseSql += buildWhereSql4Clickhouse(reqBody);
+    baseSql += buildLogQuery4Clickhouse(reqBody);
     const querySql = `${baseSql} format JSON`;
     const queryRes = await dbQuery4Clickhouse(dbConf, querySql);
     return {
@@ -437,12 +435,12 @@ module.exports = createCoreService('api::trafficlog.trafficlog',{
     }
     if (reqBody?.reqTimeFrom) {
       whereSql += ` 
-        AND reqTime / 1000 > ${reqBody.reqTimeFrom} 
+        AND reqTime > ${reqBody.reqTimeFrom.getTime()} 
       `;
     }
     if (reqBody?.reqTimeTo) {
       whereSql += ` 
-        AND reqTime / 1000 < ${reqBody.reqTimeTo} 
+        AND reqTime < ${reqBody.reqTimeTo.getTime()} 
       `;
     }
     let limitSize = 10
@@ -450,8 +448,8 @@ module.exports = createCoreService('api::trafficlog.trafficlog',{
       limitSize = reqBody.pageSize;
     }
     let limitStart = 0;
-    if (reqBody?.pageNo) {
-      limitStart = reqBody.pageNo * limitSize;
+    if (reqBody?.pageNo > 0) { // 第一页 pageNo = 1
+      limitStart = (reqBody.pageNo - 1) * limitSize;
     }
     const querySql = `
     SELECT traceId, COUNT(1) spanCount, (MAX(maxResTime1) - MIN(minReqTime1)) as duration, MIN(minReqTime1) as minReqTime,
@@ -524,18 +522,34 @@ module.exports = createCoreService('api::trafficlog.trafficlog',{
     if (reqBody?.reqTimeTo) { //e.g. reqTimeTo=1 second
       whereSql += " AND toDateTime(reqTime / 1000) < (now() - interval " + reqBody.reqTimeTo + ") ";
     }
+
+    // DAG for services
+    // const querySql = `
+    // SELECT COUNT(1) weight, serviceName
+    // FROM 
+    //   ( SELECT trace.span as traceSpan, groupArray(service.name) as serviceName
+    //     FROM
+    //       (SELECT trace.span, service.name, reqTime, bondType
+    //         FROM log
+    //         WHERE bondType <> '' 
+    //         AND  trace.id != '' ${whereSql}
+    //         ORDER BY reqTime ASC, bondType DESC )
+    //     GROUP BY traceSpan ) 
+    // GROUP BY serviceName  format JSON
+    // `; 
+    // DAG for pods
     const querySql = `
-    SELECT COUNT(1) weight, serviceName
+    SELECT COUNT(1) weight, podName
     FROM 
-      ( SELECT trace.span as traceSpan, groupArray(service.name) as serviceName
+      ( SELECT trace.span as traceSpan, groupArray(pod.name) as podName
         FROM
-          (SELECT trace.span, service.name, reqTime, bondType
+          (SELECT trace.span, pod.name, reqTime, bondType
             FROM log
-            WHERE bondType <> '' 
+            WHERE bondType <> '' AND pod.name <> ''
             AND  trace.id != '' ${whereSql}
             ORDER BY reqTime ASC, bondType DESC )
         GROUP BY traceSpan ) 
-    GROUP BY serviceName  format JSON
+    GROUP BY podName  format JSON
     `; 
     // console.debug(querySql)
     const queryRes = await dbQuery4Clickhouse(dbConf, querySql);
@@ -618,6 +632,43 @@ function buildWhereSql4Clickhouse(reqBody) {
     whereSql += " AND toDateTime(reqTime / 1000) < (now() - interval " + reqBody.reqTimeTo + ") ";
   }
   return whereSql
+}
+function buildLogQuery4Clickhouse(reqBody) {
+  let logQuery = '';
+  if (reqBody?.customQuery) {
+    logQuery += " AND (" + reqBody.customQuery + ") ";
+  }
+  if (reqBody?.reqTimeFrom) {
+    logQuery += " AND reqTime > " + reqBody.reqTimeFrom.getTime();
+  }
+  if (reqBody?.reqTimeTo) {
+    logQuery += " AND reqTime < " + reqBody.reqTimeTo.getTime();
+  }
+  if (reqBody?.serviceName) {
+    logQuery += " AND service.name = '" + reqBody.serviceName + "' ";
+  }
+  if (reqBody?.queryWords) {
+    logQuery += " AND message like '%25" + reqBody.queryWords + "%25' ";
+  }
+  if (reqBody?.meshName) {
+    logQuery += " AND meshName = '" + reqBody.meshName + "' ";
+  }
+  if (reqBody?.a4lbid) {
+    logQuery += " AND x_parameters.a4lbid = " + reqBody.a4lbid;
+  }
+  if (reqBody?.a7lbid) {
+    logQuery += " AND x_parameters.7lbid = " + reqBody.a7lbid;
+  }
+  if (reqBody?.aid) {
+    logQuery += " AND x_parameters.aid = " + reqBody.aid;
+  }
+  if (reqBody?.appid) {
+    logQuery += " AND x_parameters.appid = " + reqBody.appid;
+  }
+  if (reqBody?.igid) {
+    logQuery += " AND x_parameters.igid = " + reqBody.igid;
+  }
+  return logQuery;
 }
 
 async function dbQuery4Clickhouse(dbConf, querySql) {

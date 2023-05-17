@@ -137,6 +137,9 @@
     },
     "selector": {
       "type": "string"
+    },
+    "upstreamVersion": {
+      "type": "string"
     }
   }
 }

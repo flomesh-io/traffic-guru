@@ -71,7 +71,6 @@ module.exports = {
     // }
 
     try {
-      // await strapi.services.service.deploySidecar(data.id);
       const service = await strapi.db.query('api::service.service').findOne({
         where: {
           id: svcId
@@ -100,7 +99,6 @@ module.exports = {
       })
       if (!result.organization || result.organization.count === 0) return;
       await strapi.service('api::service.service').deployService(service);
-      // await strapi.service('api::service.service').deploySidecar(svcId);
     } catch (error) {
       console.error(error);
     }

@@ -52,6 +52,12 @@
       "relation": "oneToMany",
       "target": "api::router-setting.router-setting",
       "mappedBy": "parent"
+    },
+    "role": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.role",
+      "inversedBy": "routerSettings"
     }
   }
 }

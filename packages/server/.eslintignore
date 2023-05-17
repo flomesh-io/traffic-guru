@@ -11,7 +11,8 @@ config/pipy-codebases/
 build
 
 # Extensions
-extensions/
+public/
+src/extensions/
 
 # Logs
 logs

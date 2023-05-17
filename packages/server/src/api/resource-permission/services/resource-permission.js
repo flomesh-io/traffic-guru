@@ -187,12 +187,31 @@ module.exports = createCoreService('api::resource-permission.resource-permission
       async createRoleResourcePermission(args) {
         await this.copyPermissions(args);
         await strapi.plugin('users-permissions').service('role').createRole(args.data);
+        if (args.data.name && args.data.type) {
+          const role = await strapi.db.query('plugin::users-permissions.role').findOne({where: {name: args.data.name, type: args.data.type}})
+          return role.id;
+        }
         return 0;
       },
     
       async updateRoleResourcePermission(args) {
         await this.copyPermissions(args);
         await strapi.plugin('users-permissions').service('role').updateRole(args.id, args.data);
+        return 0;
+      },
+      async deleteRoleResourcePermission(args) {
+        const publicRole = await strapi
+          .query('plugin::users-permissions.role')
+          .findOne({ where: { type: 'public' } });
+
+        const publicRoleID = publicRole.id;
+        if (args.id) {
+          const routers = await strapi.db.query("api::router-setting.router-setting").findMany({where: {role: {id: args.id}}})
+          if (routers.length) {
+            await strapi.db.query("api::router-setting.router-setting").deleteMany({where: {id: routers.map((r) => r.id)}})
+          }
+        }
+        await strapi.plugin('users-permissions').service('role').deleteRole(args.id, publicRoleID);
         return 0;
       },
       async copyPermissions(args) {

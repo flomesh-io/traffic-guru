@@ -131,6 +131,9 @@
       "relation": "oneToMany",
       "target": "api::custom-event.custom-event",
       "mappedBy": "user"
+    },
+    "token": {
+      "type": "text"
     }
   }
 }

@@ -4,6 +4,7 @@ const loginUtils = require("./functions/loginUtils.js");
 const initCommonUtils = require("./functions/initCommonUtils.js");
 const entityUtils = require("./functions/entityUtils.js");
 const gqlUtils = require("./functions/gqlUtils.js");
+const resourceUtils = require("./functions/resourceUtils.js");
 module.exports = {
   /**
    * An asynchronous register function that runs before
@@ -140,11 +141,21 @@ module.exports = {
           verificationCode: String!
           provider: String = "local"
         }
+        input UsersPermissionsLoginNoCodeInput {
+          identifier: String!
+          password: String!
+          provider: String = "local"
+        }
         input UsersPermissionsRegisterByCodeInput {
           username: String!
           email: String!
           password: String!
           verificationCode: String!
+        }
+        input UsersPermissionsRegisterNoCodeInput {
+          username: String!
+          email: String!
+          password: String!
         }
         type ApiStatus {
           run     : Int!
@@ -168,12 +179,33 @@ module.exports = {
           api_month      : JSON
         }
 
+        type LatencyChartVO {
+          latency : Int
+          count   : Int
+        }
+        type StatusChartVO {
+          status  : Int
+          count   : Int
+        }
+        type TpsChartVO {
+          minute : String
+          count     : Int
+        }
+        type LatencyChartVOList {
+          data : [LatencyChartVO]
+        }
+        type StatusChartVOList {
+          data : [StatusChartVO]
+        }
+        type TpsChartVOList {
+          data : [TpsChartVO]
+        }
         type LogVOList {
           data : [LogVO]
           total: Int
         }
         type LogVO {
-          serviceName    : String
+          serviceName : String
           podName     : String
           reqPath     : String
           reqMethod   : String
@@ -191,18 +223,26 @@ module.exports = {
           message     : JSON
         }
         input LogFilters {
+          serviceName  : String
+          queryWords   : String
+          a4lbid       : Int
+          a7lbid       : Int
+          aid          : Int
+          appid        : Int
+          igid         : Int
+          meshName     : String
           customQuery  : String
           orderByField : String
           orderByType  : String
-          reqTimeFrom  : Int
-          reqTimeTo    : Int
+          reqTimeFrom  : DateTime
+          reqTimeTo    : DateTime
           pageSize     : Int
           pageNo       : Int
         }
         input TraceFilters {
           keyWord      : String
-          reqTimeFrom  : Int
-          reqTimeTo    : Int
+          reqTimeFrom  : DateTime
+          reqTimeTo    : DateTime
           pageSize     : Int
           pageNo       : Int
         }
@@ -286,12 +326,25 @@ module.exports = {
 
           myOrganizations(filters: OrganizationFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): OrganizationEntityResponseCollection
           myMessages(filters: MessageFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): MessageEntityResponseCollection
+          myFleets(filters: FleetFiltersInput, pagination: PaginationArg = {}, sort: [String] = []): FleetEntityResponseCollection
+          
+          logList(filters: LogFilters): LogVOList
+          latencyChart(filters: LogFilters): LatencyChartVOList
+          statusChart(filters: LogFilters): StatusChartVOList
+          tpsChart(filters: LogFilters): TpsChartVOList
+
+          traceList(filters: TraceFilters): TraceVOList
+          traceDetail(traceId: String!): TraceDetailVO
+          traceDAG(filters: TraceDAGFilters): TraceDAGVO
+
+          websiteDownload(id: Int!, os: String!): String
         }
         type Mutation {
 
 
           createRoleResourcePermission(data: RolePermissionInput): Int
           updateRoleResourcePermission(id: ID!, data: RolePermissionInput): Int
+          deleteRoleResourcePermission(id: ID!): Int
     
           batchCreateRouterSetting(data: JSON ): JSON
 
@@ -310,6 +363,12 @@ module.exports = {
           registerByCode(input: UsersPermissionsRegisterByCodeInput!): UsersPermissionsLoginPayload!
           changePasswordByCode(data: JSON!): Boolean
           generateVerificationCode(identifier: String): JSON
+
+          loginNoCode(input: UsersPermissionsLoginNoCodeInput!): UsersPermissionsLoginPayload!
+          registerNoCode(input: UsersPermissionsRegisterNoCodeInput!): UsersPermissionsLoginPayload!
+          changePasswordNoCode(data: JSON!): Boolean
+
+          logout: Boolean
 
           pingRegistry(data: RegistryInput): JSON
           refreshRegistry(id: Int): Boolean
@@ -439,6 +498,60 @@ module.exports = {
             },
           },
 
+          myFleets: {
+            async resolve (obj, args, ctx) {
+              return await resourceUtils.myOrgResources(args, ctx, "fleet", true);
+            }
+          },
+
+          logList: {
+            async resolve (obj, args, ctx) {
+              ctx.request = { body: args.filters };
+              return await strapi.controller('api::trafficlog.trafficlog').querylogs(ctx);
+            }
+          },
+          latencyChart: {
+            async resolve (obj, args, ctx) {
+              ctx.request = { body: args.filters };
+              return await strapi.controller('api::trafficlog.trafficlog').countlatency(ctx);
+            }
+          },
+          statusChart: {
+            async resolve (obj, args, ctx) {
+              ctx.request = { body: args.filters };
+              return await strapi.controller('api::trafficlog.trafficlog').countstatus(ctx);
+            }
+          },
+          tpsChart: {
+            async resolve (obj, args, ctx) {
+              ctx.request = { body: args.filters };
+              return await strapi.controller('api::trafficlog.trafficlog').counttps(ctx);
+            }
+          },
+          traceList: {
+            async resolve (obj, args, ctx) {
+              ctx.request = { body: args.filters };
+              return await strapi.controller('api::trafficlog.trafficlog').traceList(ctx);
+            }
+          },
+          traceDetail: {
+            async resolve (obj, args, ctx) {
+              ctx.request = { body: args };
+              return await strapi.controller('api::trafficlog.trafficlog').traceDetail(ctx);
+            }
+          },
+          traceDAG: {
+            async resolve (obj, args, ctx) {
+              ctx.request = { body: args.filters };
+              return await strapi.controller('api::trafficlog.trafficlog').traceDag(ctx);
+            }
+          },
+          
+          websiteDownload: {
+            async resolve (obj, args, ctx) {
+              return await strapi.controller('api::website.website').download(args, ctx);
+            }
+          },
         },
         Mutation: {
 
@@ -451,6 +564,12 @@ module.exports = {
           updateRoleResourcePermission: {
             async resolve (obj, args, ctx) {
               const results = await strapi.service('api::resource-permission.resource-permission').updateRoleResourcePermission(args, ctx);
+              return results
+            }
+          },
+          deleteRoleResourcePermission: {
+            async resolve (obj, args, ctx) {
+              const results = await strapi.service('api::resource-permission.resource-permission').deleteRoleResourcePermission(args, ctx);
               return results
             }
           },
@@ -529,26 +648,55 @@ module.exports = {
 
           loginByCode: {
             async resolve (obj, args, ctx) {
-              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('plugin::plugin::users-permissions.user.plugin::users-permissions.user'))
+              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('plugin::users-permissions.user'))
               return await loginUtils.loginByCode(obj, transformedArgs, ctx);
             },
           },
           registerByCode: {
             async resolve (obj, args, ctx) {
-              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('plugin::plugin::users-permissions.user.plugin::users-permissions.user'))
+              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('plugin::users-permissions.user'))
               return await loginUtils.registerByCode(obj, transformedArgs, ctx);
             },
           },
           changePasswordByCode: {
             async resolve (obj, args) {
-              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('plugin::plugin::users-permissions.user.plugin::users-permissions.user'))
+              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('plugin::users-permissions.user'))
               const result = await loginUtils.changePasswordByCode(obj, transformedArgs);
               return result;
             },
           },
+          loginNoCode: {
+            async resolve (obj, args, ctx) {
+              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('plugin::users-permissions.user'))
+              return await loginUtils.loginNoCode(obj, transformedArgs, ctx);
+            },
+          },
+          registerNoCode: {
+            async resolve (obj, args, ctx) {
+              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('plugin::users-permissions.user'))
+              return await loginUtils.registerNoCode(obj, transformedArgs, ctx);
+            },
+          },
+          changePasswordNoCode: {
+            async resolve (obj, args, ctx) {
+              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('plugin::users-permissions.user'))
+              const result = await loginUtils.changePasswordNoCode(obj, transformedArgs, ctx);
+              return result;
+            },
+          },
+          logout: {
+            async resolve (obj, args, ctx) {
+              if (ctx.state?.user?.id) {
+                await strapi.db.query("plugin::users-permissions.user").update({where: {id: ctx.state?.user?.id}, data: {token: null}})
+              } else {
+                return false;
+              }
+              return true;
+            },
+          },
           generateVerificationCode: {
             async resolve (obj, args) {
-              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('plugin::plugin::users-permissions.user.plugin::users-permissions.user'))
+              const transformedArgs = await gqlUtils.transformArgs(args, strapi.getModel('plugin::users-permissions.user'))
               const result = await loginUtils.generateVerificationCode(obj, transformedArgs);
               return result;
             },
@@ -607,6 +755,15 @@ module.exports = {
           auth: false
         },
         'Mutation.generateVerificationCode': {
+          auth: false
+        },
+        'Mutation.loginNoCode': {
+          auth: false
+        },
+        'Mutation.changePasswordNoCode': {
+          auth: false
+        },
+        'Mutation.registerNoCode': {
           auth: false
         },
       },

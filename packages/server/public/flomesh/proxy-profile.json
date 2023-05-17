@@ -1,0 +1,24 @@
+{
+	"apiVersion": "flomesh.io/v1alpha1", 
+	"kind": "ProxyProfile", 
+	"metadata": {
+		"name": "pf-000"
+	}, 
+	"spec": {
+		"selector": {
+			"matchLabels": {
+				"sys": "pipy-sidecar-samples", 
+				"tag": "provider"
+			}
+		}, 
+		"namespace": "default", 
+		"env": [
+			{"name": "TEST_URL", "value": "http://localhost:8888"}, 
+			{"name": "TEST_NAME", "value": "ABC"}, 
+			{"name": "TEST_XXX", "value": "XXX"}
+		], 
+		"config": {
+			"config.tpl": "pipy()\n  .listen({{ .ProxyPort }})\n  .connect(() => '127.0.0.1:{{ .TargetPort }}')"
+		}
+	}
+}

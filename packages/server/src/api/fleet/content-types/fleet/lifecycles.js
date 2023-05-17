@@ -5,7 +5,9 @@ resourceTypes.add('sidecar');
 resourceTypes.add('upstream');
 resourceTypes.add('pipy');
 resourceTypes.add('pipy4lb');
-resourceTypes.add('checkpoint');
+resourceTypes.add('pipy4lb');
+resourceTypes.add('tunnelInternal');
+resourceTypes.add('tunnelExternal');
 
 module.exports = {
   afterCreate: async (event) => {
@@ -36,6 +38,8 @@ module.exports = {
     if (event.result.type === 'log' || event.result.type === 'clickhouse') {
       try {
         await strapi.service("api::clickhouse.clickhouse").createTable(event.result);
+        await strapi.service("api::clickhouse.clickhouse").createTable(event.result,"healthcheckLog");
+        await strapi.service("api::clickhouse.clickhouse").createTable(event.result,"bgpLog");
       } catch (error) {
         console.error(error);
       }

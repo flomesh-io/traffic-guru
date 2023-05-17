@@ -1,45 +1,23 @@
 "use strict";
 
 module.exports = {
-  afterCreate: async (result) => {
+  afterCreate: async (event) => {
+    const { result } = event;
     if (result.name === 'default') return; //  模板文件不做操作
-    const templatefiles = await strapi.db.query("api::templatefile.templatefile").findMany({
+    const template = await strapi.db.query("api::template.template").findOne({
       select: ['type', 'path', 'name', 'content'],
       where: {
-        type: result.result.type
+        type: result.type,
+        name: 'default'
       },
       populate: {
-        template: {
-          where: {
-            name: "default"
-          }
-        }
+        templatefiles: true
       }
     });
-    // const knex = strapi.db.connection;
-    //   const templates = await strapi
-    //     .query('templatefile')
-    //     .model.query((qb) =>
-    //       qb
-    //         .innerJoin('templates', `templatefiles.template`, 'templates.id')
-    //         .whereRaw(`templates.name = 'default' and templatefiles.type = ?`, [
-    //           result.type,
-    //         ])
-    //     )
-    //     .fetchAll({
-    //       columns: [
-    //         'templatefiles.type',
-    //         'templatefiles.path',
-    //         'templatefiles.name',
-    //         'templatefiles.content',
-    //       ],
-    //     });
-    //   const temp = templates.toJSON();
-    //   temp.map((item) => Object.assign(item, { template: result.id }));
-
+    const templatefiles = template.templatefiles
     const codebaseName = `/flomesh/bases/${result.type}/${result.name}`;
     templatefiles.map(
-      ({ type, path, name, content }) => ({ type, path, name, content, template: result.result.id })
+      ({ type, path, name, content }) => ({ type, path, name, content, template: result.id })
     ).forEach((file) => (
       strapi.db.query("api::templatefile.templatefile").create(
         {
@@ -52,7 +30,7 @@ module.exports = {
       Object.fromEntries(
         templatefiles.map(({ path, content }) => [path, content])
       ),
-      result.result.version
+      result.version + 1
     );
 
   },

@@ -4,6 +4,40 @@ module.exports = (config, { strapi }) => {
         await next();
         try {
             const ip = ctx.req.connection.remoteAddress;
+
+            if (ctx.request.url == "/graphql"
+            || ctx.request.url.indexOf("/api/k8s") > -1
+            || ctx.request.url.indexOf("/api/clickhouse") > -1
+            || ctx.request.url.indexOf("/api/prometheus") > -1) {
+              if (ctx.request.header["authorization"] && ctx.state?.user?.id) {
+                let json = ""
+                try {
+                  json = ctx.request.body.query.replace(/\n/, '');
+                } catch {
+                }
+
+                if (json.indexOf("logout") == -1) {
+                  const user = await strapi.db.query("plugin::users-permissions.user").findOne({where:{id:ctx.state?.user?.id}})
+                  if (!user || ctx.request.header["authorization"].indexOf(user.token) == -1) {
+                    ctx.response.status = 401
+                    ctx.response.body = {
+                      "error": {
+                        "data": null,
+                        "error": {
+                          "status": 401,
+                          "name": "UnauthorizedError",
+                          "message": "Token expired",
+                          "details": {}
+                        }
+                      }
+                    }
+                }
+                  
+                  return
+                }
+              }
+            }
+
             if (
               ctx.request.body?.query &&
               ctx.request.body?.query?.indexOf('mutation') > -1
@@ -41,13 +75,16 @@ module.exports = (config, { strapi }) => {
                 }});
               }
             } else if (ctx.request.body?.identifier) {
+
               const body = JSON.parse(ctx.response.body)
               let status = "Success"
               let user = null;
               if (body.errors) {
                 status = "Failure"
               } else {
-                user = body.data.login.user.id
+                const login = body.data.login || body.data.loginByCode || body.data.loginNoCode
+                user = login?.user?.id 
+                await strapi.db.query("plugin::users-permissions.user").update({where:{id:user}, data: {token: login?.jwt}})
               }
               await strapi.db.query('api::event.event').create({data: {
               user: user,

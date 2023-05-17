@@ -58,6 +58,12 @@
       "relation": "oneToMany",
       "target": "api::user-organization-role.user-organization-role",
       "mappedBy": "role"
+    },
+    "routerSettings": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::router-setting.router-setting",
+      "mappedBy": "role"
     }
   }
 }

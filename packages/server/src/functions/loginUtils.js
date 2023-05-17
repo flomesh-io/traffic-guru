@@ -3,6 +3,7 @@ const _ = require('lodash');
 const { getOr } = require('lodash/fp');
 const { toPlainObject } = require('lodash/fp');
 const emailUtils = require('./emailUtils.js');
+const encryptUtil = require('./encryptUtil.js');
 
 const content = `
 <div style='background-color: #f2f2f2;padding: 15px;'>
@@ -65,6 +66,7 @@ async function checkCode(identifier, verificationCode) {
 
 module.exports = {
   async loginByCode(obj, args, context) {
+    console.log(args)
     const {emailConf, code} = await checkCode(args.input.identifier, args.input.verificationCode);
 
     const { koaContext } = context;
@@ -121,6 +123,10 @@ module.exports = {
         .update({ where: { id: code.id }, data: { isUsed: true } });
     }
 
+    if (output.user.id && output.jwt) {
+      await strapi.db.query("plugin::users-permissions.user").update({where:{id:output.user.id}, data: {token: output.jwt}})
+    }
+    
     return {
       user: output.user || output,
       jwt: output.jwt,
@@ -145,6 +151,12 @@ module.exports = {
       .findOne({where: { email: args.identifier }});
     }
     const email = user ? user.email : args.identifier
+    const lastCode = await strapi.db.query('api::verification-code.verification-code').findOne({where:{email}, orderBy: {createdAt: "desc"}}) 
+    if (lastCode && !lastCode.isUsed) {
+      if ((new Date().getTime() - (29 * 1000)) < new Date(lastCode.createdAt).getTime()) {
+        throw new Error("Unable to generate verification code, please try again later")
+      }
+    }
     await emailUtils.send(email, 'Flomesh verification code', html);
     await strapi.db.query('api::verification-code.verification-code').create({
       data: {
@@ -198,6 +210,87 @@ module.exports = {
     await strapi.db
       .query('plugin::users-permissions.user')
       .update({where: { id: user.id }, data: { password: password }});
+
+    return true;
+  },
+
+  //==================
+  async loginNoCode(obj, args, context) {
+    args.input.password = encryptUtil.decrypt(args.input.password)
+    
+    const { koaContext } = context;
+
+    koaContext.params = { provider: args.input.provider };
+    koaContext.request.body = toPlainObject(args.input);
+
+    await strapi
+      .plugin('users-permissions')
+      .controller('auth')
+      .callback(koaContext);
+
+    const output = koaContext.body;
+
+    checkBadRequest(output);
+
+    return {
+      user: output.user || output,
+      jwt: output.jwt,
+    };
+  },
+
+  async registerNoCode(obj, args, context) {
+    args.input.password = encryptUtil.decrypt(args.input.password)
+
+    const { koaContext } = context;
+
+    koaContext.request.body = toPlainObject(args.input);
+
+    await strapi
+      .plugin('users-permissions')
+      .controller('auth')
+      .register(koaContext);
+
+    const output = koaContext.body;
+
+    checkBadRequest(output);
+
+    if (output.user.id && output.jwt) {
+      await strapi.db.query("plugin::users-permissions.user").update({where:{id:output.user.id}, data: {token: output.jwt}})
+    }
+
+    return {
+      user: output.user || output,
+      jwt: output.jwt,
+    };
+  },
+  async changePasswordNoCode (obj, args, context) {
+
+    args.data.newPassword = encryptUtil.decrypt(args.data.newPassword)
+    args.data.currentPassword = encryptUtil.decrypt(args.data.currentPassword)
+
+
+    const { koaContext } = context;
+
+    koaContext.params = { provider: "local" };
+    koaContext.request.body = toPlainObject({identifier: args.data.email, password: args.data.currentPassword});
+
+    try {
+      await strapi
+        .plugin('users-permissions')
+        .controller('auth')
+        .callback(koaContext);
+  
+      const output = koaContext.body;
+      checkBadRequest(output);
+
+      const password = await strapi.service(`admin::auth`).hashPassword(args.data.newPassword);
+      await strapi.db
+        .query('plugin::users-permissions.user')
+        .update({where: { id: output.user.id }, data: { password: password }});
+    } catch (e){
+      console.log(e)
+      throw new Error("The old password is incorrect")
+    }
 
     return true;
   },

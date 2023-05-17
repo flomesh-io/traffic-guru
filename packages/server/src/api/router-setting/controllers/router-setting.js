@@ -32,8 +32,15 @@ module.exports = createCoreController('api::router-setting.router-setting',{
         strapi.log.info('------> routerSetting.batch');
         const routerItems = args.data;
         if (Array.prototype.isPrototypeOf(routerItems)) {
+          let routers = null
+          if (routerItems[0].role) {
+            routers = await strapi.db.query('api::router-setting.router-setting').findMany({where:{role: routerItems[0].role}, limit: 99999})
+          } else {
+            routers = await strapi.db.query('api::router-setting.router-setting').findMany({where:{role: {id: {$null: true}}}, limit: 99999})
+          }
+          const where = {id: routers.map((r) => r.id)}
           // Delete all the old menu data first
-          await strapi.db.query('api::router-setting.router-setting').deleteMany({});
+          await strapi.db.query('api::router-setting.router-setting').deleteMany({where});
           // Insert new menu data
           await createFullRouterSettings(routerItems);
           return { msg: 'ok' };

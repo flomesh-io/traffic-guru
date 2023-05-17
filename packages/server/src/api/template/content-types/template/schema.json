@@ -29,7 +29,10 @@
         "checkpoint",
         "pipy",
         "pipy4lb",
-        "pipy4lbbgp"
+        "pipy4lbbgp",
+        "tunnelInternal",
+        "tunnelExternal",
+        "tunnelbgp"
       ]
     },
     "version": {
