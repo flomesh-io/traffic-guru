@@ -3,19 +3,12 @@
     :title="$t('log')"
     :hide-head="true"
   >
-    <a-result
+    <EmptyResult
       v-if="!loading && data.length == 0"
       class="mt-100"
       :title="$t('Global search')"
       :sub-title="$t('No matching data found')"
-    >
-      <template #icon>
-        <img
-          src="../../assets/img/empty.svg"
-          style="width: 300px"
-        >
-      </template>
-    </a-result>
+    />
     <a-card
       class="nopd search-content transparent"
       :bordered="false"
@@ -126,6 +119,7 @@ import {
 import { mapState } from "vuex";
 import CardList from "@/components/card/CardList";
 import PageLayout from "@/layouts/PageLayout";
+import EmptyResult from "@/components/tag/EmptyResult";
 export default {
   name: "UniSearch",
   i18n: require("@/i18n"),
@@ -140,6 +134,7 @@ export default {
     SearchOutlined,
     CardList,
     JsonEditor,
+    EmptyResult,
   },
 
   props: ["keyword"],

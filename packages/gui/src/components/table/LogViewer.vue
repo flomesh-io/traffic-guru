@@ -278,27 +278,15 @@
 import MiniBar from "@/components/chart/MiniBar";
 import MiniArea from "@/components/chart/MiniArea";
 import MiniSector from "@/components/chart/MiniSector";
-import { spread } from "@/utils/request";
+import { timelineMap, getTimelineDate } from "@/utils/timeline";
+
 import {
-  getTPSByWhere,
-  getLatencyByWhere,
-  getLoadStatusByWhere,
-  coverArray,
-} from "@/services/clickhouse";
-import {
-  select_keys,
-  getPagingData,
+  getLogList,
+  getTPS,
+  getLatency,
+  getLoadStatus,
   coverMessage,
-  coverList,
-} from "@/services/clickhouse";
-const WHERE_DATA = {
-  " ": select_keys,
-  AND: select_keys,
-  OR: select_keys,
-  and: select_keys,
-  or: select_keys,
-  "=": ["http", "tcp", "GET", "POST", "PUT", "DELETE"],
-};
+} from "@/services/clickhouseGQL";
 import JsonEditor from "@/components/editor/JsonEditor";
 import {
   FieldTimeOutlined,
@@ -306,7 +294,6 @@ import {
 } from "@ant-design/icons-vue";
 import { mapState } from "vuex";
 import { format } from "date-fns";
-import { getServiceWhere } from "@/services/clickhouse";
 export default {
   name: "LogViewer",
   i18n: require("@/i18n"),
@@ -339,28 +326,13 @@ export default {
       selectedVal:null,
       pipys: [],
       dateVal: [60, 100],
-      sqlDateMap: {
-        0: "1 month",
-        10: "15 day",
-        20: "7 day",
-        30: "3 day",
-        40: "1 day",
-        50: "12 hour",
-        60: "6 hour",
-        70: "1 hour",
-        80: "30 minute",
-        90: "5 minute",
-        100: "1 second",
-      },
-
+      sqlDateMap: timelineMap,
       marks: {},
       name: "",
       date: "",
       log: "{}",
       arrow: "desc",
       visible: false,
-      select_keys,
-      WHERE_DATA,
       endDate: "",
       sortBy: "timestamp",
       prefix: " ",
@@ -377,7 +349,7 @@ export default {
       },
 
       data: [],
-      key: [],
+      key: "",
     };
   },
 
@@ -440,48 +412,6 @@ export default {
       this.getData();
     },
 
-    getWhere() {
-      let filters = [];
-      if (this.uid) {
-        switch (this.type) {
-        case "4lb":
-          filters.push(`x_parameters.a4lbid ='${this.uid}'`);
-          break;
-        case "7lb":
-          filters.push(`x_parameters.7lbid ='${this.uid}'`);
-          break;
-        case "api":
-          filters.push(`x_parameters.aid ='${this.uid}'`);
-          break;
-        case "mesh":
-          filters.push(`meshName ='${this.params.name}'`);
-          break;
-        case "service":
-          filters.push(
-            getServiceWhere(
-              null,
-              this.params.name,
-              this.params.namespace,
-              this.params.domain,
-            ),
-          );
-          break;
-        case "app":
-          filters.push(`x_parameters.appid ='${this.uid}'`);
-          break;
-        default:
-          break;
-        }
-      }
-      if (this.pipy) {
-        filters.push(`x_parameters.igid = '${this.pipy.id}'`);
-      }
-      if (this.key) {
-        filters.push(`message like '%${this.key}%'`);
-      }
-      return filters.join(" AND ");
-    },
-
     getData(pageNo) {
       if (pageNo) {
         this.pagging.pageNo = pageNo;
@@ -489,29 +419,26 @@ export default {
       }
       this.loading = true;
       this.data = [];
-      this.filter = this.getWhere();
-      getPagingData(
-        this.pagging.pageNo,
-        this.pageSize || 10,
-        this.filter,
-        this.sortBy,
-        this.arrow,
-        null,
-        null,
-        this.sqlDateMap[this.dateVal[0]],
-        this.sqlDateMap[this.dateVal[1]],
-        this.type,
-        this.uid,
-      )
-        .then(
-          spread((cnt, res) => {
-            this.loading = false;
-            this.pagging.total = cnt.data * 1;
-            this.data = coverList(res);
-            this.logLevelVal = this.logLevel;
-            this.selectedVal = this.selected;
-          }),
-        )
+      const filter = {
+        params: this.params,
+        pipy: this.pipy,
+        pageNo: this.pagging.pageNo,
+        pageSize: this.pageSize || 10,
+        sortBy: this.sortBy,
+        arrow: this.arrow,
+        date: getTimelineDate(this.sqlDateMap[this.dateVal[0]]),
+        endDate: getTimelineDate(this.sqlDateMap[this.dateVal[1]]),
+        type: this.type,
+        key: this.key,
+        uid: this.uid,
+      };
+      getLogList(filter).then((res) => {
+        this.loading = false;
+        this.pagging.total = res.total;
+        this.data = res.data;
+        this.logLevelVal = this.logLevel;
+        this.selectedVal = this.selected;
+      })
         .catch((err) => {
           console.log(err);
         });
@@ -520,26 +447,13 @@ export default {
         this.pipys = res.data;
       });
       if (!this.hideChart) {
-        getLatencyByWhere(
-          this.pagging.pageNo,
-          this.pageSize || 10,
-          this.filter,
-          this.sortBy,
-          this.arrow,
-          null,
-          null,
-          this.sqlDateMap[this.dateVal[0]],
-          this.sqlDateMap[this.dateVal[1]],
-          this.type,
-          this.uid,
-        ).then((res) => {
-          let ary = coverArray(res);
+        getLatency(filter).then((res) => {
           this.latency = [];
-          ary.forEach((item) => {
+          res.data.forEach((item) => {
             let _template = {};
             _template.type = this.type;
-            _template.value = item[1];
-            _template.date = item[0] * 500 + "ms";
+            _template.value = item.count;
+            _template.date = item.latency * 500 + "ms";
 
             this.latency.push(_template);
           });
@@ -552,60 +466,31 @@ export default {
           "#fb9690",
           "#fb9690",
         ];
-        getLoadStatusByWhere(
-          this.pagging.pageNo,
-          this.pageSize || 10,
-          this.filter,
-          this.sortBy,
-          this.arrow,
-          null,
-          null,
-          this.sqlDateMap[this.dateVal[0]],
-          this.sqlDateMap[this.dateVal[1]],
-          this.type,
-          this.uid,
-        ).then((res) => {
-          let ary = coverArray(res);
+        getLoadStatus(filter).then((res) => {
           this.status = [];
-          ary.forEach((item) => {
+          res.data.forEach((item) => {
             let _template = {};
             _template.type = this.type;
-            _template.value = item[0];
-            _template.name = item[1];
+            _template.value = item.count;
+            _template.name = item.status;
             this.status.push(_template);
-            this.statusColors.push(colors[(item[1] + "").substr(0, 1) * 1]);
+            this.statusColors.push(colors[(item.status + "").substr(0, 1) * 1]);
           });
         });
-        getTPSByWhere(
-          this.pagging.pageNo,
-          this.pageSize || 10,
-          this.filter,
-          this.sortBy,
-          this.arrow,
-          null,
-          null,
-          this.sqlDateMap[this.dateVal[0]],
-          this.sqlDateMap[this.dateVal[1]],
-          this.type,
-          this.uid,
-        )
-          .then(
-            spread((res, cnt) => {
-              let ary = coverArray(res);
-              this.tpsCnt = cnt.data;
-              this.tps = [];
-              ary.forEach((item) => {
-                let _template = {};
-                _template.type = this.type;
-                _template.value = item[0];
-                _template.date = format(
-                  new Date(item[1]),
-                  "yyyy-MM-dd HH:mm",
-                );
-                this.tps.push(_template);
-              });
-            }),
-          )
+        getTPS(filter)
+          .then((res) => {
+            this.tps = [];
+            res.data.forEach((item) => {
+              let _template = {};
+              _template.type = this.type;
+              _template.value = item.count;
+              _template.date = format(
+                new Date(item.minute),
+                "yyyy-MM-dd HH:mm",
+              );
+              this.tps.push(_template);
+            });
+          })
           .catch((err) => {
             console.log(err);
           });

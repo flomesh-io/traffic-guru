@@ -26,7 +26,6 @@ const workload = {
       name: "Workload Dashboard",
       meta: {
         icon: DashboardOutlined,
-        authority: "dashboard:find",
       },
       component: () => import("@/pages/workload/Dashboard"),
     },

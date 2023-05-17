@@ -5,6 +5,7 @@ import deepMerge from "deepmerge";
 import basicOptions from "@/router/async/config.async";
 import { query } from "@/services/graphql";
 import _ from "lodash";
+import store from "@/store";
 
 let appOptions = {
   router: undefined,
@@ -176,6 +177,12 @@ async function resetRoutes(newRoutes, router, store, i18n) {
 }
 
 async function formatRoutes(routes) {
+	
+	const roleInfo = store.getters["account/roles"];
+	let roleId = null;
+	if(roleInfo && roleInfo.id && roleInfo.type != 'authenticated'){
+		roleId = roleInfo.id
+	}
   routes.forEach((route) => {
     const { path } = route;
     if (!path.startsWith("/") && path !== "*") {
@@ -184,7 +191,7 @@ async function formatRoutes(routes) {
   });
 
   // store.commit('setting/setAsyncMenuData', strapiRoutes);
-  let strapiRoutes = await getStrapiRoutes();
+  let strapiRoutes = await getStrapiRoutes(roleId);
   formatAuthority(routes, [], strapiRoutes);
   reBuildRoutes({}, routes, 0);
   reSortRoutes(routes, 0);
@@ -268,11 +275,17 @@ function filterDisabled(routes, strapiRoutes) {
   });
 }
 
-async function getStrapiRoutes() {
+async function getStrapiRoutes(roleId) {
   // get strapi async routes
   let strapiRoutes = [];
+	let filters = {};
+	if(roleId){
+		filters.id = { eq: roleId }
+	} else {
+    filters.role = {id: { null: true }}
+  }
   await query(
-    `routerSettings(sort: "sort:asc", pagination: {limit: 9999 }){data{id,attributes{
+    `routerSettings(filters: $filters, sort: "sort:asc", pagination: {limit: 9999 }){data{id,attributes{
 			name,
 			displayName,
 			path,
@@ -283,7 +296,7 @@ async function getStrapiRoutes() {
 			sort,
 			level,
 			parent{data{id,attributes{name,displayName,path,fullPath,disabled,authority,invisible,sort,level}}},
-		}}}`
+		}}}`,{filters},{filters:"RouterSettingFiltersInput"}
   ).then((res) => {
     strapiRoutes = res.data || [];
   });

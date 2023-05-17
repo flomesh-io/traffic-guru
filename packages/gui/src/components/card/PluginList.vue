@@ -258,6 +258,7 @@
             :span="3"
           >
             <a-upload
+              accept="image/png, image/jpeg, .svg"
               v-model:file-list="fileList"
               :headers="upHeaders"
               name="files"
@@ -474,7 +475,7 @@ import { mapState } from "vuex";
 import CardList from "@/components/card/CardList";
 import PageLayout from "@/layouts/PageLayout";
 import { Empty } from "ant-design-vue";
-import { UPLOAD, BASE_URL, DEFAULT_BASE_URL } from "@/services/api";
+import { UPLOAD, DEFAULT_BASE_URL } from "@/services/api";
 import { getHeaders } from "@/utils/request";
 import FormItem from "@/components/tool/FormItem";
 
@@ -496,7 +497,6 @@ export default {
   data() {
     return {
       UPLOAD,
-      BASE_URL,
       DEFAULT_BASE_URL,
       fileList: [],
       upLoading: false,

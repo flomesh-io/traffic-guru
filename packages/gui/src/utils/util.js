@@ -1,6 +1,5 @@
 import enquireJs from "enquire.js";
 import _ from "lodash";
-import moment from "moment";
 
 export function isPro() {
   return process.env.VUE_APP_VERSION == "pro";
@@ -22,6 +21,29 @@ export function isDef(v) {
   return v !== undefined && v !== null;
 }
 
+export function mergeFields(init, target) {
+	let _target = target || [];
+	init.forEach((sec)=>{
+		let _idx = _target.findIndex((item)=>(item.label==sec.label || (!!item.name && item.name==sec.name)));
+		if(_idx==-1){
+			_target.push(sec);
+		} else {
+			if(sec.fields){
+				_target[_idx].fields = mergeFields(sec.fields, _target[_idx].fields);
+			} else if(sec.type != _target[_idx].type) {
+				_target[_idx] = sec;
+			}
+		}
+	});
+	
+	_target.forEach((sec,index)=>{
+		let _idx = init.findIndex((item)=>(item.label==sec.label || (!!item.name && item.name==sec.name)));
+		if(_idx==-1){
+			_target.splice(index,1);
+		}
+	});
+	return _target;
+}
 /**
  * Remove an item from an array.
  */
@@ -258,7 +280,7 @@ export function buildAddressItem(d, type) {
 			ip: `${d.a}.${d.b}.${d.c}.${d.d}-${d.a}.${d.b}.${d.c}.${d.suffix}`,
 		};
 	} else if (type == 3) {
-    if (!d.a || !d.b || !d.c || !d.d || !d.suffix) {
+    if (d.a === null || d.b === null || d.c === null || d.d === null || d.suffix === null) {
       item = { type: type, ip: `0.0.0.0/0` };
     } else {
       item = { type: type, ip: `${d.a}.${d.b}.${d.c}.${d.d}/${d.suffix}` };
@@ -503,93 +525,6 @@ export const defaultPolicySetting = [
   },
 ];
 
-export function getTimeLabel(val, date) {
-  let _d = moment(new Date(val * 1));
-  switch (date) {
-    case "1 second":
-    case "5 minute":
-      return _d.format("HH:mm:ss");
-    case "30 minute":
-    case "1 hour":
-      return _d.format("HH:mm");
-    case "6 hour":
-    case "12 hour":
-    case "1 day":
-      return _d.format("MM-DD HH:mm");
-    case "3 day":
-    case "7 day":
-    case "15 day":
-    case "1 month":
-      return _d.format("MM-DD");
-    default:
-      return _d.format("MM-DD HH:mm");
-  }
-}
-
-export function getTimeline(date) {
-  switch (date) {
-    case "1 second":
-    case "5 minute":
-      return "toStartOfInterval(toDateTime(resTime/1000),interval 1 second)";
-    case "30 minute":
-    case "1 hour":
-      return "toStartOfInterval(toDateTime(resTime/1000),interval 1 minute)";
-    case "6 hour":
-    case "12 hour":
-    case "1 day":
-      return "toStartOfInterval(toDateTime(resTime/1000),interval 1 hour)";
-    case "3 day":
-    case "7 day":
-    case "15 day":
-    case "1 month":
-      return "toStartOfInterval(toDateTime(resTime/1000),interval 1 day)";
-    default:
-      return "toStartOfInterval(toDateTime(resTime/1000),interval 1 second)";
-  }
-}
-
-export function getTimeUnit(date) {
-  switch (date) {
-    case "1 second":
-    case "5 minute":
-      return "sec";
-    case "30 minute":
-    case "1 hour":
-      return "min";
-    case "6 hour":
-    case "12 hour":
-    case "1 day":
-      return "hour";
-    case "3 day":
-    case "7 day":
-    case "15 day":
-    case "1 month":
-      return "day";
-    default:
-      return "sec";
-  }
-}
-
-export function getSteamTimeline(date) {
-  switch (date) {
-    case "1 second":
-    case "5 minute":
-    case "30 minute":
-    case "1 hour":
-      return "toStartOfInterval(toDateTime(resTime/1000),interval 1 second)";
-    case "6 hour":
-    case "12 hour":
-    case "1 day":
-      return "toStartOfInterval(toDateTime(resTime/1000),interval 1 minute)";
-    case "3 day":
-    case "7 day":
-    case "15 day":
-    case "1 month":
-      return "toStartOfInterval(toDateTime(resTime/1000),interval 1 hour)";
-    default:
-      return "toStartOfInterval(toDateTime(resTime/1000),interval 1 second)";
-  }
-}
 
 export function clickhouseResult2Array(data) {
   let result = [];

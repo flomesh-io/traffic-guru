@@ -100,7 +100,7 @@ export default {
   computed: {
     ...mapState("rules", ["rules"]),
     schemaName() {
-      let name = "Select register";
+      let name = this.$t("select")+' ' + this.$t("Registry");
       this.k8soptions.forEach((option) => {
         if (
           option.id == this.k8svalue[0] ||

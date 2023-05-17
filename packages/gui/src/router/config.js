@@ -6,6 +6,7 @@ import system from "./modules/system";
 import workload from "./modules/workload";
 import usercenter from "./modules/usercenter";
 import opscenter from "./modules/opscenter";
+import web from "./modules/web";
 import routersetting from "./modules/routersetting";
 
 const options = {
@@ -36,6 +37,7 @@ const options = {
         { ...workload },
         { ...opscenter },
         { ...usercenter },
+				{ ...web },
         { ...system },
         { ...routersetting },
       ],

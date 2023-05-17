@@ -20,7 +20,6 @@ const opscenter = {
       path: "registry/list",
       name: "Registry",
       meta: {
-        authority: "registry:find",
         svg: RegistrySvg,
       },
       component: () => import("@/pages/opscenter/RegistryList"),
@@ -29,7 +28,6 @@ const opscenter = {
       path: "registry/create",
       name: "Registry Create",
       meta: {
-        authority: "registry:find",
         invisible: true,
       },
       component: () => import("@/pages/opscenter/RegistryDetail"),
@@ -38,7 +36,6 @@ const opscenter = {
       path: "registry/detail/:id",
       name: "Registry Detail",
       meta: {
-        authority: "registry:find",
         invisible: true,
       },
       component: () => import("@/pages/opscenter/RegistryDetail"),
@@ -47,7 +44,6 @@ const opscenter = {
       path: "certificates",
       name: "Certificates",
       meta: {
-        authority: "certificate:find",
         icon: FileProtectOutlined,
       },
       component: () => import("@/pages/opscenter/Certificates"),
@@ -56,7 +52,6 @@ const opscenter = {
 			path: "components",
 			name: "Components",
 			meta: {
-				authority: "fleet:find",
 				icon: BuildOutlined,
 			},
 			component: () => import("@/pages/opscenter/Components"),

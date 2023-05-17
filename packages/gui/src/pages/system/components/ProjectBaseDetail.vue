@@ -69,8 +69,9 @@
                 ? 'project:update:organization:' + detail.organization
                 : 'project:update',
             ]"
+            v-if="pid != ''"
           >
-            {{ $t("Add members") }}
+            {{ $t("Add User") }}
           </a-button>
         </CardSelector>
         <a-button
@@ -515,14 +516,6 @@ export default {
           this.$message.success(this.$t("Deleted successfully"), 3);
           this.loaddata();
         });
-    },
-		
-    getTimeLabel(date) {
-      return (
-        new Date(date[0]).toLocaleDateString() +
-        "~" +
-        new Date(date[1]).toLocaleDateString()
-      );
     },
 
     search(pageNo, pageSize) {

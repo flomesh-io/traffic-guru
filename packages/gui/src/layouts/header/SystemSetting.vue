@@ -90,7 +90,7 @@ export default {
     },
 
     roles() {
-      this.$router.push("/system/roles");
+      this.$router.push("/system/roles/list");
     },
 
     users() {

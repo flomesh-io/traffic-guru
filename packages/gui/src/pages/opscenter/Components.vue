@@ -93,13 +93,6 @@
                   icon: 'MedicineBoxOutlined',
                   text: $t('Healthcheck'),
                   call: preview,
-                },
-                {
-                  icon: 'ExportOutlined',
-                  hide: true,
-                  text: $t('Force Push'),
-                  call: forcepush,
-                  permission: ['fleet:update'],
                 },*/
                 {
                   icon: 'CloseOutlined',
@@ -153,12 +146,12 @@
                 <div class="mb-3">
                   <a-badge
                     status="processing"
-                    v-if="item.status == 'running' && (item.type?.toLowerCase() == 'pipy' || item.type?.toLowerCase() == 'clickhouse')"
+                    v-if="item.status == 'running' && (item.type?.toLowerCase() == 'clickhouse')"
                   />
                   <a-badge
                     status="processing"
                     color="red"
-                    v-if="item.status != 'running' && (item.type?.toLowerCase() == 'pipy' || item.type?.toLowerCase() == 'clickhouse')"
+                    v-if="item.status != 'running' && (item.type?.toLowerCase() == 'clickhouse')"
                   />{{
                     item.name
                   }}
@@ -253,82 +246,6 @@
             </a-select>
           </a-descriptions-item>
           <a-descriptions-item
-            v-if="payload.type.toLowerCase() == 'pipy4lb'"
-            :label="$t('Organization')"
-            :span="3"
-          >
-            <a-select
-              :placeholder="$t('unset')"
-              mode="multiple"
-              v-model:value="payload.organizations"
-              class="width-300"
-              ref="select"
-            >
-              <a-select-option
-                :value="org.id"
-                :key="index"
-                v-for="(org, index) in orgs"
-              >
-                {{
-                  org.name
-                }}
-              </a-select-option>
-            </a-select>
-          </a-descriptions-item>
-          <a-descriptions-item
-            v-if="
-              payload.type.toLowerCase() == 'pipy' &&
-                payload.json &&
-                payload.json.port != null
-            "
-            :label="$t('Port')"
-            :span="3"
-          >
-            <div class="flex-item">
-              <label>{{ $t("Http") }} : </label>
-              <a-input
-                :placeholder="$t('unset')"
-                v-model:value="payload.json.port"
-                class="width-100"
-              />
-            </div>
-            <div class="flex-item">
-              <label>{{ $t("Https") }} : </label>
-              <a-input
-                :placeholder="$t('unset')"
-                v-model:value="payload.json.tlsport"
-                class="width-100"
-              />
-            </div>
-          </a-descriptions-item>
-          <a-descriptions-item
-            v-if="
-              false &&
-                payload.type.toLowerCase() == 'sidecar' &&
-                payload.json &&
-                payload.json.consul != null
-            "
-            :label="$t('Listen')"
-            :span="3"
-          >
-            <div class="flex">
-              <div class="flex-item">
-                <label>{{ $t("Target") }} : </label>
-                <a-input-number
-                  v-model:value="payload.json.consul.target"
-                  :min="0"
-                />
-              </div>
-              <div class="flex-item">
-                <label>{{ $t("Listen") }} : </label>
-                <a-input-number
-                  v-model:value="payload.json.consul.listen"
-                  :min="0"
-                />
-              </div>
-            </div>
-          </a-descriptions-item>
-          <a-descriptions-item
             :label="$t('Template')"
             :span="3"
             v-if="payload.type.toLowerCase() == 'checkpoint'"
@@ -363,13 +280,7 @@
             :span="3"
           >
             <Json2YamlCard
-              v-if="
-                payload.type.toLowerCase() != 'log' &&
-                  payload.type.toLowerCase() != 'host' &&
-                  payload.type.toLowerCase() != 'pipy' &&
-                  payload.type.toLowerCase() != 'pipy4lb' &&
-                  payload.type.toLowerCase() != 'sidecar'
-              "
+              v-if="payload.type.toLowerCase() != 'log' && payload.type.toLowerCase() != 'host'"
               class="card nopd"
               :is-create="editorIsCreate"
               v-model:jsonVal="payload.content"
@@ -471,269 +382,12 @@
                 </div>
               </div>
             </div>
-            <div
-              v-else-if="
-                (payload.type.toLowerCase() == 'pipy' ||
-                  payload.type.toLowerCase() == 'pipy4lb' ||
-                  payload.type.toLowerCase() == 'sidecar') &&
-                  payload.json
-              "
-            >
-              <div class="flex">
-                <div class="flex-item">
-                  <div class="mt-10">
-                    <label>{{ $t("Log") }} : </label>
-                    <a-select
-                      :placeholder="$t('unallocated')"
-                      class="width-220"
-                      v-model:value="payload.json.log.bind.id"
-                    >
-                      <a-select-option
-                        v-for="(item, index) in logs"
-                        :key="index"
-                        :value="item.id"
-                      >
-                        <b v-if="item.id">{{ item.name }}</b>
-                        <i
-                          v-if="!item.id"
-                          class="gray"
-                        >{{ item.name }} </i>
-                        <div>
-                          <div
-                            v-for="(key, index2) in Object.keys(
-                              item.content || [],
-                            )"
-                            v-show="key != 'bind' && item.content[key]"
-                            :key="index2"
-                          >
-                            {{ key }}:{{ item.content[key] }}
-                          </div>
-                        </div>
-                      </a-select-option>
-                    </a-select>
-                  </div>
-                  <div
-                    class="mt-10"
-                    v-if="payload.type.toLowerCase() == 'pipy'"
-                  >
-                    <label>{{ $t("Connect Timeout") }} : </label>
-                    <a-input
-                      :placeholder="$t('unset')"
-                      v-model:value="payload.json.connectTimeout"
-                      class="width-120"
-                    />
-                  </div>
-                  <div
-                    class="mt-10"
-                    v-if="payload.type.toLowerCase() == 'pipy'"
-                  >
-                    <label>{{ $t("Write Timeout") }} : </label>
-                    <a-input
-                      :placeholder="$t('unset')"
-                      v-model:value="payload.json.writeTimeout"
-                      class="width-120"
-                    />
-                  </div>
-                  <div
-                    class="mt-10"
-                    v-if="payload.type.toLowerCase() == 'sidecar'"
-                  >
-                    <label>{{ $t("Service Port Offset") }} : </label>
-                    <a-input-number
-                      :placeholder="$t('unset')"
-                      v-model:value="payload.json.offset"
-                      class="width-100"
-                    />
-                  </div>
-                  <div
-                    class="mt-10"
-                    v-if="payload.type.toLowerCase() == 'pipy4lb'"
-                  >
-                    <label>{{ $t("Global Max Connections") }} : </label>
-                    <a-input
-                      :placeholder="$t('unset')"
-                      v-model:value="payload.json.maxConnectionsGlobal"
-                      class="width-120"
-                    />
-                  </div>
-                  <div
-                    class="mt-10"
-                    v-if="payload.type.toLowerCase() == 'pipy4lb'"
-                  >
-                    <label>{{ $t("Default Read Timeout") }} : </label>
-                    <a-input
-                      :placeholder="$t('unset')"
-                      v-model:value="payload.json.readTimeout"
-                      class="width-120"
-                    />
-                  </div>
-                  <div
-                    class="mt-10"
-                    v-if="payload.type.toLowerCase() == 'pipy4lb'"
-                  >
-                    <label>{{ $t("Default IDLE Timeout") }} : </label>
-                    <a-input
-                      :placeholder="$t('unset')"
-                      v-model:value="payload.json.idleTimeout"
-                      class="width-120"
-                    />
-                  </div>
-                  <div
-                    class="mt-10"
-                    v-if="payload.type.toLowerCase() == 'pipy4lb'"
-                  >
-                    <label>{{ $t("Global Id Prefix") }} : </label>
-                    <a-input
-                      :placeholder="$t('unset')"
-                      v-model:value="payload.json.idPrefix"
-                      class="width-120"
-                    />
-                  </div>
-                </div>
-                <div class="flex-item">
-                  <div class="mt-10">
-                    <label>{{ $t("Template") }} : </label>
-                    <a-select
-                      :disabled="isEdit"
-                      :placeholder="$t('unallocated')"
-                      class="width-220"
-                      v-model:value="payload.template"
-                    >
-                      <a-select-option
-                        v-for="(item, index) in templates[
-                          payload.type.toLowerCase()
-                        ]"
-                        :value="item.id"
-                        :key="index"
-                      >
-                        <span>{{ item.name }}</span>
-                      </a-select-option>
-                    </a-select>
-                  </div>
-                  <div
-                    class="mt-10"
-                    v-if="payload.type.toLowerCase() == 'pipy'"
-                  >
-                    <label>{{ $t("Read Timeout") }} : </label>
-                    <a-input
-                      :placeholder="$t('unset')"
-                      v-model:value="payload.json.readTimeout"
-                      class="width-120"
-                    />
-                  </div>
-                  <div
-                    class="mt-10"
-                    v-if="payload.type.toLowerCase() == 'pipy4lb'"
-                  >
-                    <label>{{ $t("Default Max Connections") }} : </label>
-                    <a-input
-                      :placeholder="$t('unset')"
-                      v-model:value="payload.json.maxConnections"
-                      class="width-120"
-                    />
-                  </div>
-                  <div
-                    class="mt-10"
-                    v-if="payload.type.toLowerCase() == 'pipy4lb'"
-                  >
-                    <label>{{ $t("Default Write Timeout") }} : </label>
-                    <a-input
-                      :placeholder="$t('unset')"
-                      v-model:value="payload.json.writeTimeout"
-                      class="width-120"
-                    />
-                  </div>
-                  <div
-                    class="mt-10"
-                    v-if="payload.type.toLowerCase() == 'pipy4lb'"
-                  >
-                    <label>{{ $t("Max LBs") }} : </label>
-                    <a-input
-                      :placeholder="$t('unset')"
-                      v-model:value="payload.json.maxLBs"
-                      class="width-120"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
           </a-descriptions-item>
 
-          <a-descriptions-item
-            :label="$t('healthcheck')"
-            :span="3"
-            v-if="payload.type.toLowerCase() == 'pipy4lb' && payload.json.healthcheck"
-          >
-            <div class="flex">
-              <div
-                class="flex-item"
-                v-if="payload.json.healthcheck.host"
-              >
-                <div>
-                  <label>{{ $t("Host") }} : </label>
-                  <a-input
-                    :placeholder="$t('unset')"
-                    v-model:value="payload.json.healthcheck.host"
-                    class="width-220"
-                  />
-                </div>
-              </div>
-              <div
-                class="flex-item"
-                v-if="payload.json.healthcheck.port"
-              >
-                <div>
-                  <label>{{ $t("Port") }} : </label>
-                  <a-input-number
-                    :placeholder="$t('unset')"
-                    v-model:value="payload.json.healthcheck.port"
-                    :min="0"
-                  />
-                </div>
-              </div>
-            </div>
-            <div class="flex">
-              <div
-                class="flex-item"
-                v-if="payload.json.healthcheck.interval"
-              >
-                <div>
-                  <label>{{ $t("Interval") }} : </label>
-                  <a-input
-                    :placeholder="$t('unset')"
-                    v-model:value="payload.json.healthcheck.interval"
-                    class="width-120"
-                  />
-                </div>
-              </div>
-              <div
-                class="flex-item"
-                v-if="payload.json.healthcheck.failures"
-              >
-                <div>
-                  <label>{{ $t("Failures") }} : </label>
-                  <a-input-number
-                    :placeholder="$t('unset')"
-                    v-model:value="payload.json.healthcheck.failures"
-                    :min="0"
-                  />
-                </div>
-              </div>
-            </div>
-          </a-descriptions-item>
-
-          <a-descriptions-item
-            :label="'BGP Speaker ' + $t('config')"
-            :span="3"
-            v-if="payload.type.toLowerCase() == 'pipy4lb'"
-          >
-            <JsonEditor v-model:value="payload.json.bgp" />
-          </a-descriptions-item>
           <a-descriptions-item
             :label="$t('Certificates')"
             v-if="
-              (payload.type.toLowerCase() == 'pipy' ||
-                payload.type.toLowerCase() == 'host') &&
+              (payload.type.toLowerCase() == 'host') &&
                 payload.json
             "
             :span="3"
@@ -755,7 +409,6 @@
 <script>
 import _ from "lodash";
 import Json2YamlCard from "@/components/card/Json2YamlCard";
-import JsonEditor from "@/components/editor/JsonEditor";
 import Status from "@/components/tag/Status";
 import { 
   InfoCircleOutlined, 
@@ -787,7 +440,6 @@ export default {
     MiniArea,
     IdentityList,
     FormItem,
-    JsonEditor,
     CaretRightOutlined,
   },
 
@@ -812,7 +464,6 @@ export default {
         json: {},
       },
 
-      orgs:[],
       editorIsCreate: true,
       workload: [],
       projects: [],
@@ -843,11 +494,8 @@ export default {
     if (this.$isPro) {
       this.icons = {
         log: "icon-log",
-        pipy: "icon-pipy",
-        pipy4lb: "icon-pipy",
         clickhouse: "icon-clickhouse",
         mysql: "icon-mysql",
-        sidecar: "icon-car",
         checkpoint: "icon-checkpoint",
         prometheus: "icon-prometheus",
         postgresql: "icon-PostgreSQL",
@@ -870,65 +518,6 @@ export default {
 
           table: "",
           input: "",
-        },
-
-        pipy: {
-          log: {
-            bind: {
-              id: null,
-            },
-          },
-
-          port: 80,
-          tlsport: 443,
-          tls: [],
-          maxConnections: null,
-          readTimeout: null,
-          writeTimeout: null
-        },
-
-        pipy4lb: {
-          log: {
-            type: "clickhouse",
-            bind: {
-              id: null,
-            },
-
-            table: "",
-          },
-
-          tls: [],
-          healthcheck: {
-            host: "localhost",
-            port: 8888,
-            failures: 3,
-            interval: "5s"
-          },
-
-          maxConnections: "1000",
-          readTimeout: "5s",
-          writeTimeout: "5s",
-          idleTimeout: "60s",
-          maxLBs: 20,
-          maxConnectionsGlobal: "3000",
-          idPrefix: "",
-          bgp: '{\n  \"as\": 0,\n  \"id\": \"0.0.0.0\",\n  \"peers\": [],\n  \"ipv4\": {\n    \"nextHop\": \"0.0.0.0\",\n    \"reachable\": [],\n    \"unreachable\": []\n  },\n  \"ipv6\": {\n    \"nextHop\": \"::\",\n    \"reachable\": [],\n    \"unreachable\": []\n  }\n}',
-        },
-
-        sidecar: {
-          log: {
-            type: "clickhouse",
-            bind: {
-              id: null,
-            },
-
-            table: "",
-          },
-
-          consul: {
-            listen: "",
-            target: "",
-          },
         },
 
         postgresql: {
@@ -1003,7 +592,6 @@ export default {
     } else {
       this.icons = {
         log: "icon-log",
-        //pipy: 'icon-pipy',
         prometheus: "icon-prometheus",
         clickhouse: "icon-clickhouse",
         webConsole: "icon-fenxi",
@@ -1017,18 +605,6 @@ export default {
 
           table: "",
           input: "",
-        },
-
-        pipy: {
-          log: {
-            bind: {
-              id: null,
-            },
-          },
-
-          port: 80,
-          tlsport: 443,
-          tls: [],
         },
 
         clickhouse: {
@@ -1096,19 +672,7 @@ export default {
     },
 
     validLogic() {
-      if (
-        this.payload.type.toLowerCase() == "pipy" ||
-        this.payload.type.toLowerCase() == "pipy4lb" ||
-        this.payload.type.toLowerCase() == "sidecar"
-      ) {
-        if (
-          !this.payload.json.log.bind.id ||
-          !this.payload.template
-        ) {
-          this.$message.error(this.$t("Please set all config"), 3);
-          return false;
-        }
-      } else if (this.payload.type.toLowerCase() == "checkpoint") {
+      if (this.payload.type.toLowerCase() == "checkpoint") {
         if (!this.payload.template) {
           this.$message.error(this.$t("Please set template"), 3);
           return false;
@@ -1144,12 +708,7 @@ export default {
 
       let savedata = _.cloneDeep(this.payload);
       let content = null;
-      if (
-        savedata.type.toLowerCase() == "pipy" ||
-        savedata.type.toLowerCase() == "pipy4lb" ||
-        savedata.type.toLowerCase() == "sidecar" ||
-        savedata.type.toLowerCase() == "log"
-      ) {
+      if (savedata.type.toLowerCase() == "log") {
         content = _.cloneDeep(savedata.json);
       } else {
         content = JSON.parse(savedata.content);
@@ -1211,12 +770,6 @@ export default {
       this.showModal2();
     },
 
-    forcepush(index, type, item) {
-      this.$gql.mutation(`updatePipy(id: ${item.id})`).then(() => {
-        this.$message.success(this.$t("Sync successfully"), 3);
-      });
-    },
-
     setting(index, type, item) {
       this.isEdit = true;
       this.$gql
@@ -1226,7 +779,6 @@ export default {
           this.payload.content = JSON.stringify(item.content);
           this.payload.json = item.content;
           this.payload.template = item.template;
-          this.payload.organizations = item.organizations;
           this.payload.apply = item.apply;
           this.showModal();
         });
@@ -1242,9 +794,6 @@ export default {
     },
 
     loaddata() {
-      this.$gql.query(`organizations(pagination:{limit: ${this.$DFT_LIMIT}}){data{id,attributes{name}}}`).then((res) => {
-        this.orgs = res.data;
-      });
       this.$gql
         .query(`fleets(filters:{type:{eq:"log"}}){data{id,attributes{name,apply,content}}}`)
         .then((res) => {
@@ -1256,40 +805,20 @@ export default {
           this.clickhouses = res.data;
         });
       this.$gql
-        .query(`templates(filters:{type:{eq:"sidecars"}}){data{id,attributes{name,type,content}}}`)
-        .then((res) => {
-          this.templates["sidecar"] = res.data;
-        });
-      this.$gql
-        .query(`templates(filters:{type:{eq:"pipy"}}){data{id,attributes{name,type,content}}}`)
-        .then((res) => {
-          this.templates["pipy"] = res.data;
-        });
-      this.$gql
-        .query(`templates(filters:{type:{eq:"pipy4lb"}}){data{id,attributes{name,type,content}}}`)
-        .then((res) => {
-          this.templates["pipy4lb"] = res.data;
-        });
-      this.$gql
         .query(`templates(filters:{type:{eq:"checkpoint"}}){data{id,attributes{name,type,content}}}`)
         .then((res) => {
           this.templates["checkpoint"] = res.data;
         });
       this.$gql
-        .query(`fleets(pagination:{limit: ${this.$DFT_LIMIT}}){data{id,attributes{name,type,content,apply,organizations{data{id,attributes{name}}},template{data{id,attributes{name}}}, status}}}`)
+        .query(`fleets(pagination:{limit: ${this.$DFT_LIMIT}}){data{id,attributes{name,type,content,apply,template{data{id,attributes{name}}}, status}}}`)
         .then((res) => {
           this.tabs.log = [];
-          if (this.$isPro) {
-            this.tabs.pipy = [];
-            this.tabs.pipy4lb = [];
-          }
           this.tabs.prometheus = [];
           this.tabs.clickhouse = [];
           if (this.$isPro) {
             this.tabs.mysql = [];
             this.tabs.postgresql = [];
             this.tabs.checkpoint = [];
-            this.tabs.sidecar = [];
             this.tabs.fortio = [];
             this.tabs.host = [];
           }
@@ -1300,24 +829,6 @@ export default {
                 item.template = item.template.id;
               }
               if (this.tabs[item.type]) {
-                console.log(item, this.tabs);
-                if (item.type == "pipy4lb" && !item.content.healthcheck) {
-                  item.content.healthcheck = {
-                    interval: "3s",
-                    connectTimeout: "1s",
-                    readTimeout: "1s",
-                    host: "localhost",
-                    port: 8888,
-                    failures: 3,
-                  };
-                }
-                let _organizations = item.organizations;
-                item.organizations = [];
-                if(_organizations){
-                  _organizations.forEach((_org)=>{
-                    item.organizations.push(_org.id)
-                  })
-                }
                 this.tabs[item.type].push(item);
               }
             });

@@ -209,7 +209,6 @@ export default {
 
     logout() {
       logout();
-      location.reload();
       // this.$router.push('/login');
     },
   },

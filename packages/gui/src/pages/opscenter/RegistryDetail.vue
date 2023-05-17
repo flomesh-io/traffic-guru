@@ -14,17 +14,10 @@
           key="1"
           :tab="$t('Namespace')"
         >
-          <a-result
+          <EmptyResult
             v-if="pid == ''"
             :sub-title="$t('Please save the registration certificate first')"
-          >
-            <template #icon>
-              <img
-                src="../../assets/img/empty.svg"
-                style="width: 200px"
-              >
-            </template>
-          </a-result>
+          />
 
           <a-row
             class="row-mg"
@@ -108,12 +101,14 @@
 import RegistryBaseDetail from "./common/RegistryBaseDetail";
 import { mapState } from "vuex";
 import ServiceList from "@/pages/fsm/components/ServiceList";
+import EmptyResult from "@/components/tag/EmptyResult";
 export default {
   name: "RegistryDetail",
   i18n: require("@/i18n"),
   components: {
     ServiceList,
     RegistryBaseDetail,
+    EmptyResult,
   },
 
   data() {

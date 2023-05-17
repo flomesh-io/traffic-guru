@@ -96,12 +96,13 @@ import { setAuthorization } from "@/utils/request";
 import { mapMutations, mapGetters, mapState } from "vuex";
 import MdInput from "@/components/MDinput/MDinput";
 import SnsCode from "./SnsCode";
-import Cookie from "js-cookie";
+import Cookie from '@/utils/cookie'
 import { ArrowRightOutlined } from "@ant-design/icons-vue";
 import { notification } from "ant-design-vue";
 import { h } from "vue";
 import { loadRoutes } from "@/utils/routerUtil";
 import FormItem from "@/components/tool/FormItem";
+import { encrypt, decrypt } from '@/utils/encryptUtil'
 
 export default {
   name: "LoginForm",
@@ -149,7 +150,7 @@ export default {
       if (this.formState.name) {
         let password = Cookie.get(this.formState.name);
         if (password) {
-          this.formState.password = atob(password);
+          this.formState.password = decrypt(password);
         }
       }
     },
@@ -203,7 +204,7 @@ export default {
       }
       if (loginRes.jwt) {
         if (this.formState.automatic) {
-          Cookie.set(this.formState.name, btoa(this.formState.password));
+          Cookie.set(this.formState.name, encrypt(this.formState.password));
         } else {
           Cookie.remove(this.formState.name);
         }
@@ -241,7 +242,8 @@ export default {
             getPermission({id:userinfo.data.role.id})
               .then((role) => {
                 _role = role;
-                this.setRoles(role);
+                _role.id = userinfo.data.role.id;
+                this.setRoles(_role);
                 setTimeout(()=>{
                   this.$router.push("/workplace");
                 },300);

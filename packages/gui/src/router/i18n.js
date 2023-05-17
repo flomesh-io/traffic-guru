@@ -19,6 +19,11 @@ module.exports = {
           detail: { name: "4LB 详情" },
           create: { name: "新建 4LB" },
         },
+        "tunnel": {
+          list: { name: "隧道" },
+          detail: { name: "隧道详情" },
+          create: { name: "新建隧道" },
+        },
         "7lb": {
           list: { name: "7LB" },
           detail: { name: "7LB 详情" },
@@ -47,6 +52,9 @@ module.exports = {
         },
         lbevent: {
           list: { name: "LB操作记录" },
+        },
+        lblog: {
+          list: { name: "LB状态日志" },
         },
       },
       fsm: {
@@ -94,7 +102,8 @@ module.exports = {
         upstreams: { name: "服务提供者" },
         topology: { name: "拓扑" },
         api: {
-          list: { name: "API" },
+          manage: { name: "API管理" },
+          market: { name: "API市场" },
           detail: { name: "API详情" },
           create: { name: "新建API" },
         },
@@ -128,6 +137,11 @@ module.exports = {
           detail: { name: "注册详情" },
           create: { name: "新的注册" },
         },
+        pipy: {
+          list: { name: "Pipy管理" },
+          detail: { name: "Pipy详情" },
+          create: { name: "新的Pipy" },
+        },
         certificates: { name: "证书管理" },
         alarm: {
           list: { name: "告警配置" },
@@ -135,6 +149,15 @@ module.exports = {
           create: { name: "新建告警规则" },
         },
       },
+      web: {
+        name: "Web Pro ∣ 网站",
+        dashboard: { name: "看板" },
+        website: {
+          list: { name: "Web站点" },
+          detail: { name: "Web站点詳細" },
+          create: { name: "新建Web站点" },
+        },
+			},
       inspector: {
         name: "Inspector ∣ 检查工具",
         healthcheck: {
@@ -209,7 +232,11 @@ module.exports = {
 					preview: { name: "UI组件预览" },
 				},
         users: { name: "用户管理" },
-        roles: { name: "角色管理" },
+        roles: { 
+					list: { name: "角色管理" },
+					detail: { name: "角色详情" },
+					create: { name: "新建角色" },
+				},
         organizations: {
           list: { name: "组织" },
           detail: { name: "组织 详情" },
@@ -242,6 +269,11 @@ module.exports = {
           detail: { name: "4 Load Balancer Detail" },
           create: { name: "New 4LB" },
         },
+        "tunnel": {
+          list: { name: "Tunnel" },
+          detail: { name: "Tunnel Detail" },
+          create: { name: "New Tunnel" },
+        },
         "7lb": {
           list: { name: "7 Load Balancer" },
           detail: { name: "7 Load Balancer Detail" },
@@ -266,6 +298,9 @@ module.exports = {
         },
         lbevent: {
           list: { name: "LB Event" },
+        },
+        lblog: {
+          list: { name: "LB Status Log" },
         },
       },
       fsm: {
@@ -313,7 +348,8 @@ module.exports = {
         upstreams: { name: "Providers" },
         topology: { name: "Topology" },
         api: {
-          list: { name: "API" },
+          manage: { name: "API Manage" },
+          market: { name: "API Market" },
           detail: { name: "API Detail" },
           create: { name: "Create API" },
         },
@@ -346,6 +382,11 @@ module.exports = {
           list: { name: "Registry" },
           detail: { name: "Registry Detail" },
           create: { name: "New Regist" },
+        },
+        pipy: {
+          list: { name: "Pipy Manage" },
+          detail: { name: "Pipy Detail" },
+          create: { name: "New Pipy" },
         },
         certificates: { name: "Certificates" },
         alarm: {
@@ -394,6 +435,15 @@ module.exports = {
           detail: { name: "Secret Detail" },
         },
       },
+      web: {
+        name: "Web Pro",
+        dashboard: { name: "Dashboard" },
+        website: {
+          list: { name: "Website" },
+          detail: { name: "Website Detail" },
+          create: { name: "Create Website" },
+        },
+			},
       inspector: {
         name: "Inspector",
         healthcheck: {
@@ -428,7 +478,11 @@ module.exports = {
 					preview: { name: "UI Widget Preview" },
 				},
         users: { name: "Users" },
-        roles: { name: "Roles" },
+        roles: { 
+					list: { name: "Roles" },
+					detail: { name: "Role Detail" },
+					create: { name: "Create Role" },
+				},
         organizations: {
           list: { name: "Organizations" },
           detail: { name: "Organization Detail" },
@@ -464,6 +518,11 @@ module.exports = {
           detail: { name: "4LB 詳細" },
           create: { name: "新規 4LB" },
         },
+        "tunnel": {
+          list: { name: "Tunnel" },
+          detail: { name: "Tunnel 詳細" },
+          create: { name: "新規 Tunnel" },
+        },
         "7lb": {
           list: { name: "7LB" },
           detail: { name: "7LB 詳細" },
@@ -492,6 +551,9 @@ module.exports = {
         },
         lbevent: {
           list: { name: "LB操作履歴" },
+        },
+        lblog: {
+          list: { name: "LB状態ログ" },
         },
       },
       fsm: {
@@ -549,6 +611,11 @@ module.exports = {
           detail: { name: "レジストリ詳細" },
           create: { name: "新規レジストリ" },
         },
+        pipy: {
+          list: { name: "Pipyリッド" },
+          detail: { name: "Pipy詳細" },
+          create: { name: "新規Pipy" },
+        },
         certificates: { name: "証明書" },
         alarm: {
           list: { name: "アラーム設定" },
@@ -596,6 +663,15 @@ module.exports = {
           detail: { name: "暗号化詳細" },
         },
       },
+      web: {
+        name: "Web Pro",
+        dashboard: { name: "ダッシュボード" },
+        website: {
+          list: { name: "Webサイト" },
+          detail: { name: "Webサイト詳細" },
+          create: { name: "新規Webサイト" },
+        },
+			},
       inspector: {
         name: "診断ツール",
         healthcheck: {
@@ -627,6 +703,8 @@ module.exports = {
         topology: { name: "トポロジ" },
         api: {
           list: { name: "API" },
+          manage: { name: "API管理" },
+          market: { name: "API市場" },
           detail: { name: "API詳細" },
           create: { name: "新規API" },
         },
@@ -654,7 +732,11 @@ module.exports = {
 					preview: { name: "UIコンポーネントプレビュー" },
 				},
         users: { name: "ユーザー管理" },
-        roles: { name: "キャラクター管理" },
+        roles: { 
+					list: { name: "キャラクター管理" },
+					detail: { name: "キャラクター詳細" },
+					create: { name: "新規キャラクター" },
+				},
         organizations: {
           list: { name: "組織" },
           detail: { name: "組織詳細" },

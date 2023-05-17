@@ -1,5 +1,6 @@
 import api from "@/services/api";
 import { request, merge, spread, METHOD, mock } from "@/utils/request";
+import { timelineMap } from "@/utils/timeline";
 
 export const select_keys = [
   "service.name",
@@ -507,30 +508,17 @@ export function setAPITopoData() {
 }
 
 export function getTimelineWhere(dateIndex, endDateIndex) {
-  const sqlDateMap = {
-    0: "1 month",
-    10: "15 day",
-    20: "7 day",
-    30: "3 day",
-    40: "1 day",
-    50: "12 hour",
-    60: "6 hour",
-    70: "1 hour",
-    80: "30 minute",
-    90: "5 minute",
-    100: "1 second",
-  };
   let sql = "";
   if (endDateIndex >= 0) {
     sql +=
       " AND toDateTime(reqTime/1000) <now() - interval " +
-      sqlDateMap[endDateIndex] +
+      timelineMap[endDateIndex] +
       " ";
   }
   if (dateIndex >= 0) {
     sql +=
       " AND toDateTime(reqTime/1000) >now() - interval " +
-      sqlDateMap[dateIndex] +
+      timelineMap[dateIndex] +
       " ";
   }
   return sql;
@@ -620,7 +608,7 @@ function getSqlPagging(sql, pageNo, pageSize, sortBy, arrow) {
   },${pageSize};`;
 }
 
-function getWhere(filter, date, endDate, intervalDate, intervalEndDate) {
+function getWhere(filter, date, endDate) {
   let sql = `where 1=1  AND bondType != 'outbound' `;
   if (filter && filter != "") {
     sql += ` AND ${filter} `;
@@ -630,9 +618,6 @@ function getWhere(filter, date, endDate, intervalDate, intervalEndDate) {
   }
   if (endDate && endDate != "") {
     sql += " AND reqTime < " + new Date(endDate).getTime();
-  }
-  if (intervalDate && intervalEndDate) {
-    sql += ` AND toDateTime(reqTime/1000) < now() - interval ${intervalEndDate} and toDateTime(reqTime/1000) >now() - interval ${intervalDate} `;
   }
 
   return sql;
@@ -646,12 +631,10 @@ export async function getPagingData(
   arrow,
   date,
   endDate,
-  intervalDate,
-  intervalEndDate,
   type,
   uid,
 ) {
-  let whereSQL = getWhere(filter, date, endDate, intervalDate, intervalEndDate);
+  let whereSQL = getWhere(filter, date, endDate);
   let _keys = getSelectKeys("name&as");
   let SQL = getSqlPagging(
     `select ${_keys} from log ${whereSQL}`,
@@ -714,10 +697,8 @@ export async function getTPSByWhere(
   arrow,
   date,
   endDate,
-  intervalDate,
-  intervalEndDate,
 ) {
-  let whereSQL = getWhere(filter, date, endDate, intervalDate, intervalEndDate);
+  let whereSQL = getWhere(filter, date, endDate);
   let SQL = `select count(1) AS tps_sum, toStartOfInterval(toDateTime(resTime/1000),interval 1 minute) as minute from log ${whereSQL} group by minute order by minute asc`;
   let SQL2 = `select count(1) AS tps_sum from log ${whereSQL}`;
   return merge([
@@ -734,10 +715,8 @@ export async function getLatencyByWhere(
   arrow,
   date,
   endDate,
-  intervalDate,
-  intervalEndDate,
 ) {
-  let whereSQL = getWhere(filter, date, endDate, intervalDate, intervalEndDate);
+  let whereSQL = getWhere(filter, date, endDate);
   let SQL = `select (ceil((resTime - reqTime)/1000000*2)) as latency ,count() as count from log ${whereSQL} group by latency order by latency`;
   return request(api.CLICKHOUSE.QUERY(SQL), METHOD.GET);
 }
@@ -750,10 +729,8 @@ export async function getLoadStatusByWhere(
   arrow,
   date,
   endDate,
-  intervalDate,
-  intervalEndDate,
 ) {
-  let whereSQL = getWhere(filter, date, endDate, intervalDate, intervalEndDate);
+  let whereSQL = getWhere(filter, date, endDate);
   let SQL = `select count() as count,res.status from log ${whereSQL} AND res.status>'0' group by res.status order by res.status`;
   return request(api.CLICKHOUSE.QUERY(SQL), METHOD.GET);
 }

@@ -72,7 +72,7 @@ export default {
       code: '',
       snsloading: false,
       snsstatus: "free",
-      snsnum: 0,
+      snsnum: 30,
     };
   },
 
@@ -110,7 +110,7 @@ export default {
         this.snsloading = false;
         this.snsstatus = "ok";
         verificationCode(this.username, this.$t);
-        this.snsnum = 8;
+        this.snsnum = 30;
         this.countdown();
       }, 1000);
     },

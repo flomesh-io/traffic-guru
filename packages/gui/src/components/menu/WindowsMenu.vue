@@ -84,6 +84,7 @@
               placement="right"
             >
               <SlidersOutlined
+                v-permission="['admin']"
                 @click="routerSetting"
                 class="icon-menu"
               />
@@ -143,8 +144,11 @@
               style="font-size: 12px"
             />
           </h6>
-          <div class="font-center">
-            <EnvSelector v-show="routerSettingMenu.showEnv" />
+          <div
+            class="font-center"
+            v-show="routerSettingMenu.showEnv"
+          >
+            <EnvSelector />
           </div>
           <h6>{{ $t("Menu") }}</h6>
           <a-menu
@@ -466,7 +470,6 @@ export default {
     logout() {
       this.onClose();
       logout();
-      location.reload();
     },
 
     home() {

@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import { getSteamTimeline, getTimeLabel } from "@/utils/util";
+import { getSteamTimeline, getTimeLabel } from "@/utils/timeline";
 import { getServiceWhere } from "@/services/clickhouse";
 export default {
   name: "QoSSummaryChart",

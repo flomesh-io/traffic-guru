@@ -2,18 +2,11 @@
   <div class="card-list">
     <a-config-provider>
       <template #renderEmpty>
-        <a-result
+        <EmptyResult
           v-if="dataSource.length == 0 && !!resultEmpty"
-          :title="resultEmpty.title || $t('No data')"
+          :title="resultEmpty.title"
           :sub-title="resultEmpty.subTitle"
-        >
-          <template #icon>
-            <img
-              src="../../assets/img/empty.svg"
-              style="width: 300px"
-            >
-          </template>
-        </a-result>
+        />
         <a-empty
           v-else-if="dataSource.length == 0 && empty"
           :image="simpleImage"
@@ -296,6 +289,7 @@
 </template>
 
 <script>
+import EmptyResult from "@/components/tag/EmptyResult";
 import { Empty } from "ant-design-vue";
 import {
   PlusCircleTwoTone,
@@ -343,6 +337,7 @@ export default {
     ImportOutlined,
     CaretRightOutlined,
     MinusSquareTwoTone,
+    EmptyResult,
   },
 
   props: [

@@ -129,6 +129,16 @@
           />
         </DetailListItem>
         <DetailListItem
+          :term="$t('Upstream Version')"
+          v-if="$isPro"
+        >
+          <a-input
+            :placeholder="$t('unset')"
+            v-model:value="upstreamVersion"
+            class="width-300"
+          />
+        </DetailListItem>
+        <DetailListItem
           :term="$t('Is Gateway')"
           v-if="$isPro"
         >
@@ -345,6 +355,7 @@ export default {
       sidecar: null,
       isGateway: null,
       gatewayPath: null,
+      upstreamVersion: null,
       isMounted: false,
     };
   },
@@ -488,6 +499,7 @@ export default {
 						ns{data{id,attributes{name}}},
 						isGateway,
 						gatewayPath,
+            upstreamVersion,
 						organization{data{id,attributes{
 							name,
 							whiteOrgs{data{id,attributes{
@@ -666,6 +678,7 @@ export default {
           this.sidecar = res.sidecar ? res.sidecar.id : null;
           this.isGateway = res.isGateway;
           this.gatewayPath = res.gatewayPath;
+          this.upstreamVersion = res.upstreamVersion;
           if (detail.endpoints) {
             detail.endpoints.forEach((n) => {
               n.isedit = false;
@@ -794,6 +807,7 @@ export default {
         organization: this.organization?.id,
         isGateway: this.isGateway,
         gatewayPath: this.gatewayPath,
+        upstreamVersion: this.upstreamVersion,
         sidecar: this.sidecar || null,
         content: savedata,
         certificates,

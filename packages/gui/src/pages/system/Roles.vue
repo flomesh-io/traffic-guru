@@ -92,127 +92,6 @@
         </CardList>
       </a-tab-pane>
     </a-tabs>
-    <a-modal
-      v-model:visible="visible"
-      :title="$t('Role')"
-      width="70%"
-    >
-      <template #footer>
-        <a-button
-          v-if="isEdit"
-          :loading="saving"
-          v-permission="['role:update']"
-          type="primary"
-          @click="valid"
-        >
-          {{ $t("save") }}
-        </a-button>
-        <a-button
-          :loading="saving"
-          v-else
-          v-permission="['role:create']"
-          type="primary"
-          @click="valid"
-        >
-          {{ $t("create") }}
-        </a-button>
-      </template>
-      <a-form
-        :model="payload"
-        :wrapper-col="{ span: 24 }"
-        ref="form"
-      >
-        <a-descriptions bordered>
-          <a-descriptions-item
-            :label="$t('Type')"
-            :span="3"
-          >
-            <a-select
-              :disabled="isEdit"
-              :placeholder="$t('Unselect')"
-              class="width-200"
-              v-model:value="payload.type"
-              @change="renderCallback"
-            >
-              <a-select-option
-                v-for="(item, index) in tabs"
-                :key="index"
-                :value="item.type"
-              >
-                {{ $t(item.title) }}
-              </a-select-option>
-            </a-select>
-          </a-descriptions-item>
-          <a-descriptions-item
-            :label="$t('Avatar')"
-            :span="3"
-          >
-            <CrownTwoTone
-              v-if="payload.name == 'Authenticated'"
-              two-tone-color="#00adef"
-              class="font-50"
-            />
-            <CustomerServiceTwoTone
-              v-else-if="payload.name == 'Public'"
-              two-tone-color="#00adef"
-              class="font-50"
-            />
-            <IdcardTwoTone
-              v-else
-              two-tone-color="#00adef"
-              class="font-50"
-            />
-          </a-descriptions-item>
-          <a-descriptions-item
-            :label="$t('Role Name')"
-            :span="3"
-          >
-            <FormItem
-              name="name"
-              :rules="rules.uniqueName('usersPermissionsRoles',{id:payload.id,type:payload.type})"
-            >
-              <a-input
-                :maxlength="10"
-                :placeholder="$t('unset')"
-                v-model:value="payload.name"
-              >
-                <template #prefix>
-                  <UserOutlined type="user" />
-                </template>
-              </a-input>
-            </FormItem>
-          </a-descriptions-item>
-          <a-descriptions-item
-            :label="$t('Resources')"
-            :span="3"
-            v-if="permissions && permissions.length > 0"
-          >
-            <div
-              class="flex"
-              v-for="(resource, index) in permissions"
-              :key="index"
-              v-show="resource"
-            >
-              <div class="font-left width-100">
-                {{ $t(resource.name) }}
-              </div>
-              <div
-                class="font-center width-100"
-                v-for="(action, index3) in resource.actions"
-                :key="index3"
-              >
-                <a-checkbox
-                  @change="togglePermissions(action, resource.actions)"
-                  v-model:checked="action.enabled"
-                >
-                  {{ $t(action.name) }}
-                </a-checkbox>
-              </div>
-            </div>
-          </a-descriptions-item>
-        </a-descriptions>
-      </a-form>
-    </a-modal>
     <CustomerServiceOutlined v-if="false" />
   </PageLayout>
 </template>
@@ -229,10 +108,6 @@ import {
 import PageLayout from "@/layouts/PageLayout";
 import HeadInfo from "@/components/tool/HeadInfo";
 import CardList from "@/components/card/CardList";
-import FormItem from "@/components/tool/FormItem";
-import { getPermission, buildPermission } from "@/services/user";
-import _ from "lodash";
-import { mapState } from "vuex";
 export default {
   name: "Roles",
   components: {
@@ -245,7 +120,6 @@ export default {
     CrownTwoTone,
     CustomerServiceTwoTone,
     CustomerServiceOutlined,
-    FormItem,
   },
 
   i18n: require("@/i18n"),
@@ -259,35 +133,13 @@ export default {
       ],
 
       CustomerServiceOutlined,
-      isEdit: false,
       roles: [],
       visible: false,
-      payload: {
-        id: "",
-        name: "",
-        type: "system",
-        permissions: [],
-      },
-
-      defaultPermissions: {},
-      permissions: {},
-      bindTarget: {},
-      editorIsCreate: true,
-      workload: [],
-      projects: [],
       pageSize: 10,
       pageNo: 1,
       total: 0,
       loading: true,
-      saving: false,
-      activities: [],
-      config: {},
-      teams: [],
     };
-  },
-
-  computed: {
-    ...mapState("rules", ["rules"]),
   },
 	
   created() {
@@ -298,94 +150,19 @@ export default {
       ];
     }
     this.loaddata();
-    this.initResource();
   },
 
   methods: {
-    togglePermissions(action, actions) {
-      if (action.name != "find" && action.enabled) {
-        actions.forEach((_action) => {
-          if (_action.name == "find") {
-            _action.enabled = true;
-          }
-        });
-      } else if (action.name == "find" && !action.enabled) {
-        actions.forEach((_action) => {
-          _action.enabled = false;
-        });
-      }
-    },
 
     add() {
-      this.isEdit = false;
-      this.payload = {
-        name: "",
-        type: "system",
-        permissions: [],
-      };
-      this.permissions = this.defaultPermissions[this.payload.type];
-      this.showModal();
-    },
-
-    getSample() {
-      this.custom = this.customSample;
-    },
-
-    showModal() {
-      this.visible = true;
-    },
-
-    renderCallback() {
-      this.permissions = this.defaultPermissions[this.payload.type];
-    },
-
-    valid() {
-      this.$refs.form
-        .validateFields()
-        .then(() => {
-          this.handleOk();
-        })
-        .catch(() => {});
-    },
-
-    handleOk() {
-      let permissions = _.cloneDeep(this.permissions);
-      const input = {
-        name: this.payload.name,
-        type: this.payload.type,
-        permissions: buildPermission(permissions),
-      };
-      this.saving = true;
-      if (this.isEdit) {
-        this.$gql
-          .mutation(`updateRoleResourcePermission(id: ${this.payload.id}, data: $data)`, 
-                    { data: input },
-                    { data: "RolePermissionInput"},
-          )
-          .then(() => {
-            this.saving = false;
-            this.visible = false;
-            this.$message.success(this.$t("Save successfully"), 3);
-            this.loaddata();
-          });
-      } else {
-        this.$gql
-          .mutation(`createRoleResourcePermission(data: $data)`, 
-                    { data: input },
-                    { data: "RolePermissionInput"}
-          )
-          .then(() => {
-            this.saving = false;
-            this.visible = false;
-            this.$message.success(this.$t("Created successfully"), 3);
-            this.loaddata();
-          });
-      }
+      this.$router.push({
+        path: "/system/roles/create",
+      });
     },
 
     remove(index, type, item) {
       this.$gql
-        .mutation(`deleteUsersPermissionsRole(id: ${item.id}){ok}`)
+        .mutation(`deleteRoleResourcePermission(id: ${item.id})`)
         .then(() => {
           this.$message.success(this.$t("Deleted successfully"), 3);
           this.loaddata();
@@ -393,23 +170,11 @@ export default {
     },
 
     setting(index, type, item) {
-      this.payload = item;
-      getPermission({id:item.id})
-        .then((res) => {
-          this.permissions = res.permissions;
-          this.isEdit = true;
-          this.showModal();
-        });
-    },
-
-    initResource() {
-      this.tabs.forEach((tab) => {
-        getPermission({type:tab.type})
-          .then((res) => {
-            this.defaultPermissions[tab.type] = res.permissions;
-          });
+      this.$router.push({
+        path: "/system/roles/detail/" + item.id,
       });
     },
+
 
     loaddata() {
       this.roles = [];
@@ -434,32 +199,3 @@ export default {
   },
 };
 </script>
-
-<style lang="less" scoped>
-  .card-avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 48px;
-  }
-
-  .new-btn {
-    border-radius: 2px;
-    width: 100%;
-    height: 187px;
-  }
-
-  .meta-content {
-    position: relative;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    height: 64px;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-  }
-
-  :deep(.ant-divider-dashed::before),
-  :deep(.ant-divider-dashed::after) {
-    border-color: #ccc !important;
-  }
-</style>

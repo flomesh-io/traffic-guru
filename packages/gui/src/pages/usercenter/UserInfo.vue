@@ -133,7 +133,7 @@
           </a-tab-pane>
           <a-tab-pane
             key="2"
-            :tab="$t('Authority')"
+            :tab="$t('Resources Permission')"
           >
             <a-tabs
               tab-position="left"
@@ -156,6 +156,19 @@
                 />
               </a-tab-pane>
             </a-tabs>
+          </a-tab-pane>
+					
+          <a-tab-pane
+            key="3"
+            :tab="$t('Menu Permission')"
+          >
+            <MenuTree 
+              type="role" 
+              :readonly="true"
+              :draggable="false" 
+              :role-id="detail.role?.id"
+              :is-edit="!!detail.role" 
+            />
           </a-tab-pane>
         </a-tabs>
       </a-col>
@@ -185,6 +198,7 @@ import PageLayout from "@/layouts/PageLayout";
 import HeadInfo from "@/components/tool/HeadInfo";
 import PermissionCard from "@/components/card/PermissionCard";
 import { getUserInfo, editUserInfo } from "@/services/user";
+import MenuTree from "../system/components/MenuTree";
 import { mapState } from "vuex";
 import {
   ToolFilled,
@@ -198,6 +212,7 @@ export default {
     ToolFilled,
     PermissionCard,
     ForgetForm,
+    MenuTree,
   },
 
   i18n: require("@/i18n"),

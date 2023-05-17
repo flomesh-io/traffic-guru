@@ -24,7 +24,6 @@ const fsm = {
       name: "FSM Dashboard",
       meta: {
         icon: DashboardOutlined,
-        authority: "dashboard:find",
       },
       component: () => import("@/pages/fsm/dashboard/Dashboard"),
     },
@@ -57,7 +56,6 @@ const fsm = {
       name: "Services",
       meta: {
         svg: ServiceSvg,
-        authority: "service:find",
       },
       component: () => import("@/pages/fsm/Services"),
     },
@@ -66,7 +64,6 @@ const fsm = {
       name: "Service Detail",
       meta: {
         invisible: true,
-        authority: "service:find",
       },
       component: () => import("@/pages/fsm/ServiceDetail"),
     },
@@ -75,7 +72,6 @@ const fsm = {
       name: "Service Imports",
       meta: {
         icon: CloudDownloadOutlined,
-        authority: "service:find",
       },
       component: () => import("@/pages/fsm/ServiceImports"),
     },
@@ -84,7 +80,6 @@ const fsm = {
       name: "Service Create",
       meta: {
         invisible: true,
-        authority: "service:find",
       },
       component: () => import("@/pages/fsm/ServiceDetail"),
     },
@@ -93,7 +88,6 @@ const fsm = {
       name: "Ingress",
       meta: {
         icon: LoginOutlined,
-        authority: "ingress:find",
       },
       component: () => import("@/pages/fsm/Ingress"),
     },
@@ -102,7 +96,6 @@ const fsm = {
       name: "Ingress Detail",
       meta: {
         invisible: true,
-        authority: "ingress:find",
       },
       component: () => import("@/pages/fsm/IngressDetail"),
     },
@@ -111,7 +104,6 @@ const fsm = {
       name: "Ingress Create",
       meta: {
         invisible: true,
-        authority: "ingress:find",
       },
       component: () => import("@/pages/fsm/IngressDetail"),
     },
@@ -121,7 +113,6 @@ const fsm = {
       meta: {
         icon: LogoutOutlined,
         invisible: true,
-        authority: "egress:find",
       },
       component: () => import("@/pages/fsm/Egress"),
     },
@@ -130,7 +121,6 @@ const fsm = {
       name: "Egress Detail",
       meta: {
         invisible: true,
-        authority: "egress:find",
       },
       component: () => import("@/pages/fsm/EgressDetail"),
     },
@@ -139,7 +129,6 @@ const fsm = {
       name: "Egress Create",
       meta: {
         invisible: true,
-        authority: "egress:find",
       },
       component: () => import("@/pages/fsm/EgressDetail"),
     },
@@ -149,7 +138,6 @@ const fsm = {
       meta: {
         invisible: localStorage.getItem("SCHEMA_TYPE") != "k8s",
         svg: OsmSvg,
-        authority: "mesh:find",
       },
       component: () => import("@/pages/fsm/Meshs"),
     },
@@ -158,7 +146,6 @@ const fsm = {
       name: "Mesh Detail",
       meta: {
         invisible: true,
-        authority: "mesh:find",
       },
       component: () => import("@/pages/fsm/MeshDetail"),
     },

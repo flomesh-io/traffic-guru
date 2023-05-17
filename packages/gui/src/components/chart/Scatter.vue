@@ -22,7 +22,7 @@
 <script>
 import { Empty } from "ant-design-vue";
 import { mapState } from "vuex";
-import { getTimeLabel } from "@/utils/util";
+import { getTimeLabel } from "@/utils/timeline";
 export default {
   name: "Scatter",
   props: [

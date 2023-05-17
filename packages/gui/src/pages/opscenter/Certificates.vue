@@ -140,7 +140,7 @@
               <div class="mb-10">
                 <a-tag
                   v-if="item.type"
-                  :color="{ k8s: 'blue', api: 'green' }[item.type]"
+                  :color="{ k8s: 'blue', api: 'green', tunnel: 'green', rfc8998: 'green', client: 'green' }[item.type]"
                 >
                   {{ tlsMap[item.type] }}
                 </a-tag>
@@ -206,6 +206,8 @@
             <a-select
               v-model:value="payload.type"
               class="width-180"
+              :disabled="isEdit"
+              @change="changeType"
             >
               <a-select-option
                 :value="item.value"
@@ -315,6 +317,7 @@ import EnvSelector from "@/components/menu/EnvSelector";
 import FormItem from "@/components/tool/FormItem";
 import { mapState } from "vuex";
 import { Empty } from "ant-design-vue";
+import dayjs from 'dayjs';
 export default {
   name: "Certificates",
   components: {
@@ -327,13 +330,16 @@ export default {
   },
 
   i18n: require("@/i18n"),
-  props: ["isBind", "col", "bindCertificates", "certificateSize"],
+  props: ["isBind", "col", "bindCertificates", "certificateSize", "mode"],
   data() {
     return {
-      tlsMap: { k8s: "K8S Secret", api: "API/LB Secret" },
+      tlsMap: { api: "API/LB Secret", tunnel: "Tunnel Secret", client: "Client Secret", rfc8998: "RFC8998 Secret", k8s: "K8S Secret" },
       tlsTypes: [
+        { value: "api", label: "API/LB TLS Secret" },
+        { value: "tunnel", label: "Tunnel TLS Secret" },
+        { value: "client", label: "Client Secret" },
+        { value: "rfc8998", label: "RFC8998 Secret" },
         { value: "k8s", label: "K8S Secret" },
-        { value: "api", label: "API/LB Secret" },
       ],
 
       keyDisplay:{},
@@ -420,6 +426,27 @@ export default {
   },
 
   methods: {
+    changeType() {
+      switch (this.payload.type) {
+      case "api":
+      case "k8s":
+        this.payload.content = {"key":"","cert":""}
+        break;
+      case "tunnel":
+        this.payload.content = {"key":"","cert":"","ca":""}
+        break;
+      
+      case "rfc8998":
+        this.payload.content = {"key":"","cert":"","keyEnc":"","certEnc":""}
+        break;
+      case "client":
+        this.payload.content = {"cert":""}
+        break;
+      default:
+        break;
+      }
+    },
+
     envChange(data) {
       this.payload.namespaceId = data.namespaceId;
     },
@@ -438,7 +465,7 @@ export default {
       this.payload = {
         name: "",
         id: "",
-        type: "k8s",
+        type: "api",
         namespaceId: null,
         content: {"cert": "", "key": ""},
       };
@@ -473,9 +500,10 @@ export default {
           content: this.payload.content,
           ...this.payload,
         };
-        if(namespaceId){
+        if(p.type == "k8s" && namespaceId){
           p.namespace = namespaceId;
         }
+        console.log(p)
         this.$gql
           .mutation(
             `updateCertificate(id:${whereID}, data: $data){data{id}}`,
@@ -494,7 +522,7 @@ export default {
         let p = {
           ...this.payload,
         };
-        if(namespaceId){
+        if(p.type == "k8s" && namespaceId){
           p.namespace = namespaceId;
         }
 
@@ -513,6 +541,7 @@ export default {
     },
 
     setting(index, type, item) {
+
       this.keyDisplay = {};
       this.payload.namespace = item.namespace;
       this.$gql
@@ -570,7 +599,7 @@ export default {
         name: this.bindTarget.name,
         host: this.bindTarget.host,
         content:this.bindTarget.content,
-        validity:this.bindTarget.validity,
+        type:this.bindTarget.type,
         start: "" + new Date(this.bindTarget.validity[0]).getTime(),
         end: "" + new Date(this.bindTarget.validity[1]).getTime(),
       }
@@ -590,15 +619,22 @@ export default {
     },
 
     editBind(index) {
+      console.log(this.bindCertificates);
+      console.log(this.bindCertificatesVals[index]);
       this.bindCertificatesVals = this.bindCertificates;
       this.bindTarget = this.bindCertificatesVals[index];
+      let _start = new Date(this.bindTarget.start*1).toLocaleDateString();
+      let _end = new Date(this.bindTarget.end*1).toLocaleDateString();
+      this.bindTarget.validity = [dayjs(_start),dayjs(_end)]
+			
+      this.isEdit = true;
       this.showModal2();
     },
 
     bind(index, type, item) {
       const _certificateSize = this.certificateSize || 2;
       if (this.bindCertificates.length >= _certificateSize) {
-        this.$message.warning(this.$t("At most 3 certificates can be bound"));
+        this.$message.warning(this.$t(`At most ${_certificateSize} certificates can be bound`));
         return;
       }
       this.bindTarget = item;
@@ -614,9 +650,13 @@ export default {
         this.pageSize = pageSize;
       }
       this.loading = true;
+      const filters = {};
+      if (this.mode == "certificates") {
+        filters.type = { in: ["api", "rfc8998"] }
+      }
       this.$gql
         .query(
-          `certificates(sort:"name:asc",pagination: {start: ${this.start}, limit: ${this.pageSize}}){
+          `certificates(filters: $filters, sort:"name:asc",pagination: {start: ${this.start}, limit: ${this.pageSize}}){
 						data{id,attributes{
 							name,
 							type,
@@ -627,7 +667,13 @@ export default {
 							content
 						}},
 						meta{pagination{total}}
-					}`
+					}`,
+          { 
+            filters
+          },{
+            filters: "CertificateFiltersInput",
+            pagination: "PaginationArg",
+          }
         )
         .then((res) => {
           this.certificates = res.data;

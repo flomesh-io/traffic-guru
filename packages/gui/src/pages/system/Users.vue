@@ -423,14 +423,6 @@ export default {
       this.visible2 = true;
     },
 
-    getTimeLabel(date) {
-      return (
-        new Date(date[0]).toLocaleDateString() +
-        "~" +
-        new Date(date[1]).toLocaleDateString()
-      );
-    },
-
     setting(index, type, item) {
       this.payload = item;
       this.setDefaultResources();

@@ -8,6 +8,7 @@ import { query, mutation } from "@/services/graphql";
 import { notification } from "ant-design-vue";
 import { CheckOutlined } from "@ant-design/icons-vue";
 import { h } from "vue";
+import { encrypt } from '@/utils/encryptUtil'
 
 export function verificationCode(identifier, $t, call) {
   mutation(`generateVerificationCode(identifier: "${identifier}")`).then(
@@ -27,19 +28,19 @@ export function verificationCode(identifier, $t, call) {
 }
 
 export async function login(identifier, password, verificationCode, isPass) {
-  logout();
-  let input = { identifier, password };
+  clearAuth();
+  let input = { identifier, password: encrypt(password) };
   if (!isPass) {
     input.verificationCode = verificationCode;
   }
-  let loginFun = !isPass ? "loginByCode" : "login";
+  let loginFun = !isPass ? "loginByCode" : "loginNoCode";
   return mutation(
     `${loginFun}(input: $input){jwt,user{id,username,email,role{id,name,type,description}}}`,
     { input },
     {
       input: !isPass
         ? "UsersPermissionsLoginByCodeInput!"
-        : "UsersPermissionsLoginInput!",
+        : "UsersPermissionsLoginNoCodeInput!",
     },
     null,
     true,
@@ -51,36 +52,42 @@ export async function forget(email, newPassword, verificationCode, currentPasswo
   if (!isPass) {
     const input = {
       email,
-      newPassword,
+      newPassword: encrypt(newPassword),
       verificationCode,
     };
     return mutation(
       `changePasswordByCode(data: $input)`,
       { input },
-      {input: "JSON!"}
+      { input: "JSON!" }
     );
   } else {
-    return mutation(
-      `changePassword(currentPassword: "${currentPassword}",password: "${newPassword}",passwordConfirmation: "${newPassword}"){jwt}`,
-
-    );
+		const input = {
+			email,
+			newPassword: encrypt(newPassword),
+			currentPassword: encrypt(currentPassword),
+		};
+		return mutation(
+			`changePasswordNoCode(data: $input)`,
+			{ input },
+			{ input: "JSON!" }
+		);
   }
 }
 
 export async function register(username, email, password, verificationCode) {
-  const input = { username, email, password };
+  const input = { username, email, password: encrypt(password) };
   let isPass = process.env.VUE_APP_LOGIN_CODE == "pass";
   if (!isPass) {
     input.verificationCode = verificationCode;
   }
-  let _fun = !isPass ? "registerByCode" : "register";
+  let _fun = !isPass ? "registerByCode" : "registerNoCode";
   return mutation(
     `${_fun}(input: $input){jwt,user{id,username,email,role{id,name,type,description}}}`,
     { input },
     {
       input: !isPass
         ? "UsersPermissionsRegisterByCodeInput!"
-        : "UsersPermissionsRegisterInput!",
+        : "UsersPermissionsRegisterNoCodeInput!",
     },
     null,
     true,
@@ -98,6 +105,15 @@ export function getStaticRoutesConfig() {
 }
 
 export function logout() {
+	mutation(`logout`).then(() => {
+		clearAuth();
+		location.reload();
+	}).catch(() => {
+		clearAuth();
+		location.reload();
+	});
+}
+export function clearAuth() {
   localStorage.removeItem(process.env.VUE_APP_ROUTES_KEY);
   localStorage.removeItem(process.env.VUE_APP_PERMISSIONS_KEY);
   localStorage.removeItem(process.env.VUE_APP_ROLES_KEY);

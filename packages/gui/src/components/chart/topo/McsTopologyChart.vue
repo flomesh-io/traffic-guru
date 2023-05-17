@@ -7,20 +7,13 @@
       :paragraph="{ rows: 6 }"
       style="padding: 100px 50px"
     />
-    <a-result
+		
+    <EmptyResult 
       v-if="!loading && state == 0"
       class="relative result"
       style="margin-bottom: 100px"
-      :title="$t('No data')"
       :sub-title="$t('Check other time periods.')"
-    >
-      <template #icon>
-        <img
-          src="../../../assets/img/empty.svg"
-          style="width: 300px"
-        >
-      </template>
-    </a-result>
+    />
     <div
       v-show="!loading && state > 0"
       ref="main"
@@ -32,11 +25,11 @@
 
 <script>
 import _ from "lodash";
-import { Empty } from "ant-design-vue";
+import EmptyResult from "@/components/tag/EmptyResult";
 export default {
   name: "McsTopologyChart",
   i18n: require("@/i18n"),
-  components: { },
+  components: { EmptyResult },
   props: {
     where: {
       type: String,
@@ -82,7 +75,6 @@ export default {
   data() {
     return {
       isMounted: false,
-      simpleImage: Empty.PRESENTED_IMAGE_SIMPLE,
     };
   },
 

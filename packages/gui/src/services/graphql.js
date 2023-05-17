@@ -2,7 +2,7 @@ import { request, METHOD } from "@/utils/request";
 import { message } from "ant-design-vue";
 import REST from "./api";
 import _ from "lodash";
-import { checkAuthorization } from "@/utils/request";
+import { checkAuthorization, removeAuthorization } from "@/utils/request";
 
 function pipeMsg(msg) {
   return (msg || "").replace("GraphQL error:", "Error:");
@@ -26,6 +26,9 @@ function getVariablesPayload(variables, variablesType) {
 function messageError(msg, noMsg){
 	if(!noMsg){
 		message.error(pipeMsg(msg), 3);
+	}
+	if(msg == 'Token expired'){
+		removeAuthorization();
 	}
 	if(location.hash != '#/login' && !checkAuthorization()){
 		location.reload();
@@ -99,7 +102,7 @@ export function query(query, variables, variablesType, fetchPolicy) {
             } else if(_d && _d.meta) {
               resolve({data:reset(_d),pagination:_d.meta.pagination});
             } else if(_d && _d.data) {
-							resolve({data:reset(_d)});
+							resolve({..._d,data:reset(_d)});
             } else {
               resolve(_d);
             }
@@ -117,7 +120,9 @@ export function query(query, variables, variablesType, fetchPolicy) {
           }
         })
         .catch((e) => {
-          if (e.networkError) {
+					if(!!e.response?.data?.error?.error?.message){
+						messageError(e.response.data.error.error.message);
+					} else if (e.networkError) {
             if (e.networkError.message) {
               messageError(e.networkError.message);
             } else if (e.networkError.result.errors) {
@@ -162,7 +167,7 @@ export function mutation(mutation, variables, variablesType, update, noMsg) {
             } else if (!_d || Object.keys(_d).length == 0) {
               resolve(_d);
             } else if(_d && _d.data) {
-							resolve({data:reset(_d)});
+							resolve({..._d,data:reset(_d)});
             } else {
               resolve(_d);
             }
@@ -181,7 +186,9 @@ export function mutation(mutation, variables, variablesType, update, noMsg) {
         })
         .catch((e) => {
           if (!noMsg) {
-            if (e.networkError && e.networkError.result.errors) {
+            if(!!e.response?.data?.error?.error?.message){
+            	messageError(e.response.data.error.error.message);
+            } else if (e.networkError && e.networkError.result.errors) {
 							messageError(e.networkError.result.errors[0].message, noMsg);
             } else {
 							messageError(e.message, noMsg);

@@ -304,18 +304,11 @@
               :style="'width:' + previewSubscribeWidth + 'px'"
               @resp="getResp"
             />
-            <a-result
+            <EmptyResult
               v-else
               :title="$t('No Widget')"
               :sub-title="$t('Try change the config and click run button')"
-            >
-              <template #icon>
-                <img
-                  src="../../assets/img/empty.svg"
-                  style="width: 300px"
-                >
-              </template>
-            </a-result>
+            />
           </a-tab-pane>
           <a-tab-pane
             key="2"
@@ -335,6 +328,7 @@
 </template>
 
 <script>
+import EmptyResult from "@/components/tag/EmptyResult";
 import JsonEditor from "@/components/editor/JsonEditor";
 import JsEditor from "@/components/editor/JsEditor";
 import SQLEditor from "@/components/editor/SQLEditor";
@@ -373,6 +367,7 @@ export default {
     ColSpace,
     FilterOutlined,
     Timeline,
+    EmptyResult,
   },
 
   i18n: require("@/i18n"),

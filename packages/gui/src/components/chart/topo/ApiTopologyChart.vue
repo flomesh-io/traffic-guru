@@ -7,20 +7,12 @@
       :paragraph="{ rows: 6 }"
       style="padding: 100px 50px"
     />
-    <a-result
+    <EmptyResult 
       v-if="!loading && state == 0"
       class="relative result"
       style="margin-bottom: 100px"
-      :title="$t('No data')"
       :sub-title="$t('Check other time periods.')"
-    >
-      <template #icon>
-        <img
-          src="../../../assets/img/empty.svg"
-          style="width: 300px"
-        >
-      </template>
-    </a-result>
+    />
     <div class="iconfont-btn-group">
       <PartitionOutlined
         @click="changeLayout('none')"
@@ -49,7 +41,7 @@
 
 <script>
 import _ from "lodash";
-import { Empty } from "ant-design-vue";
+import EmptyResult from "@/components/tag/EmptyResult";
 import {
   DeploymentUnitOutlined,
   PartitionOutlined,
@@ -58,7 +50,7 @@ import {
 export default {
   name: "TopologyChart",
   i18n: require("@/i18n"),
-  components: { DeploymentUnitOutlined, PartitionOutlined, ForkOutlined },
+  components: { EmptyResult, DeploymentUnitOutlined, PartitionOutlined, ForkOutlined },
   props: {
     where: {
       type: String,
@@ -111,7 +103,6 @@ export default {
   data() {
     return {
       isMounted: false,
-      simpleImage: Empty.PRESENTED_IMAGE_SIMPLE,
       layout: "none",
     };
   },

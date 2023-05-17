@@ -4,6 +4,7 @@ import flb from "./flb";
 import fsm from "./fsm";
 import system from "./system";
 import openapi from "./openapi";
+import web from "./web";
 
 export default {
   workload,
@@ -11,5 +12,6 @@ export default {
   fsm,
   system,
   openapi,
+	web,
   baseComponents,
 };

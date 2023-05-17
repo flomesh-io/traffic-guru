@@ -22,6 +22,7 @@
 
 <script>
 import { FieldTimeOutlined } from "@ant-design/icons-vue";
+import { timelineMap } from "@/utils/timeline";
 export default {
   name: "Timeline",
   components: { FieldTimeOutlined },
@@ -29,20 +30,7 @@ export default {
   props: ["dateVal"],
   data() {
     return {
-      sqlDateMap: {
-        0: "1 month",
-        10: "15 day",
-        20: "7 day",
-        30: "3 day",
-        40: "1 day",
-        50: "12 hour",
-        60: "6 hour",
-        70: "1 hour",
-        80: "30 minute",
-        90: "5 minute",
-        100: "1 second",
-      },
-
+      sqlDateMap: timelineMap,
       marks: {},
     };
   },

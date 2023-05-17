@@ -3,39 +3,67 @@
     <template #headerContent>
       <div :class="['search-head', layout, pageWidth]">
         <div class="search-input">
-          <a-mentions
-            class="a-mentions search-ipt"
-            v-model:value="filter"
-            rows="3"
-            :placeholder="$t('Please input filter')"
-            :prefix="[' ']"
-            @search="onSearch"
-          >
-            <a-mentions-option
-              v-for="value in WHERE_DATA[prefix] || []"
-              :key="value"
-              :value="value"
-            >
-              {{ value }}
-            </a-mentions-option>
-          </a-mentions>
-
-          <a-button
-            type="primary"
-            @click="getData()"
-            shape="circle"
-            class="border-round ml-15"
-          >
-            <SearchOutlined />
-          </a-button>
           <div
-            class="div-msg"
-            v-html="
-              $t(
-                `Input <b>SPACE</b> to add filter, <b>AND</b>/<b>OR</b> to concat. eg: feild1 = 'A' or feild2 = 'B'`,
-              )
-            "
-          />
+            class="flex"
+            style="width:510px;margin: auto"
+          >
+            <InputList
+              class="flex-item"
+              :width="450"
+              :d="filter"
+              :attrs="newFilter"
+              :xl-button="true"
+            >
+              <template #default="{ item }">
+                <a-select
+                  :placeholder="$t('Column')"
+                  v-model:value="item.col"
+                  class="bold font-center width-150"
+                >
+                  <a-select-option
+                    :value="col"
+                    v-for="(col, colIdx) in columns"
+                    :key="colIdx"
+                  >
+                    {{
+                      col
+                    }}
+                  </a-select-option>
+                </a-select>
+                <a-select
+                  :placeholder="$t('Operator')"
+                  v-model:value="item.opt"
+                  class="font-center ml-5"
+                >
+                  <a-select-option
+                    :value="opt"
+                    v-for="(opt, optIdx) in opts"
+                    :key="optIdx"
+                  >
+                    {{
+                      opt
+                    }}
+                  </a-select-option>
+                </a-select>
+                <a-input
+                  v-model:value="item.value"
+                  :placeholder="$t('Value')"
+                  class="bold font-center ml-5 width-120"
+                />
+              </template>
+            </InputList>
+            <div>
+              <a-divider type="vertical" />
+              <a-button
+                type="primary"
+                @click="getData()"
+                shape="circle"
+                class="border-round ml-15"
+              >
+                <SearchOutlined />
+              </a-button>
+            </div>
+          </div>
         </div>
         <a-card
           :bordered="false"
@@ -80,12 +108,11 @@
                       <a-menu>
                         <a-menu-item
                           :key="idx"
-                          v-for="(item, idx) in select_keys"
+                          v-for="(item, idx) in columns"
                         >
                           <a
                             href="javascript:void(0);"
                             @click="orderBy(item, arrow)"
-                            class="uppercase"
                           >{{ item.replace(/\./g, " ") }}</a>
                         </a-menu-item>
                       </a-menu>
@@ -166,8 +193,8 @@
             <template #avatar>
               <svg
                 v-if="
-                  record['res.status'] * 1 >= 200 &&
-                    record['res.status'] * 1 < 600
+                  record['resStatus'] * 1 >= 200 &&
+                    record['resStatus'] * 1 < 600
                 "
                 class="icon square-30"
                 aria-hidden="true"
@@ -181,7 +208,7 @@
                       '#icon-warning',
                       '#icon-error',
                       '#icon-error',
-                    ][(record['res.status'] + '').substr(0, 1) * 1]
+                    ][(record['resStatus'] + '').substr(0, 1) * 1]
                   "
                 />
               </svg>
@@ -194,13 +221,13 @@
               </svg>
             </template>
             <template #title>
-              <a href="javascript:void(0)">{{ record["req.path"] || "-" }}</a>
+              <a href="javascript:void(0)">{{ record["reqPath"] || "-" }}</a>
             </template>
             <template #description>
-              <a-tag v-if="record['req.protocol'] != '4LB'">
-                Method:{{ record["req.method"] || "-" }}
+              <a-tag v-if="record['reqProtocol'] != '4LB'">
+                Method:{{ record["reqMethod"] || "-" }}
               </a-tag>
-              <a-tag v-if="record['req.protocol'] != '4LB'">
+              <a-tag v-if="record['reqProtocol'] != '4LB'">
                 Size:{{ record["resSize"] > 0 ? (record["resSize"] / 1000) : "-" }} kb
               </a-tag>
             </template>
@@ -211,10 +238,10 @@
                 <div>
                   <b>{{ $t("Status") }}</b> :
                   <span
-                    v-if="record['req.protocol'] == 'dubbo'"
+                    v-if="record['reqProtocol'] == 'dubbo'"
                   ><a-badge
-                    :color="record['res.status'] * 1 > 20 ? 'red' : 'green'"
-                    :text="record['res.status']"
+                    :color="record['resStatus'] * 1 > 20 ? 'red' : 'green'"
+                    :text="record['resStatus']"
                   /></span>
                   <span
                     v-else
@@ -233,18 +260,18 @@
                         'red',
                         'red',
                         'red',
-                      ][record['res.status'].substr(0, 1)]
+                      ][(record['resStatus'] + '').substr(0, 1)]
                     "
-                    :text="record['res.status'] == 0 ? '-' : record['res.status']"
+                    :text="record['resStatus'] == 0 ? '-' : record['resStatus']"
                   /></span>
                 </div>
-                <div v-if="record['service.name']">
-                  <b>Service</b> : <span>{{ record["service.name"] }}</span>
+                <div v-if="record['serviceName']">
+                  <b>Service</b> : <span>{{ record["serviceName"] }}</span>
                 </div>
                 <div>
-                  <b>Headers</b> :
+                  <b>{{ $t("Headers") }}</b> :
                   <span
-                    v-if="record['req.headers']"
+                    v-if="record['reqHeaders']"
                     class="relative"
                     style="top: 5px"
                   >
@@ -252,18 +279,18 @@
                       placement="topRight"
                       :key="index2"
                       v-for="(key, index2) in Object.keys(
-                        getParse(record['req.headers']),
+                        getParse(record['reqHeaders']),
                       )"
                     >
                       <template #title>
                         <span>{{ key }}:{{
-                          getParse(record["req.headers"])[key]
+                          getParse(record["reqHeaders"])[key]
                         }}</span>
                       </template>
                       <a-tag
                         class="ellipsis"
                       >{{ key }}:{{
-                        getParse(record["req.headers"])[key]
+                        getParse(record["reqHeaders"])[key]
                       }}</a-tag>
                     </a-tooltip>
                   </span>
@@ -271,31 +298,31 @@
                 </div>
               </div>
               <div class="flex-item">
-                <div v-if="record['req.protocol'] != '4LB'">
+                <div v-if="record['reqProtocol'] != '4LB'">
                   <b>{{ $t("Time Quantum") }}</b> :
                   <em>{{ new Date(record.reqTime * 1).toLocaleString() }}</em>
                   <em> ~ </em>
                   <em>{{ new Date(record.resTime * 1).toLocaleString() }}</em>
                 </div>
-                <div v-if="record['pod.name']">
-                  <b>Pod</b> : <span>{{ record["pod.name"] }}</span>
+                <div v-if="record['podName']">
+                  <b>Pod</b> : <span>{{ record["podName"] }}</span>
                 </div>
                 <div>
                   <b>{{ $t("Protocol") }}</b> :
-                  <span>{{ record["req.protocol"] || "-" }}</span>
+                  <span>{{ record["reqProtocol"] || "-" }}</span>
                 </div>
               </div>
             </div>
           </div>
           <template #actions>
-            <span><FieldTimeOutlined /> {{ record.timestamp }}</span>
+            <span><FieldTimeOutlined /> {{ record.createdAt }}</span>
             <span
               v-if="record.remoteAddr"
-            >Remote {{ record.remoteAddr }} : {{ record.remotePort }}
+            >{{ $t("Remote") }} {{ record.remoteAddr }} : {{ record.remotePort }}
             </span>
             <span
               v-if="record.localAddr"
-            >Local {{ record.localAddr }} : {{ record.localPort }}
+            >{{ $t("Local") }} {{ record.localAddr }} : {{ record.localPort }}
             </span>
           </template>
         </a-list-item>
@@ -305,21 +332,12 @@
 </template>
 
 <script>
-import { spread } from "@/utils/request";
 import {
-  select_keys,
-  getPagingData,
-  coverMessage,
-  coverList,
-} from "@/services/clickhouse";
-const WHERE_DATA = {
-  " ": select_keys,
-  AND: select_keys,
-  OR: select_keys,
-  and: select_keys,
-  or: select_keys,
-  "=": ["http", "tcp", "GET", "POST", "PUT", "DELETE"],
-};
+  filterColumns,
+  getLogList,
+  coverMessage
+} from "@/services/clickhouseGQL";
+import InputList from "@/components/form/InputList";
 import JsonEditor from "@/components/editor/JsonEditor";
 import {
   DownOutlined,
@@ -337,21 +355,28 @@ export default {
     PageLayout,
     FieldTimeOutlined,
     SearchOutlined,
+    InputList,
     JsonEditor,
   },
 
   data() {
     return {
+      newFilter: {
+        col: null,
+        opt: "=",
+        value: "",
+      },
+
+      opts: ["=", ">", ">=", "<=", "<", "like"],
       date: "",
       endDate: "",
       log: "{}",
       arrow: "desc",
       visible: false,
-      select_keys,
-      WHERE_DATA,
-      sortBy: "timestamp",
+      columns: filterColumns,
+      sortBy: "createdAt",
       prefix: " ",
-      filter: "",
+      filter: [],
       loading: true,
       params: {
         pageNo: 1,
@@ -376,6 +401,29 @@ export default {
       return JSON.parse(jsonString.replace(/\\\\"/g, `'`));
     },
 
+    getFilter(list){
+      let filter = "";
+      let total = 0;
+      if(list){
+        list.forEach((item)=>{
+          if(item.value != null && item.value != "" && item.col){
+            if(total>0){
+              filter += " and "
+            }
+            let _val = ""
+            if(item.opt == 'like'){
+              _val = `'%${item.value}%'`;
+            } else {
+              _val = isNaN(item.value)?`'${item.value}'`:(item.value+'');
+            }
+            filter += `${item.col} ${item.opt} ${_val}`;
+            total++;
+          }
+        })
+      }
+      return filter;
+    },
+
     getData(pageNo, pageSize) {
       if (pageNo) {
         this.params.pageNo = pageNo;
@@ -383,22 +431,19 @@ export default {
       }
       this.loading = true;
       this.data = [];
-      getPagingData(
-        this.params.pageNo,
-        this.params.pageSize,
-        this.filter,
-        this.sortBy,
-        this.arrow,
-        this.date,
-        this.endDate,
-      )
-        .then(
-          spread((cnt, res) => {
-            this.loading = false;
-            this.params.total = cnt.data * 1;
-            this.data = coverList(res);
-          }),
-        )
+      getLogList({
+        ...this.params,
+        filter: this.getFilter(this.filter),
+        sortBy: this.sortBy,
+        arrow: this.arrow,
+        date: this.date,
+        endDate: this.endDate
+      })
+        .then((res) => {
+          this.loading = false;
+          this.params.total = res.total;
+          this.data = res.data;
+        })
         .catch((err) => {
           console.log(err);
         });
@@ -449,7 +494,6 @@ export default {
     top: 10px;
   }
   .sortby-value {
-    text-transform: uppercase;
     position: relative;
     top: 10px;
     color: #00adef;

@@ -1,14 +1,5 @@
 <template>
-  <a-result
-    v-if="plugins.length == 0"
-    :title="$t('No data')"
-  >
-    <template #icon>
-      <img
-        src="../../assets/img/empty.svg"
-        style="width: 300px"
-      >
-    </template>
+  <EmptyResult v-if="plugins.length == 0">
     <template #extra>
       <a-button
         :disabled="disabled"
@@ -30,7 +21,7 @@
         }}
       </a-button>
     </template>
-  </a-result>
+  </EmptyResult>
   <a-card
     v-for="(plugin, index) in plugins"
     :key="index"
@@ -104,6 +95,7 @@ import {
 import AutoForm from "@/components/form/AutoForm";
 import { DEFAULT_BASE_URL } from "@/services/api";
 import JsEditor from "@/components/editor/JsEditor";
+import EmptyResult from "@/components/tag/EmptyResult";
 
 export default {
   name: "PluginConfig",
@@ -112,7 +104,8 @@ export default {
     AutoForm,
     CheckOutlined,
     CloseOutlined,
-    JsEditor
+    JsEditor,
+    EmptyResult
   },
 
   props: ["type", "addText", "plugins",'disabled'],

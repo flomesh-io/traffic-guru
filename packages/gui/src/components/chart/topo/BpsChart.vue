@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import { getTimeline, getTimeLabel } from "@/utils/util";
+import { getTimeline, getTimeLabel } from "@/utils/timeline";
 import { getServiceWhere } from "@/services/clickhouse";
 export default {
   name: "BpsChart",

@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import { getTimeline, getTimeLabel, getTimeUnit } from "@/utils/util";
+import { getTimeline, getTimeLabel, getTimeUnit } from "@/utils/timeline";
 import { getServiceWhere } from "@/services/clickhouse";
 export default {
   name: "AreaChart",

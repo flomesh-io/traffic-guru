@@ -21,7 +21,6 @@ const system = {
       path: "dashboard/list",
       name: "Dashboard Setting",
       meta: {
-        authority: "dashboard:find",
         icon: LayoutOutlined,
       },
       component: () => import("@/pages/system/DashboardList"),
@@ -30,7 +29,6 @@ const system = {
       path: "dashboard/detail/:id",
       name: "Dashboard Detail",
       meta: {
-        authority: "dashboard:find",
         invisible: true,
       },
       component: () => import("@/pages/system/DashboardDetail"),
@@ -39,7 +37,6 @@ const system = {
       path: "dashboard/create",
       name: "Dashboard Create",
       meta: {
-        authority: "dashboard:create",
         invisible: true,
       },
       component: () => import("@/pages/system/DashboardDetail"),
@@ -48,7 +45,6 @@ const system = {
       path: "organizations/list",
       name: "Organizations",
       meta: {
-        authority: "organization:find",
         icon: PartitionOutlined,
       },
       component: () => import("@/pages/system/Organizations"),
@@ -57,7 +53,6 @@ const system = {
       path: "organizations/detail/:id",
       name: "Organization Detail",
       meta: {
-        authority: "organization:find",
         invisible: true,
       },
       component: () => import("@/pages/system/OrganizationDetail"),
@@ -67,7 +62,6 @@ const system = {
       name: "Projects",
       meta: {
         icon: ProjectOutlined,
-        authority: "project:find",
       },
       component: () => import("@/pages/system/Projects"),
     },
@@ -75,7 +69,6 @@ const system = {
       path: "projects/detail/:id",
       name: "Project Detail",
       meta: {
-        authority: "project:find",
         invisible: true,
       },
       component: () => import("@/pages/system/ProjectDetail"),
@@ -84,26 +77,39 @@ const system = {
       path: "projects/create",
       name: "Project Create",
       meta: {
-        authority: "project:find",
         invisible: true,
       },
       component: () => import("@/pages/system/ProjectDetail"),
     },
     {
-      path: "roles",
+      path: "roles/list",
       name: "Roles",
       meta: {
         icon: CustomerServiceOutlined,
-        authority: "role:find",
       },
       component: () => import("@/pages/system/Roles"),
+    },
+    {
+      path: "roles/detail/:id",
+      name: "Role Detail",
+      meta: {
+        invisible: true,
+      },
+      component: () => import("@/pages/system/RoleDetail"),
+    },
+    {
+      path: "roles/create",
+      name: "Role Create",
+      meta: {
+        invisible: true,
+      },
+      component: () => import("@/pages/system/RoleDetail"),
     },
     {
       path: "users",
       name: "Users",
       meta: {
         icon: TeamOutlined,
-        authority: "user:find",
       },
       component: () => import("@/pages/system/Users"),
     },
@@ -111,7 +117,6 @@ const system = {
       path: "widget/list",
       name: "UI Widgets",
       meta: {
-        authority: "widget:find",
         icon: BuildOutlined,
       },
       component: () => import("@/pages/system/Widgets"),
@@ -120,7 +125,6 @@ const system = {
       path: "widget/creator",
       name: "UI Widget Creator",
       meta: {
-        authority: "widget:find",
         invisible: true,
       },
       component: () => import("@/pages/system/WidgetEditor"),
@@ -129,7 +133,6 @@ const system = {
       path: "widget/editor/:id",
       name: "UI Widget Editor",
       meta: {
-        authority: "widget:find",
         invisible: true,
       },
       component: () => import("@/pages/system/WidgetEditor"),
@@ -138,7 +141,6 @@ const system = {
       path: "widget/preview/:name",
       name: "UI Widget Preview",
       meta: {
-        authority: "widget:find",
         invisible: true,
       },
       component: () => import("@/pages/system/WidgetEditor"),

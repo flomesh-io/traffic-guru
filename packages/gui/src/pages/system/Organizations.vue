@@ -98,17 +98,7 @@
           </div>
         </template>
       </a-tree>
-      <a-result
-        v-else
-        :title="$t('No data')"
-      >
-        <template #icon>
-          <img
-            src="../../assets/img/empty.svg"
-            style="width: 300px"
-          >
-        </template>
-      </a-result>
+      <EmptyResult v-else />
     </a-card>
 
     <a-modal
@@ -196,6 +186,7 @@ import { mapGetters } from "vuex";
 import { Empty } from "ant-design-vue";
 import FormItem from "@/components/tool/FormItem";
 import { mapState } from "vuex";
+import EmptyResult from "@/components/tag/EmptyResult";
 export default {
   name: "Organizations",
   components: {
@@ -208,6 +199,7 @@ export default {
     CloseOutlined,
     EditOutlined,
     FormItem,
+    EmptyResult,
   },
 
   i18n: require("@/i18n"),

@@ -1,4 +1,4 @@
-import Cookie from "js-cookie";
+import Cookie from '@/utils/cookie'
 
 const resp401 = {
   onFulfilled(response, options) {

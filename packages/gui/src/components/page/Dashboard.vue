@@ -116,7 +116,7 @@
       </HeadInfo>
     </template>
 
-    <a-result
+    <EmptyResult 
       v-if="!isEdit && (loading || !subscribes || subscribes.length == 0)"
       class="mt-20"
       :title="$t('My Dashboard')"
@@ -124,12 +124,6 @@
         loading ? $t('The system is reading your preferences') + '...' : ''
       "
     >
-      <template #icon>
-        <img
-          src="../../assets/img/empty.svg"
-          style="width: 300px"
-        >
-      </template>
       <template
         #extra
         v-if="!loading"
@@ -151,7 +145,7 @@
           {{ $t("Add a component") }}
         </a-button>
       </template>
-    </a-result>
+    </EmptyResult>
 
     <div
       v-if="isEdit"
@@ -411,6 +405,7 @@
 </template>
 
 <script>
+import EmptyResult from "@/components/tag/EmptyResult";
 import _ from "lodash";
 import PageLayout from "@/layouts/PageLayout";
 import HeadInfo from "@/components/tool/HeadInfo";
@@ -442,6 +437,7 @@ const isFree = !isPro();
 export default {
   name: "Dashboard",
   components: {
+    EmptyResult,
     HeadInfo,
     PageLayout,
     AutoCard,

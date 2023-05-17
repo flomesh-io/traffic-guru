@@ -2,17 +2,30 @@
   <a-tag
     :key="index"
     v-for="(tag, index) in list"
-    @close="handleClose(tag)"
+    @close.prevent="handleClose(index)"
     :closable="true"
   >
     {{ tag }}
   </a-tag>
+  <a-input-number
+    v-if="type=='number'"
+    :min="0"
+    v-show="visible"
+    :ref="name"
+    size="small"
+    class="mr-10 width-100"
+    :placeholder="placeholder"
+    v-model:value="value"
+    @blur="inputConfirm"
+    @keyup.enter="inputConfirm"
+  />
   <a-input
+    v-else
     v-show="visible"
     :ref="name"
     type="text"
     size="small"
-    class="width-100"
+    class="mr-10 width-100"
     :placeholder="placeholder"
     v-model:value="value"
     @blur="inputConfirm"
@@ -34,7 +47,7 @@ import { PlusOutlined } from "@ant-design/icons-vue";
 export default {
   name: "TagList",
   components: { PlusOutlined },
-  props: ["placeholder", "name", "list"],
+  props: ["placeholder", "name", "list", "type"],
   i18n: require("@/i18n"),
   data() {
     return {
@@ -51,8 +64,9 @@ export default {
       });
     },
 
-    handleClose(removedTag) {
-      const tags = this.list.filter((tag) => tag !== removedTag);
+    handleClose(index) {
+      this.list.splice(index,1);
+      const tags = this.list;
       this.$emit("update:list", tags);
       this.$emit("change", tags);
     },

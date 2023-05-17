@@ -229,7 +229,8 @@ export default {
             getPermission({id:userinfo.data.role.id})
               .then((role) => {
                 _role = role;
-                this.setRoles(role);
+                _role.id = userinfo.data.role.id;
+                this.setRoles(_role);
                 setTimeout(()=>{
                   this.$router.push("/workplace");
                 },300);

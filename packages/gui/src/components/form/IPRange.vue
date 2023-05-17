@@ -169,11 +169,19 @@ export default {
       let _ip = this.ip;
       if (_ip) {
         if(this.type==5){
-          _ip.a = "::ffff:0";
-          _ip.suffix = "ffff";
+          if(!_ip.a){
+            _ip.a = "::ffff:0";
+          }
+          if(!_ip.suffix){
+            _ip.suffix = "ffff";
+          }
         }else if(_ip.type==6){
-          _ip.a = "::ffff:0:0";
-          _ip.suffix = "120";
+          if(!_ip.a){
+            _ip.a = "::ffff:0:0";
+          }
+          if(!_ip.suffix){
+            _ip.suffix = "120";
+          }
         }
         _ip[column] = value;
         this.$emit('update:ip', _ip);

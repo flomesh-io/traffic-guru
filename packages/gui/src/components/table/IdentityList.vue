@@ -111,6 +111,7 @@
         v-if="certificatesVal"
         :col="col"
         :is-bind="true"
+        :mode="mode"
         v-model:bindCertificates="certificatesVal"
       />
     </div>
