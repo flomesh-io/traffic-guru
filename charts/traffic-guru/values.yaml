@@ -18,7 +18,7 @@ gui:
 
 pipyRepo:
   imageName: pipy-repo
-  tag: 0.90.0-18
+  tag: 0.90.1-87
   resources: {}
     #limits:
     #  cpu: 1
