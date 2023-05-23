@@ -65,14 +65,20 @@ spec:
       {{- end }}
       hostNetwork: true
       containers:
-      - image: "{{ include "osmInterceptor.image" . }}"
+      - name: osm-interceptor
+        image: "{{ include "osmInterceptor.image" . }}"
         imagePullPolicy: {{ .Values.osm.image.pullPolicy }}
-        name: osm-interceptor
-        args:
-        - /app/osm-interceptor
-        - --cni-mode=true
-        - --kind=false
-        - --debug={{ .Values.osm.osmInterceptor.debug }}
+        command: ['/app/osm-interceptor']
+        args: [
+          "--verbosity", "{{.Values.osm.controllerLogLevel}}",
+          "--osm-namespace", "{{ include "osm.namespace" . }}",
+          "--osm-version", "{{ .Chart.AppVersion }}",
+          "--mesh-name", "{{.Values.osm.meshName}}",
+          "--trust-domain", "{{.Values.osm.trustDomain}}",
+          "--cni-mode={{ .Values.osm.osmInterceptor.cniMode }}",
+          "--kind={{ .Values.osm.osmInterceptor.kindMode }}",
+          "--kernel-tracing={{ .Values.osm.osmInterceptor.kernelTracing }}",
+        ]
         lifecycle:
           preStop:
             exec:

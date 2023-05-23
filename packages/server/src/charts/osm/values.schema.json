@@ -273,11 +273,29 @@
                         "tolerations": {
                             "type": "array"
                         },
-                        "debug": {
-                            "$id": "#/properties/osm/properties/osmInterceptor/properties//debug",
+                        "kernelTracing": {
+                            "$id": "#/properties/osm/properties/osmInterceptor/properties/kernelTracing",
                             "type": "boolean",
-                            "title": "debug enable",
-                            "description": "Indicates whether debug should be enabled or not.",
+                            "title": "kernel tracing enable",
+                            "description": "Indicates whether kernel tracing should be enabled or not.",
+                            "examples": [
+                                false
+                            ]
+                        },
+                        "cniMode": {
+                            "$id": "#/properties/osm/properties/osmInterceptor/properties/cniMode",
+                            "type": "boolean",
+                            "title": "cni plugin enable",
+                            "description": "Indicates whether cni plugin should be enabled or not.",
+                            "examples": [
+                                false
+                            ]
+                        },
+                        "kindMode": {
+                            "$id": "#/properties/osm/properties/osmInterceptor/properties/kindMode",
+                            "type": "boolean",
+                            "title": "running kind cluster",
+                            "description": "Indicates whether running kind cluster.",
                             "examples": [
                                 false
                             ]
@@ -775,7 +793,8 @@
                     "description": "Traffic interception mode in the mesh.",
                     "enum": [
                         "iptables",
-                        "ebpf"
+                        "ebpf",
+                        "none"
                     ],
                     "examples": [
                         "iptables"

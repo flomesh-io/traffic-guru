@@ -29,7 +29,6 @@ module.exports = {
       }
     }
     const results = strapi.entityService.findMany(model,transformedArgs);
-    console.log(transformedArgs)
     return entityUtils.toEntityResponseCollection(
       transformedArgs,
       model,

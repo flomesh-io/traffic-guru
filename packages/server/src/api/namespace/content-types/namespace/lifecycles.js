@@ -3,14 +3,32 @@
 const k8s = require('@kubernetes/client-node');
 
 module.exports = {
-  afterCreate: (event) => {
+  afterCreate: async (event) => {
     const { result, params } = event;
     if (params.data.regType == 'k8s') {
-      strapi.log.debug('-- fetch k8s service --');
+      strapi.log.info('-- fetch k8s service --');
       strapi.service('api::namespace.namespace').fetchK8sService(result, params.data.regData);
 
     } else {
-      strapi.log.debug('-- fetch xxx service --');
+
+      const ns = await strapi.db.query("api::namespace.namespace").findOne({where:{id: result.id}, populate: true})
+      if (ns.registry.type == "k8s") {
+        const kc = await strapi.service('api::kubernetes.kubernetes').getKubeConfig(
+          ns.registry.id,
+          'k8s'
+        );
+        const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
+        const item = {
+          "apiVersion": "v1",
+          "kind": "Namespace",
+          "metadata": {
+             "name": ns.name,
+          }
+        }
+        await k8sApi.createNamespace(item);
+        strapi.log.info('-- create k8s namespace -- ' + ns.name);
+      }
+
     }
   },
   beforeUpdate: async (event) => {

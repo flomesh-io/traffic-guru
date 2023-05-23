@@ -1,0 +1,14 @@
+{
+  "blacklist": {
+    "ips": [
+    ],
+    "serviceName": {
+    }
+  },
+  "whitelist": {
+    "ips": [
+    ],
+    "serviceName": {
+    }
+  }
+}

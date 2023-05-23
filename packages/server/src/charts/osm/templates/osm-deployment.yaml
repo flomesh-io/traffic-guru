@@ -57,6 +57,20 @@ spec:
           args: [
               "--admin-port={{ .proxyServerPort }}",
           ]
+          readinessProbe:
+            initialDelaySeconds: 1
+            timeoutSeconds: 5
+            httpGet:
+              scheme: HTTP
+              path: /
+              port: 6060
+          livenessProbe:
+            initialDelaySeconds: 1
+            timeoutSeconds: 5
+            httpGet:
+              scheme: HTTP
+              path: /
+              port: 6060
         {{- end }}
         {{- end }}
         {{- end }}

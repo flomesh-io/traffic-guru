@@ -267,14 +267,15 @@ module.exports = {
           duration    : String
           reqTime     : String
           resTime     : String
+          message     : JSON
         }
         type TraceDetailVO {
           data : [TraceSpanVO]
           rows : Int
         }
         input TraceDAGFilters {
-          reqTimeFrom  : String
-          reqTimeTo    : String
+          reqTimeFrom  : DateTime
+          reqTimeTo    : DateTime
         }
         type TraceDAGRegistryVO {
           id   : Int

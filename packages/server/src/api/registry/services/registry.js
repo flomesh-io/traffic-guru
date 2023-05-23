@@ -200,6 +200,20 @@ module.exports = createCoreService('api::registry.registry', {
           });
         }
       });
+      namespaces.forEach(async (item) => {
+        if (!result.body.items.find((n) => n.metadata.name== item.name)) {
+          strapi.log.debug("delete namespace: " + item.name)
+          const svcs = await strapi.db.query("api::service.service").findMany({where: {ns: item.id}})
+          svcs.length && strapi.log.debug("delete service: " + svcs.map((s) => s.name))
+          await strapi.db.query("api::service.service").deleteMany({where: {id: svcs.map((s) => s.id)}})
+          const meshs = await strapi.db.query("api::mesh.mesh").findMany({where: {namespace: item.id}})
+          meshs.length && strapi.log.debug("delete mesh: " + meshs.map((s) => s.name))
+          await strapi.db.query("api::mesh.mesh").deleteMany({where: {id: meshs.map((s) => s.id)}})
+
+          await strapi.db.query("api::namespace.namespace").delete({where: {id: item.id}})
+        }
+      });
+      
     } catch (error) {
       console.error(error);
     }

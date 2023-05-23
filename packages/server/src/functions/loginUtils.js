@@ -66,7 +66,7 @@ async function checkCode(identifier, verificationCode) {
 
 module.exports = {
   async loginByCode(obj, args, context) {
-    console.log(args)
+    args.input.password = encryptUtil.decrypt(args.input.password)
     const {emailConf, code} = await checkCode(args.input.identifier, args.input.verificationCode);
 
     const { koaContext } = context;
@@ -100,6 +100,8 @@ module.exports = {
 
   async registerByCode(obj, args, context) {
     const {emailConf, code} = await checkCode(args.input.email, args.input.verificationCode);
+
+    args.input.password = encryptUtil.decrypt(args.input.password)
 
     const { koaContext } = context;
 
@@ -173,6 +175,7 @@ module.exports = {
     const emailConf = await strapi.db
       .query('api::system-setting.system-setting')
       .findOne({where: { type: 'EmailConf' }});
+    args.data.newPassword = encryptUtil.decrypt(args.data.newPassword)
     if (emailConf?.content?.service) {
       const date = new Date(
         new Date().getTime() - 5 * 60 * 1000

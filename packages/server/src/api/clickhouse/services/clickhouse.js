@@ -203,6 +203,7 @@ module.exports = createCoreService('api::clickhouse.clickhouse', {
         }
       }
     } catch (error) {
+      console.error(error)
     }
   },
 });

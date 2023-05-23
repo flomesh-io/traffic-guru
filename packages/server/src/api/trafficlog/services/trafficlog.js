@@ -13,10 +13,13 @@ module.exports = createCoreService('api::trafficlog.trafficlog',{
    */
   async getLogFleet() {
     const logConf = await strapi.db.query('api::fleet.fleet').findOne({ where: { type: 'log', apply: true } });
+    let fleet = null
     if (logConf == null || logConf.length == 0) {
-      throw new Error('no log conf');
+      fleet = await strapi.db.query('api::fleet.fleet').findOne({ where: { type: 'clickhouse', apply: true} });
+    } else {
+      fleet = await strapi.db.query('api::fleet.fleet').findOne({ where: { id: logConf.content.bind.id } });
+     
     }
-    const fleet = await strapi.db.query('api::fleet.fleet').findOne({ where: { id: logConf.content.bind.id } });
     if (fleet == null || fleet.length == 0) {
       throw new Error('no db conf');
     }
@@ -486,15 +489,19 @@ module.exports = createCoreService('api::trafficlog.trafficlog',{
     // `; 
     const querySql = `
     SELECT trace.span as traceSpan, trace.parent as traceParent, service.name as serviceName,
-      pod.name as podName, (resTime - reqTime) as duration, reqTime, resTime, bondType as boundType
+      pod.name as podName, (resTime - reqTime) as duration, reqTime, resTime, bondType as boundType, message
     FROM log
     WHERE trace.id = '${reqBody.traceId}'
     ORDER BY reqTime ASC  format JSON
     `;
     const queryRes = await dbQuery4Clickhouse(dbConf, querySql);
-    //all inbound spans + a outbond span which(parentId=traceId)
+    // -- all inbound spans + a outbond span which(parentId=traceId)
+    // const resultData = queryRes.data.data.filter((element) => 
+    //   element.boundType !== 'outbound' || element.traceParent == reqBody.traceId);
+    // -- all inbound spans
     const resultData = queryRes.data.data.filter((element) => 
-      element.boundType !== 'outbound' || element.traceParent == reqBody.traceId)
+      element.boundType !== 'outbound');
+
     return {
       "data": resultData,
       "rows": resultData.length
@@ -506,51 +513,47 @@ module.exports = createCoreService('api::trafficlog.trafficlog',{
    */
   async traceDag2Clickhouse(reqBody, dbConf) {
     let whereSql = '';
-    // if (reqBody?.reqTimeFrom) {
-    //   whereSql += ` 
-    //     AND reqTime > ${reqBody.reqTimeFrom} 
-    //   `;
-    // }
-    // if (reqBody?.reqTimeTo) {
-    //   whereSql += ` 
-    //     AND reqTime < ${reqBody.reqTimeTo} 
-    //   `;
-    // }
-    if (reqBody?.reqTimeFrom) {//e.g. reqTimeFrom=15 day
-      whereSql += " AND toDateTime(reqTime / 1000) > (now() - interval " + reqBody.reqTimeFrom + ") ";
+    if (reqBody?.reqTimeFrom) {
+      whereSql += " AND reqTime > " + reqBody.reqTimeFrom.getTime();
     }
-    if (reqBody?.reqTimeTo) { //e.g. reqTimeTo=1 second
-      whereSql += " AND toDateTime(reqTime / 1000) < (now() - interval " + reqBody.reqTimeTo + ") ";
+    if (reqBody?.reqTimeTo) {
+      whereSql += " AND reqTime < " + reqBody.reqTimeTo.getTime();
     }
+    // if (reqBody?.reqTimeFrom) {//e.g. reqTimeFrom=15 day
+    //   whereSql += " AND toDateTime(reqTime / 1000) > (now() - interval " + reqBody.reqTimeFrom + ") ";
+    // }
+    // if (reqBody?.reqTimeTo) { //e.g. reqTimeTo=1 second
+    //   whereSql += " AND toDateTime(reqTime / 1000) < (now() - interval " + reqBody.reqTimeTo + ") ";
+    // }
 
     // DAG for services
-    // const querySql = `
-    // SELECT COUNT(1) weight, serviceName
-    // FROM 
-    //   ( SELECT trace.span as traceSpan, groupArray(service.name) as serviceName
-    //     FROM
-    //       (SELECT trace.span, service.name, reqTime, bondType
-    //         FROM log
-    //         WHERE bondType <> '' 
-    //         AND  trace.id != '' ${whereSql}
-    //         ORDER BY reqTime ASC, bondType DESC )
-    //     GROUP BY traceSpan ) 
-    // GROUP BY serviceName  format JSON
-    // `; 
-    // DAG for pods
     const querySql = `
-    SELECT COUNT(1) weight, podName
+    SELECT COUNT(1) weight, serviceName
     FROM 
-      ( SELECT trace.span as traceSpan, groupArray(pod.name) as podName
+      ( SELECT trace.span as traceSpan, groupArray(service.name) as serviceName
         FROM
-          (SELECT trace.span, pod.name, reqTime, bondType
+          (SELECT trace.span, service.name, reqTime, bondType
             FROM log
-            WHERE bondType <> '' AND pod.name <> ''
+            WHERE bondType <> '' 
             AND  trace.id != '' ${whereSql}
             ORDER BY reqTime ASC, bondType DESC )
         GROUP BY traceSpan ) 
-    GROUP BY podName  format JSON
+    GROUP BY serviceName  format JSON
     `; 
+    // // DAG for pods
+    // const querySql = `
+    // SELECT COUNT(1) weight, podName
+    // FROM 
+    //   ( SELECT trace.span as traceSpan, groupArray(pod.name) as podName
+    //     FROM
+    //       (SELECT trace.span, pod.name, reqTime, bondType
+    //         FROM log
+    //         WHERE bondType <> '' AND pod.name <> ''
+    //         AND  trace.id != '' ${whereSql}
+    //         ORDER BY reqTime ASC, bondType DESC )
+    //     GROUP BY traceSpan ) 
+    // GROUP BY podName  format JSON
+    // `; 
     // console.debug(querySql)
     const queryRes = await dbQuery4Clickhouse(dbConf, querySql);
     // get svc list
@@ -620,7 +623,7 @@ function buildWhereSql4Postgresql(reqBody) {
 function buildWhereSql4Clickhouse(reqBody) {
   let whereSql = '';
   if (reqBody?.serviceName) {
-    whereSql += " AND service.name = '" + reqBody.serviceName + "' ";
+    whereSql += " AND service.name = '" + reqBody.serviceName?.replace("null.","") + "' ";
   }
   if (reqBody?.queryWords) {
     whereSql = whereSql + " AND message like '%25" + reqBody.queryWords + "%25' ";
@@ -645,7 +648,7 @@ function buildLogQuery4Clickhouse(reqBody) {
     logQuery += " AND reqTime < " + reqBody.reqTimeTo.getTime();
   }
   if (reqBody?.serviceName) {
-    logQuery += " AND service.name = '" + reqBody.serviceName + "' ";
+    logQuery += " AND service.name = '" + reqBody.serviceName?.replace("null.","") + "' ";
   }
   if (reqBody?.queryWords) {
     logQuery += " AND message like '%25" + reqBody.queryWords + "%25' ";
@@ -680,11 +683,13 @@ async function dbQuery4Clickhouse(dbConf, querySql) {
       method: 'get',
       url: queryUrl,
       headers: { Authorization: 'Basic ' + base64Str },
+      timeout: 30000,
     });
   } else {
     return await axios({
       method: 'get',
       url: queryUrl,
+      timeout: 30000,
     });
   } 
 }

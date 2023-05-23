@@ -12,7 +12,7 @@ osm:
     # -- Container image pull policy for control plane containers
     pullPolicy: IfNotPresent
     # -- Container image tag for control plane images
-    tag: "1.3.2"
+    tag: "1.3.5"
     # -- Image name defaults
     name:
       # -- osm-controller's image name
@@ -60,7 +60,7 @@ osm:
   sidecarDrivers:
     - sidecarName: pipy
       # -- Sidecar image for Linux workloads
-      sidecarImage: flomesh/pipy:0.90.0-54
+      sidecarImage: flomesh/pipy:0.90.1-87
       # -- Remote destination port on which the Discovery Service listens for new connections from Sidecars.
       proxyServerPort: 6060
     - sidecarName: envoy
@@ -76,7 +76,7 @@ osm:
   # -- Pipy RepoServer
   repoServer:
     # -- Image used for Pipy RepoServer
-    image: flomesh/pipy-repo:0.90.0-54
+    image: flomesh/pipy-repo:0.90.1-87
     # -- if false , Pipy RepoServer is installed within osmController pod.
     standalone: false
     # -- ipaddr of host/service where Pipy RepoServer is installed
@@ -207,7 +207,9 @@ osm:
   #
   # -- OSM interceptor parameters
   osmInterceptor:
-    debug: false
+    kernelTracing: true
+    cniMode: true
+    kindMode: false
     resource:
       limits:
         cpu: "1.5"
@@ -300,7 +302,7 @@ osm:
     # -- The Certificate manager type: `tresor`, `vault` or `cert-manager`
     kind: tresor
     # -- Service certificate validity duration for certificate issued to workloads to communicate over mTLS
-    serviceCertValidityDuration: 24h
+    serviceCertValidityDuration: 365d
     # -- Certificate key bit size for data plane certificates issued to workloads to communicate over mTLS
     certKeyBitSize: 2048
 

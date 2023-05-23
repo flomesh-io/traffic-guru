@@ -64,7 +64,7 @@ module.exports = createCoreService('api::mesh.mesh',{
     );
     const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
 
-    if (!result.options.osm.remoteLogging.address) {
+    if (result.options.osm.remoteLogging.enable) {
        const log = await strapi.db.query('api::fleet.fleet').findOne({ where: { type: 'log', apply: true } });
        let ch = null
        if (log == null) {
@@ -158,8 +158,11 @@ module.exports = createCoreService('api::mesh.mesh',{
       }
     });
 
-    if (result.mcsEnable) {
-      let helmFsmCmd = `helm repo add fsm https://charts.flomesh.io && helm install --namespace ${namespace.name} --kubeconfig ${kubeconfigPath} --set fsm.logLevel=5 --version=0.2.3 fsm fsm/fsm --create-namespace`;
+    const k8sPodApi = kc.makeApiClient(k8s.CoreV1Api);
+    const pods = await k8sPodApi.listPodForAllNamespaces(null,null,null, 'app.kubernetes.io/name=fsm')
+    
+    if (result.mcsEnable && pods.body.items.length == 0) {
+      let helmFsmCmd = `helm repo add fsm https://charts.flomesh.io && helm install --namespace ${namespace.name} --kubeconfig ${kubeconfigPath} --set fsm.logLevel=5 --version=0.2.4 fsm fsm/fsm --create-namespace`;
 
       if (result.timeout) {
         helmFsmCmd += ' --timeout ${result.timeout}';
@@ -347,14 +350,7 @@ module.exports = createCoreService('api::mesh.mesh',{
     );
 
     // FSM status===========
-    pods = await k8sPodApi.listNamespacedPod(
-      namespace.name,
-      null,
-      null,
-      null,
-      null,
-      'app.kubernetes.io/name=fsm'
-    );
+    pods = await k8sPodApi.listPodForAllNamespaces(null,null,null, 'app.kubernetes.io/name=fsm')
     if (pods.body.items.length == 0) {
       data.status.mcs = 'stop';
     } else {

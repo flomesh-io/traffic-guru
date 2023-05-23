@@ -29,6 +29,9 @@ module.exports = createCoreService('api::prometheus.prometheus', {
     
         let url = `${host}/api/v1/${type}`;
         url = url.replace("//api/v1", "/api/v1")
+        if (url.indexOf("http") == -1) {
+          url = "http://" + url
+        }
         if (queryStr) {
           url = `${url}?${queryStr}`;
         }
