@@ -310,6 +310,76 @@
               </FormItem>
             </a-descriptions-item>
             <a-descriptions-item
+              span="3"
+            >
+              <template #label>
+                {{ $t("Enable Logging") }}
+              </template>
+              <FormItem>
+                <a-switch
+                  v-model:checked="payload.options.osm.remoteLogging.enable"
+                />
+              </FormItem>
+            </a-descriptions-item>
+            <!--
+              <a-descriptions-item
+              v-if="payload.options.osm.remoteLogging.enable"
+              :span="2"
+              >
+              <template #label>
+              {{ $t("Authorization") }}
+              </template>
+              <FormItem>
+              <a-textarea
+              :placeholder="$t('Authorization')"
+              v-model:value="
+              payload.options.osm.remoteLogging.authorization
+              "
+              />
+              </FormItem>
+              </a-descriptions-item>
+              <a-descriptions-item
+              :span="3"
+              v-if="payload.options.osm.remoteLogging.enable"
+              >
+              <template #label>
+              {{ $t("Remote Logging") }}
+              </template>
+              <div class="flex">
+              <div class="flex-item">
+              <FormItem>
+              <a-input
+              :placeholder="$t('Address')"
+              v-model:value="
+              payload.options.osm.remoteLogging.address
+              "
+              />
+              </FormItem>
+              </div>
+              <div class="flex-item">
+              <FormItem>
+              <a-input
+              :placeholder="$t('Port')"
+              v-model:value="
+              payload.options.osm.remoteLogging.port
+              "
+              />
+              </FormItem>
+              </div>
+              <div class="flex-item">
+              <FormItem>
+              <a-input
+              :placeholder="$t('Endpoint')"
+              v-model:value="
+              payload.options.osm.remoteLogging.endpoint
+              "
+              />
+              </FormItem>
+              </div>
+              </div>
+              </a-descriptions-item>
+            -->
+            <a-descriptions-item
               :span="payload.options.osm.tracing.enable ? 2 : 3"
             >
               <template #label>

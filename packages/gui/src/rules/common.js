@@ -72,7 +72,7 @@ const rules = {
 			type: "object",
 			message: "This is required",
 			whitespace: true,
-			trigger: "blur",
+			trigger: "submit",
 		},
 	],
 	name: [

@@ -3,9 +3,6 @@
     class="card nopd"
     :title="$t('Waterfall Detail')"
   >
-    <div class="network-card-header">
-      <h2>Trace ID : {{ traceId }}</h2>
-    </div>
     <div class="network-card-body">
       <a-drawer
         v-if="visible"
@@ -34,7 +31,7 @@
             <div class="inline-block">
               <a
                 href="javascript:void(0)"
-                @click="showDrawer(record.spanId)"
+                @click="showDrawer(record)"
               >{{
                 record.spanId
               }}</a>
@@ -46,7 +43,7 @@
           <template v-else-if="column.dataIndex === 'svcName'">
             <a-tag
               :key="tagidx"
-              v-for="(tag, tagidx) in record.svcName"
+              v-for="(tag, tagidx) in record.svcAry"
             >
               {{ tag }}
             </a-tag>
@@ -54,7 +51,7 @@
           <template v-else-if="column.dataIndex === 'podName'">
             <a-tag
               :key="tagidx"
-              v-for="(tag, tagidx) in record.podName"
+              v-for="(tag, tagidx) in record.podAry"
             >
               {{ tag }}
             </a-tag>
@@ -78,7 +75,9 @@
 </template>
 
 <script>
-import _ from "lodash";
+import {
+  getTraceDetail,
+} from "@/services/clickhouseGQL";
 import JsonEditor from "@/components/editor/JsonEditor";
 const columns = [
   {
@@ -126,6 +125,7 @@ export default {
       duration: 0,
       time: "",
       spans: [],
+      list:[],
       columns,
     };
   },
@@ -154,8 +154,8 @@ export default {
       console.log("visible", val);
     },
 
-    showDrawer(spanid) {
-      this.getLog(spanid);
+    showDrawer(span) {
+      this.getLog(span);
       this.visible = true;
     },
 
@@ -163,166 +163,66 @@ export default {
       this.visible = false;
     },
 
-    getStep(val) {
-      return Math.ceil((val / this.duration) * 100);
+    getStep(val, duration) {
+      return Math.ceil((val / duration) * 100);
     },
 
     getTime(val) {
       return val + "ms";
     },
 
-    buildSpan(lastduration, node, nodes, ending) {
-      let _start = node[6] - this.time;
-      let _n = {
-        key: node[0],
-        spanId: node[0],
-        cnt: node[2],
-        svcName:
-          node[3].indexOf("[") >= 0 ? _.uniq(eval(node[3])) : [node[3]],
-
-        podName:
-          node[4].indexOf("[") >= 0 ? _.uniq(eval(node[4])) : [node[4]],
-
-        duration: node[5],
-        reqTime: node[6],
-        resTime: node[7],
-        start: this.getStep(_start),
-        end: this.getStep(_start + node[5] * 1),
-        startTime: this.getTime(_start),
-        endTime: this.getTime(_start + node[5] * 1),
-        marks: {},
-      };
-      _n.marks[this.getStep(_start)] = this.getTime(_start);
-      _n.marks[this.getStep(_start * 1 + node[5] * 1)] = this.getTime(
-        _start * 1 + node[5] * 1,
-      );
-      if (!ending) {
-        let _child = this.getChild({ start: _start }, node[0], nodes);
-        if (_child && _child.length > 0) {
-          _n.children = _child;
-        } else {
-          this.getChildSpan({ start: _start }, _n);
-        }
-      }
-      lastduration.start = node[5];
-      return _n;
-    },
-
-    getChild(lastduration, parent, nodes) {
-      let child = [];
-      if (!nodes) {
-        return [];
-      }
-      nodes.forEach((nodeStr) => {
-        let node = nodeStr.split("\t");
-        if (node[0] && parent != "" && parent == node[1]) {
-          child.push(this.buildSpan(lastduration, node));
-        }
-      });
-      return child;
-    },
-
-    getEndChild(lastduration, nodes) {
-      let child = [];
-      nodes.forEach((nodeStr) => {
-        let node = nodeStr.split("\t");
-        if (node[0]) {
-          child.push(this.buildSpan(lastduration, node, null, true));
-        }
-      });
-      return child;
-    },
-
-    setSpan(nodes) {
-      let lastduration = { start: 0 };
-      nodes.forEach((nodeStr) => {
-        let node = nodeStr.split("\t");
-        if ((node[0] && !node[1]) || node[1] == "") {
-          this.spans.push(this.buildSpan(lastduration, node, nodes));
-        }
-      });
-    },
-
-    getLog(spanid) {
-      let SQL = `select message from log where trace.span='${spanid}';`;
-      this.$request(this.$REST.CLICKHOUSE.QUERY(SQL), this.$METHOD.GET)
-        .then((res) => {
-          if (typeof res.data == "object") {
-            this.log = JSON.stringify(res.data);
-          } else {
-            let _nodes = [];
-            let nodes = res.data.split("\n");
-            nodes.map((nodeStr) => {
-              if (nodeStr && nodeStr != "") {
-                _nodes.push(JSON.parse(nodeStr.replaceAll('\\"', '"')));
-              }
-              return nodeStr;
-            });
-            this.log = JSON.stringify(_nodes);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+    getLog(span) {
+      this.log = span.message || JSON.stringify({});
     },
 
     getData() {
-      let SQL = `select trace.id,count(),(max(resTime) - min(reqTime)) as duration,min(reqTime) from log where trace.id='${this.traceId}' group by trace.id;`;
-      this.$request(this.$REST.CLICKHOUSE.QUERY(SQL), this.$METHOD.GET)
+      this.loading = true;
+      this.data = [];
+      getTraceDetail(this.traceId)
         .then((res) => {
-          let nodes = res.data.split("\n");
-          nodes.map((nodeStr) => {
-            let node = nodeStr.split("\t");
-            if (node[0]) {
-              this.duration = node[2];
-              this.time = node[3];
-            }
-            return nodeStr;
-          });
-          this.getSpan();
+          this.loading = false;
+          this.list = res.data;
+          this.spans = this.findSpan(this.traceId, true);
         })
         .catch((err) => {
           console.log(err);
         });
     },
 
-    getSpan() {
-      let SQL = `select trace.span,max(trace.parent),count(),groupArray(service.name),groupArray(pod.name),(max(resTime) - min(reqTime)) as duration,min(reqTime) as minreqTime,max(resTime) from log where trace.id='${this.traceId}' group by trace.span  order by minreqTime asc;`;
-      this.$request(this.$REST.CLICKHOUSE.QUERY(SQL), this.$METHOD.GET)
-        .then((res) => {
-          let nodes = res.data.split("\n");
-          this.setSpan(nodes);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+    findSpan(spanId,isRoot,time,duration){
+      let _spans = this.list.filter(item => item.traceParent == spanId);
+      _spans.forEach((span)=>{
+        let _time = isRoot?span.reqTime:time;
+        let _duration = isRoot?span.duration:duration;
+        this.buildSpan(span,_time,_duration);
+        let children = this.findSpan(span.traceSpan,false,_time,_duration);
+        if(children && children.length > 0){
+          span.children = children;
+        }
+      });
+      return _spans;
     },
-
-    getChildSpan(lastduration, _n) {
-      let SQL = `select trace.span,trace.parent,1,service.name,pod.name,(resTime - reqTime) as duration,reqTime,resTime from log where trace.id='${this.traceId}' and trace.span='${_n.spanId}' order by reqTime asc;`;
-      this.$request(this.$REST.CLICKHOUSE.QUERY(SQL), this.$METHOD.GET)
-        .then((res) => {
-          let total = 0;
-          let nodes = res.data.split("\n");
-          nodes.forEach((nodeStr) => {
-            let node = nodeStr.split("\t");
-            if (node[0]) {
-              total++;
-            }
-          });
-          if (total > 1) {
-            _n.children = [];
-            let _child = this.getEndChild(lastduration, nodes);
-            _child.forEach((node) => {
-              _n.children.push(node);
-            });
-            this.spans = _.cloneDeep(this.spans);
-          }
-          console.log(this.spans);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+		
+    buildSpan(span, time, duration) {
+      let _start = span.reqTime - time;
+      span.key= span.traceSpan;
+      span.spanId= span.traceSpan;
+      span.cnt= 1;
+      span.svcAry = (span.serviceName||"").split(",");
+      span.podAty = (span.podName||"").split(",");
+	
+      //span.duration: node[5],
+      //span.reqTime: node[6],
+      //span.resTime: node[7],
+      span.start= this.getStep(_start, duration),
+      span.end= this.getStep(_start + span.duration * 1, duration),
+      span.startTime= this.getTime(_start),
+      span.endTime= this.getTime(_start + span.duration * 1),
+      span.marks= {},
+      span.marks[this.getStep(_start, duration)] = this.getTime(_start);
+      span.marks[this.getStep(_start * 1 + span.duration * 1, duration)] = this.getTime(
+        _start * 1 + span.duration * 1,
+      );
     },
   },
 };

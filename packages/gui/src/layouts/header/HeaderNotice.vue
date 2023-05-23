@@ -358,7 +358,7 @@ export default {
       flex: 1;
     }
   }
-  .ExclamationOutlined {
+  .dropdown-tabs .ExclamationOutlined {
     color: #fff;
     border-radius: 50%;
     font-size: 30px;
@@ -366,11 +366,11 @@ export default {
   .tab-pane-head {
     padding: 0 0px 20px 0px;
   }
-  .pagination {
+  .dropdown-tabs .pagination {
     margin: auto auto 15px auto !important;
     text-align: center;
   }
-  .MailFilled {
+  .dropdown-tabs .MailFilled {
     background-color: #0aacac;
     border-radius: 50%;
     color: #fff;

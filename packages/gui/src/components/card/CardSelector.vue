@@ -61,62 +61,58 @@
             />
           </a-card-grid>
         </a-card>
-        <a-card
-          v-else
-          class="grid-menu"
-          :style="'width: ' + (width ? width : 300) + 'px'"
-        >
-          <a-card-grid
-            class="selector-item"
-            :class="
-              (value == option.id ? 'selected' : '') +
-                (disabled && disabled(option) ? ' disabled' : '')
-            "
-            v-for="(option, optionIndex) in filterOptions"
-            :key="optionIndex"
-            :value="option.id"
-            :style="
-              col
-                ? 'width:' + 100 / col + '%'
-                : options.length >= 3
-                  ? 'width: 33%;'
-                  : options.length == 2
-                    ? 'width:50%;'
-                    : 'width:100%;'
-            "
-            @click="select(option)"
+        <div v-else>
+          <a-card
+            v-for="(colItem,colIndex) in calcCol"
+            :key="colItem"
+            class="grid-menu"
+            style="float: left;"
+            :style="'width: ' + ((width ? width : 300)/calcCol) + 'px'"
           >
-            <CheckOutlined
-              v-if="option.checked"
-              class="CheckOutlined"
-            />
-            <div :class="getTag ? 'mt-15' : ''">
-              <component
-                two-tone-color="#00adef"
-                :is="icon"
-                v-if="icon"
-              />
-              <svg
-                :class="getTag ? 'mt-20' : ''"
-                v-else-if="svg"
-                class="card-avatar icon"
-                aria-hidden="true"
-              >
-                <use :xlink:href="svg" />
-              </svg>
-              <div class="card-selector-title">
-                {{ option.name || option.username }}
-              </div>
-            </div>
-            <a-tag
-              v-if="getTag && getTag(option)"
-              class="ribbon"
-              color="#f5f5f5"
+            <a-card-grid
+              class="selector-item"
+              :class="
+                (value == option.id ? 'selected' : '') +
+                  (disabled && disabled(option) ? ' disabled' : '')
+              "
+              v-for="(option, optionIndex) in calcFilterOptions(colIndex)"
+              :key="optionIndex"
+              :value="option.id"
+              style="width:100%"
+              @click="select(option)"
             >
-              {{ getTag(option) }}
-            </a-tag>
-          </a-card-grid>
-        </a-card>
+              <CheckOutlined
+                v-if="option.checked"
+                class="CheckOutlined"
+              />
+              <div :class="getTag ? 'mt-15' : ''">
+                <component
+                  two-tone-color="#00adef"
+                  :is="icon"
+                  v-if="icon"
+                />
+                <svg
+                  :class="getTag ? 'mt-20' : ''"
+                  v-else-if="svg"
+                  class="card-avatar icon"
+                  aria-hidden="true"
+                >
+                  <use :xlink:href="svg" />
+                </svg>
+                <div class="card-selector-title">
+                  {{ option.name || option.username }}
+                </div>
+              </div>
+              <a-tag
+                v-if="getTag && getTag(option)"
+                class="ribbon"
+                color="#f5f5f5"
+              >
+                {{ getTag(option) }}
+              </a-tag>
+            </a-card-grid>
+          </a-card>
+        </div>
       </div>
     </template>
     <slot />
@@ -163,6 +159,25 @@ export default {
 
   i18n: require("@/i18n"),
   computed: {
+    calcFilterOptions(){
+      return (colIndex)=> {
+        if(this.calcCol>1){
+          return this.filterOptions.filter((item,index) => index%this.calcCol == colIndex);
+        } else {
+          return this.filterOptions;
+        }
+      }
+    },
+
+    calcCol(){
+      let defaultCol = 3;
+      if(this.options.length>=defaultCol){
+        return this.col || defaultCol;
+      } else {
+        return this.options.length > this.col ? this.col : (this.options.length || 1)
+      }
+    },
+
     multipleSelectNum() {
       let total = 0;
       this.options.forEach((_option) => {
@@ -266,9 +281,7 @@ export default {
     border-radius: 0;
   }
   .card-selector-title {
-    white-space: nowrap;
     text-overflow: ellipsis;
-    overflow: hidden;
     padding: 0 10px;
   }
   .CheckOutlined {

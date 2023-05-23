@@ -84,13 +84,13 @@
             <template #description>
               <a-tag
                 :key="tagIdx"
-                v-for="(tag, tagIdx) in record.service"
+                v-for="(tag, tagIdx) in record.serviceName"
               >
                 {{ tag }}
               </a-tag>
               <a-tag
                 :key="tagIdx"
-                v-for="(tag, tagIdx) in record.pod"
+                v-for="(tag, tagIdx) in record.podName"
               >
                 {{ tag }}
               </a-tag>
@@ -98,12 +98,12 @@
           </a-list-item-meta>
           <div class="content" />
           <template #actions>
-            <span><NodeIndexOutlined /> {{ record.spancnt }}
+            <span><NodeIndexOutlined /> {{ record.spanCount }}
               {{ $t("unitci") }}</span>
             <span><FieldTimeOutlined /> {{ record.duration }} ms</span>
-            <span><em>{{ new Date(record.start * 1).toLocaleString() }}</em>
+            <span><em>{{ new Date(record.minReqTime * 1).toLocaleString() }}</em>
               <em> ~ </em>
-              <em>{{ new Date(record.end * 1).toLocaleString() }}</em></span>
+              <em>{{ new Date(record.maxResTime * 1).toLocaleString() }}</em></span>
           </template>
         </a-list-item>
       </a-list>
@@ -112,7 +112,9 @@
 </template>
 
 <script>
-import _ from "lodash";
+import {
+  getTraceList,
+} from "@/services/clickhouseGQL";
 import {
   FieldTimeOutlined,
   NodeIndexOutlined,
@@ -154,70 +156,23 @@ export default {
   },
 
   methods: {
-    getSqlPagging(sql) {
-      return `SELECT traceid,cnt,duration,minReqTime,maxResTime,serviceName,podName FROM ( ${sql} ) ORDER BY minReqTime DESC LIMIT ${
-        (this.params.pageNo - 1) * this.params.pageSize
-      },${this.params.pageSize};`;
-    },
-
-    getWhere() {
-      let sql = "where 1=1 ";
-      if (this.filter && this.filter != "") {
-        sql += ` AND (trace.id = '${this.filter}' or service.name = '${this.filter}' or pod.name = '${this.filter}' or pod.ip = '${this.filter}') `;
-      }
-      if (this.date && this.date != "") {
-        sql += " AND reqTime > " + new Date(this.date).getTime();
-      }
-      if (this.endDate && this.endDate != "") {
-        sql += " AND reqTime < " + new Date(this.endDate).getTime();
-      }
-      return sql;
-    },
-
-    getCount(whereSQL) {
-      let SQL = `select count(1) as cnt from (select 1 from log ${whereSQL} group by trace.id)`;
-      this.$request(this.$REST.CLICKHOUSE.QUERY(SQL), this.$METHOD.GET)
-        .then((res) => {
-          this.params.total = res.data * 1;
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    },
-
     getData(pageNo, pageSize) {
       if (pageNo) {
         this.params.pageNo = pageNo;
         this.params.pageSize = pageSize;
       }
-      let whereSQL = this.getWhere();
-      this.getCount(whereSQL);
-      this.data = [];
       this.loading = true;
-      let SQL = this.getSqlPagging(
-        `select trace.id as traceid,count() as cnt,(max(resTime) - min(reqTime)) as duration,min(reqTime) as minReqTime,max(resTime) as maxResTime,groupUniqArray(service.name) as serviceName,groupUniqArray(pod.name) as podName from log ${whereSQL} group by trace.id`,
-      );
-      this.$request(this.$REST.CLICKHOUSE.QUERY(SQL), this.$METHOD.GET)
+      this.data = [];
+      getTraceList({
+        ...this.params,
+        filter: this.filter,
+        date: this.date,
+        endDate: this.endDate
+      })
         .then((res) => {
           this.loading = false;
-          let nodes = res.data.split("\n");
-          nodes.map((nodeStr) => {
-            let node = nodeStr.split("\t");
-            let item = {
-              traceId: node[0],
-              spancnt: node[1],
-              duration: node[2],
-              start: node[3],
-              end: node[4],
-              service: _.uniq(eval(node[5])),
-              pod: _.uniq(eval(node[6])),
-            };
-            if (node[0] != "") {
-              this.data.push(item);
-            }
-
-            return nodeStr;
-          });
+          this.params.total = res.total;
+          this.data = res.data;
         })
         .catch((err) => {
           console.log(err);

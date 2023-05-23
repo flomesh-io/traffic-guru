@@ -66,20 +66,19 @@ export default {
 
   watch: {
     json(val, oldVal) {
-      if (val != oldVal) {
+      if (val != oldVal && this.configKey == 'JSON') {
         this.jsonInput(val);
       }
     },
 
     yaml(val, oldVal) {
-      if (val != oldVal) {
+      if (val != oldVal && this.configKey == 'YAML') {
         this.yamlInput(val);
       }
     },
 
     jsonVal: {
       handler(val, oldVal) {
-        console.log(val);
         if (val == "{}" || val == "") {
           val = `{"key":"value"}`;
         } else if (val == "[]") {

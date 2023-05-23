@@ -5,17 +5,61 @@
     @close="handleClose(key)"
     :closable="true"
   >
-    {{ key }}:{{ map[key] }}
+    <span v-if="key == 'objectset.rio.cattle.io/applied'">
+      <a-tooltip
+        placement="topLeft"
+        :title="map[key]"
+      >
+        <a
+          class="font-primary"
+          href="javascript:void(0)"
+        >{{ key }}</a>
+      </a-tooltip>
+    </span>
+    <span
+      v-else-if="
+        key == 'kubectl.kubernetes.io/last-applied-configuration'
+      "
+    >
+      <a-popover
+        trigger="click"
+        :title="key"
+      >
+        <template #content>
+          <JsonEditor
+            :is-json="true"
+            :value="map[key]"
+          />
+        </template>
+        <a
+          class="font-primary"
+          href="javascript:void(0)"
+        >{{ key }}</a>
+      </a-popover>
+    </span>
+    <span
+      v-else
+    >{{ key }}: {{ map[key] }}</span>
   </a-tag>
   <a-input
     v-show="visible"
-    :ref="name"
+    ref="key"
     type="text"
     size="small"
-    class="width-100"
-    :placeholder="placeholder"
-    v-model:value="value"
-    @blur="inputConfirm"
+    class="width-60"
+    :placeholder="$t('Key')"
+    @keyup.enter="next"
+    v-model:value="keyInput"
+  />
+  <span v-show="visible"> : </span>
+  <a-input
+    v-show="visible"
+    ref="val"
+    type="text"
+    size="small"
+    class="width-60"
+    :placeholder="$t('Value')"
+    v-model:value="valInput"
     @keyup.enter="inputConfirm"
   />
   <a-tag
@@ -30,24 +74,30 @@
 
 <script>
 import { PlusOutlined } from "@ant-design/icons-vue";
+import JsonEditor from "@/components/editor/JsonEditor";
 
 export default {
   name: "TagMap",
-  components: { PlusOutlined },
-  props: ["placeholder", "name", "map"],
+  components: { PlusOutlined, JsonEditor },
+  props: ["map"],
   i18n: require("@/i18n"),
   data() {
     return {
-      value: "",
+      keyInput: "",
+      valInput: "",
       visible: false,
     };
   },
 
   methods: {
+    next() {
+      this.$refs['val'].focus();
+    },
+
     showInput() {
       this.visible = true;
       this.$nextTick().then(() => {
-        this.$refs[this.name].focus();
+        this.$refs['key'].focus();
       });
     },
 
@@ -59,19 +109,18 @@ export default {
     },
 
     inputConfirm() {
-      if (this.value == "") {
+      if (this.keyInput == "" && this.valInput == "") {
         this.visible = false;
         return;
-      }
-      let vals = this.value.split(":");
-      if (vals.length < 2) {
+      } else if (this.keyInput == "" || this.valInput == "") {
         this.$message.error({
           content: this.$t("Please enter the format of [key]:[value]"),
         });
       } else {
         let map = this.map || {};
-        map[vals.shift()] = vals.join(":");
-        this.value = "";
+        map[this.keyInput] = this.valInput;
+        this.keyInput = ""; 
+        this.valInput = "";
         this.visible = false;
         this.$emit("update:map", map);
         this.$emit("change", map);

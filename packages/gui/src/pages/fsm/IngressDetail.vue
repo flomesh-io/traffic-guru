@@ -19,6 +19,13 @@
           }}
         </DetailListItem>
         <DetailListItem
+          v-if="pid != ''"
+          :term="$t('as')"
+        >
+          {{ detail.name }}
+        </DetailListItem>
+        <DetailListItem
+          v-else
           :term="$t('as')"
           :rules="rules.uniqueName('ingresses',{id:pid,namespace:detail.namespace?.id})"
           name="name"
@@ -51,104 +58,18 @@
         :col="1"
       >
         <DetailListItem :term="$t('Labels')">
-          <a-tag
-            :key="index"
-            v-for="(key, index) in Object.keys(
-              detail.content.metadata.labels || [],
-            )"
-            @close="handleClose(detail.content.metadata.labels, key)"
-            :closable="true"
-          >
-            {{ key }}:{{ detail.content.metadata.labels[key] }}
-          </a-tag>
-          <a-input
-            v-show="labelVisible"
-            ref="labelRef"
-            type="text"
-            size="small"
-            class="width-100"
-            placeholder="[KEY:VALUE]"
-            v-model:value="labelValue"
-            @blur="labelInputConfirm"
-            @keyup.enter="labelInputConfirm"
+          <TagMap
+            v-model:map="detail.content.metadata.labels"
+            name="labels"
+            placeholder="[key]:[value]"
           />
-          <a-tag
-            v-permission="['ingress:update']"
-            v-if="!labelVisible"
-            @click="labelShowInput"
-            class="dashed-tag"
-          >
-            <PlusOutlined />
-            {{ $t("add") }}
-          </a-tag>
         </DetailListItem>
         <DetailListItem :term="$t('Annotations')">
-          <a-tag
-            :key="index"
-            v-for="(key, index) in Object.keys(
-              detail.content.metadata.annotations || [],
-            )"
-            @close="handleClose(detail.content.metadata.annotations, key)"
-            :closable="true"
-            class="mb-5"
-          >
-            <span v-if="key == 'objectset.rio.cattle.io/applied'">
-              <a-tooltip
-                placement="topLeft"
-                :title="detail.content.metadata.annotations[key]"
-              >
-                <a
-                  class="font-primary"
-                  href="javascript:void(0)"
-                >{{ key }}</a>
-              </a-tooltip>
-            </span>
-            <span
-              v-else-if="
-                key == 'kubectl.kubernetes.io/last-applied-configuration'
-              "
-            >
-              <a-popover
-                trigger="click"
-                :title="key"
-              >
-                <template #content>
-                  <JsonEditor
-                    :is-json="true"
-                    :value="detail.content.metadata.annotations[key]"
-                  />
-                </template>
-                <a
-                  class="font-primary"
-                  href="javascript:void(0)"
-                >{{ key }}</a>
-              </a-popover>
-            </span>
-            <span
-              v-else
-            >{{ key }}:{{ detail.content.metadata.annotations[key] }}</span>
-          </a-tag>
-
-          <a-input
-            v-show="annotationVisible"
-            ref="annotationRef"
-            type="text"
-            size="small"
-            class="width-100"
-            placeholder="[KEY:VALUE]"
-            v-model:value="annotationValue"
-            @blur="annotationInputConfirm"
-            @keyup.enter="annotationInputConfirm"
+          <TagMap
+            v-model:map="detail.content.metadata.annotations"
+            name="labels"
+            placeholder="[key]:[value]"
           />
-          <a-tag
-            v-permission="['ingress:update']"
-            v-if="!annotationVisible"
-            @click="annotationShowInput"
-            class="dashed-tag"
-          >
-            <PlusOutlined />
-            {{ $t("add") }}
-          </a-tag>
         </DetailListItem>
       </DetailList>
     </template>
@@ -347,10 +268,13 @@
                         </CardSelector>
                       </div>
                       <div v-else>
-                        <a
+                        <!--
+                          <a
                           href="javascript:void(0)"
                           @click="servicedetail(text)"
-                        >{{ record.service?.name || "-" }}</a>
+                          >{{ record.service?.name || "-" }}</a>
+                        -->
+                        {{ record.service?.name || "-" }}
                       </div>
                     </FormItem>
                   </template>
@@ -570,16 +494,15 @@
 <script>
 import FormItem from "@/components/tool/FormItem";
 import JsEditor from "@/components/editor/JsEditor";
-import JsonEditor from "@/components/editor/JsonEditor";
 import PageLayout from "@/layouts/PageLayout";
 import DetailList from "@/components/tool/DetailList";
 import { mapState } from "vuex";
 import DetailListItem from "@/components/tool/DetailListItem";
 import EnvSelector from "@/components/menu/EnvSelector";
 import CardSelector from "@/components/card/CardSelector";
+import TagMap from "@/components/tag/TagMap";
 import _ from "lodash";
 import {
-  PlusOutlined,
   PlusCircleTwoTone,
   EditOutlined,
   CloseOutlined,
@@ -674,16 +597,15 @@ export default {
   i18n: require("@/i18n"),
   components: {
     JsEditor,
-    JsonEditor,
     DetailListItem,
     DetailList,
     PageLayout,
-    PlusOutlined,
     PlusCircleTwoTone,
     EditOutlined,
     CloseOutlined,
     FormItem,
     EnvSelector,
+    TagMap,
     DatabaseOutlined,
     CardSelector,
     CheckOutlined,
@@ -692,11 +614,8 @@ export default {
   data() {
     return {
       certificates: [],
-      labelVisible: false,
-      labelValue: "",
-      annotationVisible: false,
       creationTimestamp: "-",
-      annotationValue: "",
+      DatabaseOutlined,
       pathTypes: ["Prefix", "Exact", "Mixed"],
       detail: {
         name: "",
@@ -893,63 +812,6 @@ export default {
       });
     },
 
-    handleClose(list, index) {
-      delete list[index];
-    },
-
-    labelShowInput() {
-      this.labelVisible = true;
-      this.$nextTick().then(() => {
-        this.$refs.labelRef.focus();
-      });
-    },
-
-    labelInputConfirm() {
-      if (this.labelValue == "") {
-        this.labelVisible = false;
-        return;
-      }
-      let vals = this.labelValue.split(":");
-      if (vals.length < 2) {
-        this.$message.error({
-          content: this.$t("Please enter the format of [key]:[value]"),
-        });
-      } else {
-        this.detail.content.metadata.labels =
-          this.detail.content.metadata.labels || {};
-        this.detail.content.metadata.labels[vals.shift()] = vals.join(":");
-        this.labelValue = "";
-        this.labelVisible = false;
-      }
-    },
-
-    annotationShowInput() {
-      this.annotationVisible = true;
-      this.$nextTick().then(() => {
-        this.$refs.annotationRef.focus();
-      });
-    },
-
-    annotationInputConfirm() {
-      if (this.annotationValue == "") {
-        this.annotationVisible = false;
-        return;
-      }
-      let vals = this.annotationValue.split(":");
-      if (vals.length < 2) {
-        this.$message.error({
-          content: this.$t("Please enter the format of [key]:[value]"),
-        });
-      } else {
-        this.detail.content.metadata.annotations =
-          this.detail.content.metadata.annotations || {};
-        this.detail.content.metadata.annotations[vals.shift()] =
-          vals.join(":");
-        this.annotationValue = "";
-        this.annotationVisible = false;
-      }
-    },
-
     addEndpoints() {
       this.detail.endpoints = this.detail.endpoints || [];
       this.detail.endpoints.push({
@@ -1143,7 +1005,7 @@ export default {
           )
           .then(() => {
             this.$message.success(this.$t("Save successfully"), 3);
-            this.$closePage(this.$route);
+            //this.$closePage(this.$route);
           });
       } else {
         console.log({

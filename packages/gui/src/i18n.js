@@ -2,6 +2,7 @@ module.exports = {
   messages: {
     CN: {
       "Welcome Flomesh": "欢迎使用 Flomesh",
+      "Healthcheck Log": "健康检查日志",
       "Version": "版本",
       "Error Code": "错误代码",
       "log file path": "日志文件路径",
@@ -15,6 +16,9 @@ module.exports = {
       "Client Cert": "客户端证书",
 			"Website": "Web站点",
 			"Download": "下载",
+			"Enable Logging": "启用日志",
+			"Authorization": "授权",
+			"Remote Logging": "远程日志",
 			"Domain": "域名",
 			"Statistic": "统计",
 			"Monitor": "监控",
@@ -567,7 +571,7 @@ module.exports = {
       "Claims To Verify": "验证字段",
       "Key Claim Name": "关键字段",
       "Secret": "密钥",
-      "Key": "关键字段",
+      "Key": "键",
       /** 插件  end*/
 
       "Create Plugin": "创建插件",
@@ -1048,6 +1052,7 @@ module.exports = {
     },
     JP: {
       "Excluded path": "除外パス",
+      "Healthcheck Log": "健康診断のログ",
       "Version": "バージョン",
       "Error Code": "エラーコード",
       "log file path": "ログファイルパス",
@@ -1205,6 +1210,9 @@ module.exports = {
       "Address Pool Create": "アドレスプールの作成",
       "Address Pool": "アドレスプール",
       "Cluster Detail": "クラスタ詳細",
+			"Enable Logging": "ログの有効化",
+			"Authorization": "承認",
+			"Remote Logging": "リモートログ",
       "LB Event": "ロードバランシングイベント",
       "Enabled TLS": "TLS有効化",
       "Source Ip Pool": "ソースIpプール",

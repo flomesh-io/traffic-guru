@@ -145,8 +145,8 @@
                     <template #avatar>
                       <svg
                         v-if="
-                          record['res.status'] * 1 >= 200 &&
-                            record['res.status'] * 1 < 600
+                          record['resStatus'] * 1 >= 200 &&
+                            record['resStatus'] * 1 < 600
                         "
                         class="icon"
                         aria-hidden="true"
@@ -160,7 +160,7 @@
                               '#icon-warning',
                               '#icon-error',
                               '#icon-error',
-                            ][(record['res.status'] + '').substr(0, 1) * 1]
+                            ][(record['resStatus'] + '').substr(0, 1) * 1]
                           "
                         />
                       </svg>
@@ -177,20 +177,20 @@
                         href="javascript:void(0)"
                         class="mr-16 pointer"
                         @click="detail(record.message)"
-                      >{{ record["req.path"] || record["pod.name"] }}</a>
+                      >{{ record["reqPath"] || record["pod.name"] }}</a>
                       <a-tag
                         :color="
-                          record['req.method'] == 'GET' ? 'green' : 'blue'
+                          record['reqMethod'] == 'GET' ? 'green' : 'blue'
                         "
-                        v-if="record['req.method']"
+                        v-if="record['reqMethod']"
                       >
-                        {{ record["req.method"] }}
+                        {{ record["reqMethod"] }}
                       </a-tag>
                     </template>
                     <template #description />
                   </a-list-item-meta>
                   <template #actions>
-                    <span v-if="record['res.status'] > 0">Status {{ record["res.status"] }}</span>
+                    <span v-if="record['resStatus'] > 0">Status {{ record["resStatus"] }}</span>
                     <span><FieldTimeOutlined /> {{ record.timestamp }}</span>
                     <span
                       v-if="record.remoteAddr"

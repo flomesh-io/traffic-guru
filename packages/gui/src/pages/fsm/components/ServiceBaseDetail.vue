@@ -150,99 +150,18 @@
         :col="1"
       >
         <DetailListItem :term="$t('Labels')">
-          <a-tag
-            :key="index"
-            v-for="(key, index) in Object.keys(detail.metadata.labels || [])"
-            @close="handleClose(detail.metadata.labels, key)"
-            :closable="true"
-          >
-            {{ key }}:{{ detail.metadata.labels[key] }}
-          </a-tag>
-          <a-input
-            v-show="labelVisible"
-            ref="labelRef"
-            type="text"
-            size="small"
-            class="width-100"
-            placeholder="[KEY:VALUE]"
-            v-model:value="labelValue"
-            @blur="labelInputConfirm"
-            @keyup.enter="labelInputConfirm"
+          <TagMap
+            v-model:map="detail.metadata.labels"
+            name="labels"
+            placeholder="[key]:[value]"
           />
-          <a-tag
-            v-permission="['service:update']"
-            v-if="!labelVisible"
-            @click="labelShowInput"
-            class="dashed-tag"
-          >
-            <PlusOutlined />
-            {{ $t("add") }}
-          </a-tag>
         </DetailListItem>
         <DetailListItem :term="$t('Annotations')">
-          <a-tag
-            :key="index"
-            v-for="(key, index) in Object.keys(
-              detail.metadata.annotations || [],
-            )"
-            @close="handleClose(detail.metadata.annotations, key)"
-            :closable="true"
-            class="mb-5"
-          >
-            <span v-if="key == 'objectset.rio.cattle.io/applied'">
-              <a-tooltip
-                placement="topLeft"
-                :title="detail.metadata.annotations[key]"
-              >
-                <a
-                  class="font-primary"
-                  href="javascript:void(0)"
-                >{{ key }}</a>
-              </a-tooltip>
-            </span>
-            <span
-              v-else-if="
-                key == 'kubectl.kubernetes.io/last-applied-configuration'
-              "
-            >
-              <a-popover
-                trigger="click"
-                :title="key"
-              >
-                <template #content>
-                  <JsonEditor
-                    :is-json="true"
-                    :value="detail.metadata.annotations[key]"
-                  />
-                </template>
-                <a
-                  class="font-primary"
-                  href="javascript:void(0)"
-                >{{ key }}</a>
-              </a-popover>
-            </span>
-            <span v-else>{{ key }}:{{ detail.metadata.annotations[key] }}</span>
-          </a-tag>
-          <a-input
-            v-show="annotationVisible"
-            ref="annotationRef"
-            type="text"
-            size="small"
-            class="width-100"
-            placeholder="[KEY:VALUE]"
-            v-model:value="annotationValue"
-            @blur="annotationInputConfirm"
-            @keyup.enter="annotationInputConfirm"
+          <TagMap
+            v-model:map="detail.metadata.annotations"
+            name="labels"
+            placeholder="[key]:[value]"
           />
-          <a-tag
-            v-permission="['service:update']"
-            v-if="!annotationVisible"
-            @click="annotationShowInput"
-            class="dashed-tag"
-          >
-            <PlusOutlined />
-            {{ $t("add") }}
-          </a-tag>
         </DetailListItem>
         <DetailListItem
           v-if="pid != ''"
@@ -297,25 +216,21 @@
 <script>
 import _ from "lodash";
 import EnvSelector from "@/components/menu/EnvSelector";
-import JsonEditor from "@/components/editor/JsonEditor";
 import PageLayout from "@/layouts/PageLayout";
 import DetailList from "@/components/tool/DetailList";
 import DetailListItem from "@/components/tool/DetailListItem";
+import TagMap from "@/components/tag/TagMap";
 import { mapState } from "vuex";
-import {
-  PlusOutlined,
-} from "@ant-design/icons-vue";
 
 export default {
   name: "ServicesBaseDetail",
   i18n: require("@/i18n"),
   components: {
-    JsonEditor,
     DetailListItem,
     DetailList,
     PageLayout,
-    PlusOutlined,
     EnvSelector,
+    TagMap,
   },
 
   props: [
@@ -345,11 +260,7 @@ export default {
       blackAddress: [],
       visible: false,
       aclKey: "2",
-      labelVisible: false,
-      labelValue: "",
-      annotationVisible: false,
       creationTimestamp: "-",
-      annotationValue: "",
       certificates: [],
       organization: {id:null},
       sidecar: null,
@@ -421,67 +332,7 @@ export default {
       });
       this.$emit("update:detail", detail);
     },
-
-    handleClose(list, index) {
-      delete list[index];
-      let detail = this.detail;
-      this.$emit("update:detail", detail);
-    },
-
-    labelShowInput() {
-      this.labelVisible = true;
-      this.$nextTick().then(() => {
-        this.$refs.labelRef.focus();
-      });
-    },
-
-    labelInputConfirm() {
-      if (this.labelValue == "") {
-        this.labelVisible = false;
-        return;
-      }
-      let vals = this.labelValue.split(":");
-      if (vals.length < 2) {
-        this.$message.error({
-          content: this.$t("Please enter the format of [key]:[value]"),
-        });
-      } else {
-        let detail = this.detail;
-        detail.metadata.labels = detail.metadata.labels || {};
-        detail.metadata.labels[vals.shift()] = vals.join(":");
-        this.labelValue = "";
-        this.labelVisible = false;
-        this.$emit("update:detail", detail);
-      }
-    },
-
-    annotationShowInput() {
-      this.annotationVisible = true;
-      this.$nextTick().then(() => {
-        this.$refs.annotationRef.focus();
-      });
-    },
-
-    annotationInputConfirm() {
-      if (this.annotationValue == "") {
-        this.annotationVisible = false;
-        return;
-      }
-      let vals = this.annotationValue.split(":");
-      if (vals.length < 2) {
-        this.$message.error({
-          content: this.$t("Please enter the format of [key]:[value]"),
-        });
-      } else {
-        let detail = this.detail;
-        detail.metadata.annotations = detail.metadata.annotations || {};
-        detail.metadata.annotations[vals.shift()] = vals.join(":");
-        this.annotationValue = "";
-        this.annotationVisible = false;
-        this.$emit("update:detail", detail);
-      }
-    },
-
+		
     k8sDetail() {
       this.$router.push({
         path: "/ops-center/registry/detail/" + this.registry.id,
@@ -825,7 +676,7 @@ export default {
           .then(() => {
             this.$message.success(this.$t("Save successfully"), 3);
             if (keep != true) {
-              this.$closePage(this.$route);
+              //this.$closePage(this.$route);
             }
           });
       } else {

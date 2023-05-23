@@ -104,8 +104,9 @@
             keyset[field.label] &&
             keyset[field.label].type == 'textarea')
       "
-      :placeholder="$t('unset')"
+      :placeholder="field.placeholder ? field.placeholder : $t('unset')"
       class="form-width"
+      :style="field.width?`width: ${field.width}px`:''"
       :auto-size="{ minRows: 4, maxRows: 6 }"
     />
     <div

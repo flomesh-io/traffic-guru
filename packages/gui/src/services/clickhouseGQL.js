@@ -68,6 +68,25 @@ export function getDate(date){
 		return new Date(date);
 	}
 }
+function getTraceFilter(filter) {
+	let _filter = {};
+	if (filter.filter) {
+		_filter.keyWord = filter.filter;
+	}
+	if(filter.date){
+		_filter.reqTimeFrom = getDate(filter.date);
+	}
+	if(filter.endDate){
+		_filter.reqTimeTo = getDate(filter.endDate);
+	}
+	if(filter.pageSize){
+		_filter.pageSize = filter.pageSize;
+	}
+	if(filter.pageNo){
+		_filter.pageNo = filter.pageNo;
+	}
+  return _filter;
+}
 function getLogFilter(filter) {
 	let _filter = {};
 	if(filter.sortBy){
@@ -184,6 +203,39 @@ export async function getLoadStatus(payload) {
 	);
 }
 
+export async function getTraceList(payload) {
+	const filters = getTraceFilter(payload);
+  return query(`traceList(filters: $filters){
+			data{
+				traceId,
+				spanCount,
+				duration,
+				minReqTime,
+				maxResTime,
+				serviceName,
+				podName
+			},
+			total
+		}`,
+		{filters},
+		{filters:"TraceFilters"}
+	);
+}
+export async function getTraceDetail(id) {
+  return query(`traceDetail(traceId: "${id}"){
+			data{
+				traceSpan,
+				traceParent,
+				duration,
+				reqTime,
+				resTime,
+				serviceName,
+				podName,
+				message
+			}
+		}`
+	);
+}
 export function coverMessage(res) {
   if (typeof res.data == "object") {
     return JSON.stringify(res.data);
