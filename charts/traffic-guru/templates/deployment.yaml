@@ -1,3 +1,16 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: traffic-guru-website-volume-claim
+  labels:
+    {{- include "traffic-guru.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -24,10 +37,17 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ .Values.serviceAccount.name }}
+      volumes:
+      - name: traffic-guru-website-volume
+        persistentVolumeClaim:
+          claimName: traffic-guru-website-volume-claim
       containers:
         - name: {{ .Chart.Name }}
           image: "{{- include "traffic-guru.imageName" .}}:{{- include "traffic-guru.tag" .}}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+            - name: traffic-guru-website-volume
+              mountPath: /usr/local/flomesh/public/uploads
           env:
           - name: HOST
             value: '::'
