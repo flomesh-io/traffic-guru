@@ -13,7 +13,7 @@ ENV pkg_confdir    /etc/flomesh
 COPY packages /packages
 
 RUN apk add --no-cache openssh-client nodejs npm alpine-sdk linux-headers musl vips vips-dev \
-    && apk --no-cache add --virtual builds-deps build-base python3 git \
+    && apk --no-cache add --virtual builds-deps build-base python3 git curl \
     && ln -sfn /usr/bin/python3 /usr/bin/python \
     && npm install -g node-pre-gyp pkg yarn \
     && npm rebuild bcrypt --build-from-source
@@ -32,6 +32,24 @@ RUN cd /packages/gui \
     && yarn build
 
 RUN cp -r /packages/gui/dist/*  ${pkg_prefix}/flomesh/public/flomesh/
+
+RUN cd /tmp \
+    mkdir -p ${pkg_prefix}/flomesh/config/website/pipybin/GeneralLinux-x64/ \
+    && curl -LO https://pipy-oss-1255617643.cos-website.ap-beijing.myqcloud.com/repo/pipy/x86_64/binary/pipy-0.90.1-157-generic_linux-x86_64.tar.gz \
+    && tar xvf pipy-0.90.1-157-generic_linux-x86_64.tar.gz \
+    && mv usr/local/bin/pipy ${pkg_prefix}/flomesh/config/website/pipybin/GeneralLinux-x64/
+
+RUN cd /tmp \
+    && mkdir -p ${pkg_prefix}/flomesh/config/website/pipybin/GeneralLinux-ARM/ \
+    && curl -LO https://pipy-oss-1255617643.cos-website.ap-beijing.myqcloud.com/repo/pipy/aarch64/binary/pipy-0.90.1-157-generic_linux-aarch64.tar.gz \
+    && tar xvf pipy-0.90.1-157-generic_linux-aarch64.tar.gz \
+    && mv usr/local/bin/pipy ${pkg_prefix}/flomesh/config/website/pipybin/GeneralLinux-ARM/
+
+RUN cd /tmp \
+    && mkdir -p ${pkg_prefix}/flomesh/config/website/pipybin/MacOS-ARM/ \
+    && curl -LO https://pipy-oss-1255617643.cos-website.ap-beijing.myqcloud.com/repo/pipy/aarch64/binary/pipy-0.90.1-10-darwin-aarch64.tar.gz \
+    && tar xvf pipy-0.90.1-10-darwin-aarch64.tar.gz \
+    && mv bin/pipy ${pkg_prefix}/flomesh/config/website/pipybin/MacOS-ARM/
 
 ############## Stage Build End ################
 
