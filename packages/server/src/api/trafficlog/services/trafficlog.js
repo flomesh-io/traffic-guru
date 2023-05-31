@@ -519,6 +519,9 @@ module.exports = createCoreService('api::trafficlog.trafficlog',{
     if (reqBody?.reqTimeTo) {
       whereSql += " AND reqTime < " + reqBody.reqTimeTo.getTime();
     }
+    if (reqBody?.meshName) {
+      whereSql += " AND meshName = '" + reqBody.meshName + "' ";
+    }
     // if (reqBody?.reqTimeFrom) {//e.g. reqTimeFrom=15 day
     //   whereSql += " AND toDateTime(reqTime / 1000) > (now() - interval " + reqBody.reqTimeFrom + ") ";
     // }
@@ -587,13 +590,22 @@ module.exports = createCoreService('api::trafficlog.trafficlog',{
       linkItem.weight = element.weight;
       linkItem.source = svcList.find((svc) => svc.name === element.serviceName[0])?.id;
       linkItem.target = svcList.find((svc) => svc.name === element.serviceName[1])?.id;
-      links.push(linkItem);
+      if(linkItem.source && linkItem.target) { // only keep the link which has source and target
+        links.push(linkItem);
+      }
     }
-    for (let index = 0; index < svcList.length; index++) { 
-      svcList[index].pods = (queryPodRes.data.data?.find((svc) => svc.serviceName === svcList[index].name))?.podName;
+    // fill pods in a service & filter services in DAG
+    const services = [];
+    for (let index = 0; index < svcList.length; index++) {
+      const tracedSvc = queryPodRes.data.data?.find((svc) => svc.serviceName === svcList[index].name);
+      if(tracedSvc) {
+        svcList[index].pods = (tracedSvc)?.podName;
+        services.push(svcList[index]);
+      }
     }
+
     return {
-      "services": svcList,
+      "services": services,
       "links": links
     };
   },

@@ -3,6 +3,8 @@ node_modules/
 
 # PipyJS
 config/pipy-codebases/
+config/pjs/
+config/website/
 *.yaml
 
 # Temp

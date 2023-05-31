@@ -16,7 +16,7 @@ CREATE TABLE healthcheckLog
     `serviceId` UInt64 DEFAULT JSONExtractInt(message,
  'serviceId'),
 
-    `serviceName` UInt64 DEFAULT JSONExtractString(message,
+    `serviceName` String DEFAULT JSONExtractString(message,
  'serviceName'),
 
     `message` String,

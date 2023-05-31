@@ -10,7 +10,7 @@
  */
 const k8s = require('@kubernetes/client-node');
 
-async function syncRegistries () {
+async function syncRegistries() {
   if (process.env.DISABLE_SYNCREGISTRIES) return;
   const all = await strapi.db.query('api::registry.registry').findMany();
   for (const data of all) {
@@ -83,7 +83,7 @@ async function syncOsm () {
         if (!meshName) continue;
         let ns = await strapi.db
           .query('api::namespace.namespace')
-          .findOne({ where: { name: item.metadata.name, registry: registry.id }, populate: true});
+          .findOne({ where: { name: item.metadata.name, registry: registry.id }, populate: true });
         if (!ns) {
           ns = await strapi.db
             .query('api::namespace.namespace')
@@ -101,7 +101,7 @@ async function syncOsm () {
         if (mesh.bindNamespaces.indexOf(ns.id) == -1) {
           mesh.bindNamespaces.push(ns.id);
           await strapi.db.query('api::mesh.mesh')
-          .update({where: {id: mesh.id}, data: {bindNamespaces: mesh.bindNamespaces}})
+            .update({ where: { id: mesh.id }, data: { bindNamespaces: mesh.bindNamespaces } })
         }
       }
     }

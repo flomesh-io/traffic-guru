@@ -10,6 +10,10 @@ resourceTypes.add('tunnelInternal');
 resourceTypes.add('tunnelExternal');
 
 module.exports = {
+  beforeCreate: async (event) => {
+    const data = event.params.data;
+    data.version = 2;
+  },
   afterCreate: async (event) => {
 
     if (!event || !event.result.type) return;
@@ -32,14 +36,14 @@ module.exports = {
     if ((event.result.type === 'clickhouse' || event.result.type === 'log' || event.result.type === 'prometheus') && !event.result.apply) {
       const fleets = await strapi.db.query('api::fleet.fleet').findMany({ where: { type: event.result.type } });
       if (fleets.length == 1) {
-        strapi.db.query('api::fleet.fleet').update({where: { id: fleets[0].id }, data: { apply: false }});
+        strapi.db.query('api::fleet.fleet').update({ where: { id: fleets[0].id }, data: { apply: false } });
       }
     }
     if (event.result.type === 'log' || event.result.type === 'clickhouse') {
       try {
         await strapi.service("api::clickhouse.clickhouse").createTable(event.result);
-        await strapi.service("api::clickhouse.clickhouse").createTable(event.result,"healthcheckLog");
-        await strapi.service("api::clickhouse.clickhouse").createTable(event.result,"bgpLog");
+        await strapi.service("api::clickhouse.clickhouse").createTable(event.result, "healthcheckLog");
+        await strapi.service("api::clickhouse.clickhouse").createTable(event.result, "bgpLog");
       } catch (error) {
         console.error(error);
       }

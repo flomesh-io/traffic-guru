@@ -276,6 +276,7 @@ module.exports = {
         input TraceDAGFilters {
           reqTimeFrom  : DateTime
           reqTimeTo    : DateTime
+          meshName     : String
         }
         type TraceDAGRegistryVO {
           id   : Int
