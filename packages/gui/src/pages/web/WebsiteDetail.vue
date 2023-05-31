@@ -272,20 +272,21 @@
                     </div>
                   </template>
                   <!--
-                  <div class="list-content">
+                    <div class="list-content">
                     <div class="flex list-content-item">
-                      <div class="flex-item pl-10">
-                        <span>{{ $t("Default") }}</span>
-                        <p>
-                          <a-switch
-                            @change="changePrdDefault(item, i)"
-                            v-model:checked="item.isDefault"
-                            size="small"
-                          />
-                        </p>
-                      </div>
+                    <div class="flex-item pl-10">
+                    <span>{{ $t("Default") }}</span>
+                    <p>
+                    <a-switch
+                    @change="changePrdDefault(item, i)"
+                    v-model:checked="item.isDefault"
+                    size="small"
+                    />
+                    </p>
                     </div>
-                  </div>-->
+                    </div>
+                    </div>
+                  -->
                 </a-list-item>
               </a-list>
             </a-card>

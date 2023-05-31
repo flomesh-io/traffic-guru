@@ -55,7 +55,7 @@ export default {
     return {
       osList:[
         { icon:'#icon-apple',label:"MacOS",value:"MacOS-ARM",tag:'ARM',downloading:false },
-       // { icon:'#icon-centos',label:"Centos / RHEL7",value:"CentosRHEL7-x64",downloading:false },
+        // { icon:'#icon-centos',label:"Centos / RHEL7",value:"CentosRHEL7-x64",downloading:false },
         { icon:'#icon-linux',label:"GeneralLinux",value:"GeneralLinux-ARM",tag:'ARM',downloading:false },
         { icon:'#icon-linux',label:"GeneralLinux ",value:"GeneralLinux-x64",tag:'x64',downloading:false },
       ],
