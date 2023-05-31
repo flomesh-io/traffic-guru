@@ -21,7 +21,7 @@ const flb = {
       title: "LB Total",
       tag: TotalChart,
       service: flb_svc.getSummary,
-      col: 6,
+      col: 8,
       className: "card nopd",
       data: (res) => {
         let alldata = res.loadbalancer_summary;
@@ -79,7 +79,7 @@ const flb = {
       tag: BarChart,
       provide: "clickhouse",
       service: clickhouse_svc.allErrorRate,
-      col: 6,
+      col: 8,
       className: "card nopd",
       data: spread((res, cnt) => {
         let barData = [],
@@ -109,7 +109,7 @@ const flb = {
       title: "apu",
       tag: BarGroupChart,
       service: flb_svc.getAddressPoolUsage,
-      col: 6,
+      col: 8,
       className: "card nopd",
       data: (res) => {
         let alldata = res.address_pool_usage;
@@ -229,7 +229,7 @@ const flb = {
 		CONNECTIONS: {
 			title: "Connections",
 			tag: MiniArea,
-			col: 6,
+			col: 8,
 			service: pro_svc.getLBConns(true),
 			provide: "prometheus",
 			className: "card nopd",
@@ -267,7 +267,7 @@ const flb = {
 		CURRENT_CONNECTIONS: {
 			title: "Current Connections",
 			tag: MiniArea,
-			col: 6,
+			col: 8,
 			service: pro_svc.getLBCurConns(true),
 			provide: "prometheus",
 			className: "card nopd",
@@ -296,7 +296,7 @@ const flb = {
 		INACT_CONNECTIONS: {
 			title: "In Act Connections",
 			tag: MiniArea,
-			col: 6,
+			col: 8,
 			service: pro_svc.getLBInActConns(true),
 			provide: "prometheus",
 			className: "card nopd",
@@ -325,7 +325,7 @@ const flb = {
 		FAIL_CONNECTIONS: {
 			title: "Fail Connections",
 			tag: MiniArea,
-			col: 6,
+			col: 8,
 			service: pro_svc.getLBFailConns(true),
 			provide: "prometheus",
 			className: "card nopd",
@@ -362,7 +362,7 @@ const flb = {
 		FAIL_INBOUND_CONNECTIONS: {
 			title: "Fail Connections (Inbound)",
 			tag: MiniArea,
-			col: 6,
+			col: 8,
 			service: pro_svc.getLBInFailConns(true),
 			provide: "prometheus",
 			className: "card nopd",
@@ -391,7 +391,7 @@ const flb = {
 		FAIL_OUTBOUND_CONNECTIONS: {
 			title: "Fail Connections (Outbound)",
 			tag: MiniArea,
-			col: 6,
+			col: 8,
 			service: pro_svc.getLBOutFailConns(true),
 			provide: "prometheus",
 			className: "card nopd",
@@ -420,7 +420,7 @@ const flb = {
 		NEW_CONNECTIONS: {
 			title: "New Connections",
 			tag: MiniArea,
-			col: 6,
+			col: 8,
 			service: pro_svc.getLBNewConns(true),
 			provide: "prometheus",
 			className: "card nopd",
@@ -449,7 +449,7 @@ const flb = {
 		BYTES: {
 			title: "Bytes",
 			tag: MiniArea,
-			col: 6,
+			col: 8,
 			service: pro_svc.getLBBits(true),
 			provide: "prometheus",
 			className: "card nopd",
@@ -497,7 +497,7 @@ const flb = {
 		DOWNSTREAM_BYTES: {
 			title: "Downstream Bytes",
 			tag: MiniArea,
-			col: 6,
+			col: 8,
 			service: pro_svc.getLBInBits(true),
 			provide: "prometheus",
 			className: "card nopd",
@@ -533,7 +533,7 @@ const flb = {
 		UPSTREAM_BYTES: {
 			title: "Upstream Bytes",
 			tag: MiniArea,
-			col: 6,
+			col: 8,
 			service: pro_svc.getLBOutBits(true),
 			provide: "prometheus",
 			className: "card nopd",
@@ -570,7 +570,7 @@ const flb = {
 		FREE_CPU: {
 			title: "Free CPU",
 			tag: MiniArea,
-			col: 6,
+			col: 8,
 			service: pro_svc.getFreeCpu(true),
 			provide: "prometheus",
 			className: "card nopd",
@@ -603,7 +603,7 @@ const flb = {
 		PROCESS_CPU: {
 			title: "Process CPU",
 			tag: MiniArea,
-			col: 6,
+			col: 8,
 			service: pro_svc.getProcessCpu(true),
 			provide: "prometheus",
 			className: "card nopd",
@@ -632,7 +632,7 @@ const flb = {
 		PROCESS_MEMORY: {
 			title: "Process Memory",
 			tag: MiniArea,
-			col: 6,
+			col: 8,
 			service: pro_svc.getProcessMemory(true),
 			provide: "prometheus",
 			className: "card nopd",
@@ -668,7 +668,7 @@ const flb = {
 		TIME_WAIT: {
 			title: "Time Wait",
 			tag: MiniArea,
-			col: 6,
+			col: 8,
 			service: pro_svc.getTimeWait(true),
 			provide: "prometheus",
 			className: "card nopd",
@@ -697,7 +697,7 @@ const flb = {
 		OVERFLOW_ERROR: {
 			title: "Overflow Error",
 			tag: MiniArea,
-			col: 6,
+			col: 8,
 			service: pro_svc.getConnOverflowError(true),
 			provide: "prometheus",
 			className: "card nopd",
@@ -735,7 +735,7 @@ const flb = {
 		FULL_CONN_OVERFLOW_ERROR: {
 			title: "Overflow Error ( Full Connection )",
 			tag: MiniArea,
-			col: 6,
+			col: 8,
 			service: pro_svc.getFullConnOverflowError(true),
 			provide: "prometheus",
 			className: "card nopd",
@@ -764,7 +764,7 @@ const flb = {
 		HALF_CONN_OVERFLOW_ERROR: {
 			title: "Overflow Error ( Half Connection )",
 			tag: MiniArea,
-			col: 6,
+			col: 8,
 			service: pro_svc.getHalfConnOverflowError(true),
 			provide: "prometheus",
 			className: "card nopd",

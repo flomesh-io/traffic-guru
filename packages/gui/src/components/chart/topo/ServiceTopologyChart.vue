@@ -49,7 +49,7 @@ import {
   ForkOutlined,
 } from "@ant-design/icons-vue";
 export default {
-  name: "TopologyChart",
+  name: "ServiceTopologyChart",
   i18n: require("@/i18n"),
   components: { EmptyResult, DeploymentUnitOutlined, PartitionOutlined, ForkOutlined },
   props: {

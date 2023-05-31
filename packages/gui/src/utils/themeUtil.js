@@ -25,6 +25,12 @@ function getThemeColors(color, $theme) {
   return themeColors;
 }
 
+function getThemeColorsObject(color, $theme) {
+  const _color = color || theme.color;
+  const mode = $theme || theme.mode;
+  const replaceColors = getThemeToggleColors(_color, mode);
+  return replaceColors;
+}
 function changeThemeColor(newColor, $theme) {
   let promise = client.changer.changeColor({newColors: getThemeColors(newColor, $theme)})
   return promise
@@ -113,5 +119,6 @@ module.exports = {
   changeThemeColor,
   modifyVars,
   loadLocalTheme,
+	getThemeColorsObject,
   getLocalSetting,
 };

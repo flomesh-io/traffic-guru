@@ -6,12 +6,15 @@ const ANTD = {
     error: "#f5222d",
     light: {
       menuColors: ["#000c17", "#001529", "#002140"],
+			textColors: ["#999999"],
     },
     dark: {
       menuColors: ["#000c17", "#001529", "#002140"],
+			textColors: ["#ffffff"],
     },
     night: {
       menuColors: ["#151515", "#1f1f1f", "#1e1e1e"],
+			textColors: ["#ffffff"],
     },
   },
   theme: {

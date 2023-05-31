@@ -566,7 +566,13 @@ blockquote {
 .overflowHidden {
   overflow: hidden;
 }
-.windowDrawer {
+.nopd .ant-popover-inner-content{
+	padding: 0;
+}
+.side-nav-memu .ant-popover-content{
+	width:450px;
+}
+.windowDrawer, .side-nav-memu{
   .ant-drawer-content-wrapper {
     max-width: 300px;
   }
@@ -645,8 +651,8 @@ blockquote {
   font-size: 18px;
   padding: 0px 0px 0 0;
   line-height: 34px;
-  top: 97px;
-  right: 25px;
+  top: 92px;
+  right: 18px;
   width: 30px;
   height: 30px;
   border-radius: 2px 2px 0 0;
@@ -660,8 +666,8 @@ blockquote {
 .header-fullscreen.fullscreen {
 }
 .header-fullscreen.fullscreen-exit {
-  top: 33px;
-  right: 25px;
+  top: 28px;
+  right: 18px;
   border-radius: 0;
   &:hover {
     border-radius: 5px;
@@ -683,6 +689,12 @@ blockquote {
 }
 .full {
   width: 100% !important;
+}
+.pd-5 {
+  padding: 5px;
+}
+.pd-8 {
+  padding: 8px;
 }
 .pd-10 {
   padding: 10px;
@@ -818,6 +830,9 @@ blockquote {
 }
 .mt-25 {
   margin-top: 25px;
+}
+.mt-60 {
+  margin-top: 60px;
 }
 .mt-100 {
   margin-top: 100px;

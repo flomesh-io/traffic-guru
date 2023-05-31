@@ -20,17 +20,30 @@
       #extra
     >
       <div class="relative toggle-card-item">
-        <a-divider type="vertical" />
-        <CaretRightOutlined
-          @click="toggleRuntime"
-          v-if="!data.runtime"
-          class="font-20 gray handle icon-menu-sm relative"
+        <a-divider
+          type="vertical"
+          v-if="data.hasRuntime || isEdit"
         />
-        <LoadingOutlined
-          @click="toggleRuntime"
-          v-else
-          class="font-primary icon-menu-sm"
-        />
+        <a-tooltip
+          v-if="!data.runtime && data.hasRuntime"
+          placement="top"
+          :title="$t('Start Runtime')"
+        >
+          <CaretRightOutlined
+            @click="toggleRuntime"
+            class="font-20 gray handle icon-menu-sm relative"
+          />
+        </a-tooltip>
+        <a-tooltip
+          v-else-if="data.hasRuntime"
+          placement="top"
+          :title="$t('Pause')"
+        >
+          <PauseOutlined
+            @click="toggleRuntime"
+            class="font-20 gray handle icon-menu-sm relative"
+          />
+        </a-tooltip>
         <CloseOutlined
           v-if="isEdit"
           @click="unpin"
@@ -43,17 +56,31 @@
       v-if="data.cardToolLayout == 'absolute'"
       class="card-span toggle-card-item"
     >
-      <a-divider type="vertical" />
-      <CaretRightOutlined
-        @click="toggleRuntime"
-        v-if="!data.runtime"
-        class="font-20 gray handle icon-menu-sm relative"
+      <a-divider
+        type="vertical"
+        v-if="data.hasRuntime || isEdit"
       />
-      <LoadingOutlined
-        @click="toggleRuntime"
-        v-else
-        class="font-primary icon-menu-sm"
-      />
+			
+      <a-tooltip
+        v-if="!data.runtime && data.hasRuntime"
+        placement="top"
+        :title="$t('Start Runtime')"
+      >
+        <CaretRightOutlined
+          @click="toggleRuntime"
+          class="font-20 gray handle icon-menu-sm relative"
+        />
+      </a-tooltip>
+      <a-tooltip
+        v-else-if="data.hasRuntime"
+        placement="top"
+        :title="$t('Pause')"
+      >
+        <PauseOutlined
+          @click="toggleRuntime"
+          class="font-20 gray handle icon-menu-sm relative"
+        />
+      </a-tooltip>
       <CloseOutlined
         v-if="isEdit"
         @click="unpin"
@@ -102,9 +129,10 @@ import {
   SwapOutlined,
   CloseOutlined,
   CaretRightOutlined,
-  LoadingOutlined,
+  PauseOutlined
 } from "@ant-design/icons-vue";
 import { getCurrentInstance, computed, shallowReactive, watch } from "vue";
+import { useStore } from "vuex";
 import { clickhouseResult2Array } from "@/utils/util";
 import { setDashboard } from "@/services/dashboard";
 import { customQuery } from "@/services/prometheus";
@@ -117,7 +145,7 @@ export default {
     CloseOutlined,
     setDashboard,
     CaretRightOutlined,
-    LoadingOutlined,
+    PauseOutlined,
   },
 	
   props: [
@@ -140,11 +168,18 @@ export default {
   i18n: require("@/i18n"),
 
   setup(props, ctx) {
+    const $store = useStore();
     const { proxy } = getCurrentInstance();
+    const globalRuntime = computed(() => $store.state.setting.runtime);
+    const config = computed(() => props.config);
+    const getTitle = computed(() => proxy.$t(data.noTitle ? "" : data.title));
+    let subscribes = computed(() => props.subscribes);
+    const ver = computed(() => props.ver);
     const data = shallowReactive({
       ary: [],
-      runtime: false,
+      runtime: globalRuntime.value,
       noTitle: false,
+      hasRuntime: !!subscribe.baseComponents[config.value.tag.name].hasRuntime,
       className: "",
       name: null,
       cardToolLayout: "slot",
@@ -155,10 +190,12 @@ export default {
       source: null,
       loading: true,
     });
-    const getTitle = computed(() => proxy.$t(data.noTitle ? "" : data.title));
-    let subscribes = computed(() => props.subscribes);
-    const ver = computed(() => props.ver);
-    const config = computed(() => props.config);
+    watch(
+      () => globalRuntime.value,
+      () => {
+        setRuntime(globalRuntime.value);
+      },
+    );
     watch(
       () => props.n,
       () => {
@@ -184,13 +221,19 @@ export default {
         renderCardTimer();
       }
     };
+    let setRuntime = (val) => {
+      data.runtime = val;
+      if (data.runtime) {
+        renderCardTimer();
+      }
+    };
     let renderCardTimer = () => {
       if (data.ary[0] == "custom") {
         reqCustomService();
       } else {
         reqNormalService();
       }
-      if (data.runtime) {
+      if (data.runtime && data.hasRuntime) {
         setTimeout(() => {
           renderCardTimer();
         }, data.config?.timer || 3000);
@@ -407,15 +450,17 @@ export default {
     transition: all 0.3s;
   }
   .shadow-card:hover {
-    filter: drop-shadow(0 5px 5px rgba(0, 0, 0, 0.05));
+    // filter: drop-shadow(0 5px 5px rgba(0, 0, 0, 0.05));
+		box-shadow:  20px 20px 60px rgba(214, 214, 214, 0.05),
+		             -20px -20px 60px rgba(0, 0, 0, 0.05);
   }
   .provide {
 		z-index: 1;
     font-size: 8px;
     line-height: 14px;
     padding: 1px 4px 1px 2px;
-		background-color: rgba(240, 240, 240, 0.8);
-		color: #aaa;
+		background-color: rgba(140, 140, 140, 0.1);
+		color: rgba(0, 0, 0, 0.5) !important;
     position: absolute;
     right: 0;
     bottom: 0;
@@ -432,7 +477,7 @@ export default {
     margin-left: -8px;
     margin-top: 0px;
     border-width: 7.5px 3px;
-		border-color: transparent rgba(240, 240, 240, 0.8) rgba(240, 240, 240, 0.8) transparent;
+		border-color: transparent rgba(140, 140, 140, 0.1) rgba(140, 140, 140, 0.1) transparent;
   }
 	.card-content{
 		background-color: transparent;

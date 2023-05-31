@@ -221,6 +221,7 @@ export async function getTraceList(payload) {
 		{filters:"TraceFilters"}
 	);
 }
+
 export async function getTraceDetail(id) {
   return query(`traceDetail(traceId: "${id}"){
 			data{
@@ -236,6 +237,98 @@ export async function getTraceDetail(id) {
 		}`
 	);
 }
+
+export async function getTopoData(payload) {
+	const filters = getTraceFilter(payload);
+  return query(`traceList(filters: $filters){
+			services{
+				id,
+				name,
+				pods,
+				namespace,
+				registry{id,name},
+			},
+			links{
+				error,
+				weight,
+				source,
+				target
+			}
+		}`,
+		{filters},
+		{filters:"TraceDAGFilters"}
+	);
+	//traceDAG
+}
+
+export function setTopoData() {
+  return (res) => {
+    let categories = [];
+    let categoryMap = {};
+    let nodes = [];
+    let links = [];
+    let nodePos = {};
+    let state = -1;
+    //service
+    let serviceNodes = res.data.services;
+    let index = 0;
+    serviceNodes.forEach((node) => {
+      let _map = {
+        value: node.id,
+        index: index,
+        unset: true,
+      };
+      let category = {
+        name: node.name,
+        id: node.id,
+      };
+      if (node.id != "") {
+        index++;
+        categories.push(category);
+        categoryMap[node.id] = _map;
+      }
+			
+			let service = {
+        name: node.name,
+        id: node.id,
+			  value: 10,
+			  symbol: serviceIcon,
+			  symbolSize: 30,
+			  category: categoryMap[node.id].index,
+			  isSvc: true,
+			};
+			nodes.push(service);
+    });
+
+    //path
+    let pathNodes = res.data.links;
+    pathNodes.forEach((node) => {
+      if (node.source) {
+        let source = node.source;
+        let target = node.target;
+        let link = {
+          source,
+          target,
+          value: node.weight,
+          label: {
+            show: true,
+            position: "middle",
+            backgroundColor: "#cccccc",
+            padding: 2,
+            borderRadius: 3,
+            fontSize: 10,
+            color: "#000000",
+            formatter: "{@value}",
+          },
+        };
+        links.push(link);
+      }
+    });
+    state = nodes.length;
+    return { categories, categoryMap, nodes, links, nodePos, state };
+  };
+}
+
 export function coverMessage(res) {
   if (typeof res.data == "object") {
     return JSON.stringify(res.data);

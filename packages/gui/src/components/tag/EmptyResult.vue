@@ -1,6 +1,6 @@
 <template>
   <a-result
-    class="mt-100"
+    class="mt-60"
     :title="title||$t('No data')"
     :sub-title="subTitle"
   >

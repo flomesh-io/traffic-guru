@@ -1,8 +1,244 @@
 <template>
   <div>
     <div
+      class="side-nav"
+      v-if="mode == 'nav'"
+    >
+      <div class="left-bar">
+        <div class="bottom">
+          <a-popover
+            overlay-class-name="nopd"
+            trigger="hover"
+            v-if="(routerSettingMenu.showZone && $isPro) || routerSettingMenu.showEnv"
+            placement="rightTop"
+          >
+            <template #content>
+              <a-descriptions
+                style="width: 400px;"
+                bordered
+              >
+                <a-descriptions-item
+                  :span="3"
+                  :label="$t('Zone')"
+                  v-if="routerSettingMenu.showZone && $isPro"
+                >
+                  <a-select
+                    class="ant-dropdown-link font-center full"
+                    v-model:value="zoneVal"
+                  >
+                    <a-select-option value="default">
+                      default
+                    </a-select-option>
+                  </a-select>
+                </a-descriptions-item>
+                <a-descriptions-item
+                  :span="3"
+                  :label="$t('Registry')"
+                  v-if="routerSettingMenu.showEnv"
+                >
+                  <div
+                    class="font-center"
+                  >
+                    <EnvSelector />
+                  </div>
+                </a-descriptions-item>
+              </a-descriptions>
+            </template>
+            <SelectOutlined class="icon-menu" />
+          </a-popover>
+          <a-tooltip
+            :key="index"
+            v-for="(menu, index) in subMenu"
+          >
+            <a-popover
+              overlay-class-name="nopd side-nav-memu"
+              trigger="hover"
+              v-if="
+                !menu.meta.invisible &&
+                  menu.children &&
+                  menu.children.length > 0
+              "
+              placement="rightTop"
+            >
+              <template #content>
+                <div
+                  class="menu-content"
+                  v-if="contentIndex >= 0"
+                >
+                  <h4 class="pd-20">
+                    <img
+                      class="img-radius"
+                      v-if="subMenu[contentIndex].path == 'flb'"
+                      width="30"
+                      src="@/assets/img/app1.jpg"
+                    >
+                    <img
+                      class="img-radius"
+                      v-else-if="subMenu[contentIndex].path == 'fsm'"
+                      width="30"
+                      src="@/assets/img/app2.jpg"
+                    >
+                    <component
+                      v-else
+                      :is="subMenu[contentIndex].meta.icon"
+                      class="app-icon"
+                    />
+                    <span class="ml-15">{{ subMenu[contentIndex].name }}</span>
+                  </h4>
+                  <a-card class="full grid-menu nodb pd-x-20 transparent">
+                    <a-card-grid
+                      v-for="(subitem, subindex) in subMenu[contentIndex].children"
+                      :key="subitem.fullPath"
+                      class="grid-menu-item"
+                      :style="subindex % 3 > 0 ? 'margin-left:5%' : ''"
+                    >
+                      <a-tooltip
+                        placement="topLeft"
+                        :title="subitem.name"
+                        arrow-point-at-center
+                      >
+                        <router-link
+                          @click="() => {contentIndex = contentIndex}"
+                          :to="subitem.fullPath"
+                          class="block"
+                        >
+                          <EyeInvisibleOutlined
+                            v-if="editMenu"
+                            class="EyeInvisibleOutlined absolute gray right-10 top-10"
+                            style="font-size: 12px"
+                          />
+                          <component
+                            v-if="subitem.meta.icon"
+                            :is="subitem.meta.icon"
+                          />
+                          <div v-if="subitem.meta.svg">
+                            <img
+                              :src="subitem.meta.svg"
+                              width="26"
+                              height="26"
+                            >
+                          </div>
+                          <a-typography-text
+                            v-if="subitem.meta.badge && !editMenu"
+                            class="absolute right-10 top-10"
+                            type="warning"
+                          >
+                            {{ subitem.meta.badge }}
+                          </a-typography-text>
+                          <span>{{ subitem.name }}</span>
+                        </router-link>
+                      </a-tooltip>
+                    </a-card-grid>
+                    <a-card-grid
+                      v-if="subMenu[contentIndex].path == 'system' && false"
+                      key="edit-menu"
+                      class="grid-menu-item"
+                      :style="
+                        subMenu[contentIndex].children.length % 3 > 0
+                          ? 'margin-left:5%'
+                          : ''
+                      "
+                    >
+                      <div class="block">
+                        <div class="block">
+                          <a-switch v-model:checked="editMenu" />
+                        </div>
+                        <div
+                          class="black"
+                          style="margin-top: 5px"
+                        >
+                          {{ $t("Edit Menu") }}
+                        </div>
+                      </div>
+                    </a-card-grid>
+                    <a-card-grid
+                      class="back-menu grid-menu-item"
+                      v-if="contentIndex >= 0"
+                      @click="onBack"
+                      :style="
+                        subMenu[contentIndex].children.length % 3 > 0
+                          ? 'margin-left:5%'
+                          : ''
+                      "
+                    >
+                      <LeftOutlined class="LeftOutlined" />
+                    </a-card-grid>
+                  </a-card>
+                </div>
+              </template>
+              <div>
+                <div 
+                  class="img-menu" 
+                  v-if="menu.path == 'flb'"
+                  @mouseenter="selectContent(index)"
+                  @mouseleave="() => {contentIndex = contentIndex}"
+                >
+                  <img src="@/assets/img/app1.jpg">
+                </div>
+                <div 
+                  class="img-menu" 
+                  v-else-if="menu.path == 'fsm'"
+                  @mouseenter="selectContent(index)"
+                  @mouseleave="() => {contentIndex = contentIndex}"
+                >
+                  <img src="@/assets/img/app2.jpg">
+                </div>
+                <component
+                  v-else
+                  class="icon-menu"
+                  @mouseenter="selectContent(index)"
+                  @mouseleave="() => {contentIndex = contentIndex}"
+                  :is="menu.meta.icon"
+                />
+              </div>
+            </a-popover>
+            <router-link
+              v-else-if="!menu.meta.invisible && menu.children == 0"
+              :to="menu.fullPath"
+            >
+              <component
+                class="icon-menu"
+                :is="menu.meta.icon"
+              />
+            </router-link>
+          </a-tooltip>
+          <a-tooltip
+            :title="$t('router-setting.name')"
+            color="#00adef"
+            placement="right"
+          >
+            <SlidersOutlined
+              v-permission="['admin']"
+              @click="routerSetting"
+              class="icon-menu"
+            />
+          </a-tooltip>
+          <a-tooltip
+            :title="$t('Logout')"
+            color="#00adef"
+            placement="right"
+          >
+            <PoweroffOutlined
+              @click="logout"
+              class="icon-menu"
+            />
+          </a-tooltip>
+          <a-tooltip
+            :title="$t('Collapse')"
+            color="#00adef"
+            placement="right"
+          >
+            <FullscreenExitOutlined
+              @click="changeLayout('small')"
+              class="icon-menu"
+            />
+          </a-tooltip>
+        </div>
+      </div>
+    </div>
+    <div
       class="windowWrapper wrapper"
-      v-if="!visible"
+      v-if="!visible && mode != 'nav'"
       @click="showDrawer"
     >
       <div
@@ -90,6 +326,16 @@
               />
             </a-tooltip>
             <a-tooltip
+              :title="$t('Change Menu Layout')"
+              color="#00adef"
+              placement="right"
+            >
+              <BorderLeftOutlined
+                @click="() => {onClose();changeLayout('nav')}"
+                class="icon-menu"
+              />
+            </a-tooltip>
+            <a-tooltip
               :title="$t('Logout')"
               color="#00adef"
               placement="right"
@@ -170,7 +416,22 @@
                     menu.children.length > 0
                 "
               >
-                <component :is="menu.meta.icon" />
+                <div 
+                  class="img-menu inline-block" 
+                  v-if="menu.path == 'flb'"
+                >
+                  <img src="@/assets/img/app1.jpg">
+                </div>
+                <div 
+                  class="img-menu inline-block" 
+                  v-else-if="menu.path == 'fsm'"
+                >
+                  <img src="@/assets/img/app2.jpg">
+                </div>
+                <component
+                  v-else
+                  :is="menu.meta.icon"
+                />
                 <span>{{ menu.name }}</span>
                 <EyeInvisibleOutlined
                   v-if="editMenu"
@@ -318,6 +579,8 @@ import {
   HomeOutlined,
   SettingOutlined,
   IdcardOutlined,
+  BorderLeftOutlined,
+  SelectOutlined,
   PoweroffOutlined,
 } from "@ant-design/icons-vue";
 import { getI18nKey } from "@/utils/routerUtil";
@@ -336,7 +599,9 @@ export default {
     SettingOutlined,
     IdcardOutlined,
     PoweroffOutlined,
+    BorderLeftOutlined,
     SlidersOutlined,
+    SelectOutlined,
     EnvSelector,
   },
 
@@ -359,6 +624,7 @@ export default {
   // i18n: require('@/i18n'),
   data() {
     return {
+      mode: localStorage.getItem('MENU_LAYOUT') || 'small',
       editMenu: false,
       visible: false,
       selectedKeys: [],
@@ -442,6 +708,11 @@ export default {
   },
 
   methods: {
+    changeLayout(mode){
+      this.mode = mode;
+      localStorage.setItem('MENU_LAYOUT',mode);
+    },
+
     systemSetting() {
       let systemIndex = -1;
       let _options = _.cloneDeep(this.menuData);
@@ -537,12 +808,63 @@ export default {
     height: 100%;
     overflow: hidden;
   }
+	.img-menu{
+		text-align: center;
+	}
+	.windowDrawerBody .img-menu{
+		margin-right: 10px;
+	}
+	.windowDrawerBody .img-menu img{
+		width:20px;
+		height: 20px;
+		position: relative;
+		top: -2px;
+		border-radius: 2px;
+	}
+	.side-nav .img-menu img{
+		
+		margin: 10px 0;
+		width: 30px;
+		height: 30px;
+		transition: .3s all;
+		cursor: pointer;
+		border-radius: 2px;
+	}
+	.side-nav .img-menu:hover img{
+		border-radius: 50%;
+		margin: 0;
+		width: 50px;
+		height: 50px;
+	}
   .left-bar {
     position: relative;
     width: 50px;
   }
+	.side-nav .menu-content{
+		
+	}
   .left-bar .bottom {
     width: 50px;
+  }
+	.side-nav{
+		padding-right: 3px;
+		padding-top: 10px;
+		height: 100%;
+		position: relative;
+		z-index: 1;
+	}
+	.side-nav:after {
+		position: absolute;
+		top: 20px;
+		content: "";
+		width: 2px;
+		height: 600px;
+		display: block;
+		right: -1px;
+		box-shadow: -1px 0px 3px 0px rgba(0,0,0,0.2);
+		border-radius: 100%;
+	}
+	.windowDrawerBody .left-bar .bottom {
     position: absolute;
     bottom: 0;
   }
@@ -618,6 +940,12 @@ export default {
     width: 50px;
     text-align: center;
   }
+  .side-nav-memu .app-icon {
+    height: 30px !important;
+    line-height: 27px !important;
+    font-size: 18px !important;
+    width: 30px !important;
+	}
 
   .wrapper {
     perspective: 1000px;

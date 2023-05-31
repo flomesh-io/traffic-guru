@@ -1,4 +1,30 @@
 <template>
+  <div
+    v-show="!hideAdd"
+    class="fullscreen header-fullscreen runtime"
+    :class="embed ? 'embed' : 'normal'"
+  >
+    <a-tooltip
+      v-if="!runtime"
+      placement="top"
+      :title="$t('Start Runtime')"
+    >
+      <CaretRightOutlined
+        @click="toggleRuntime(true)"
+        class="icon"
+      />
+    </a-tooltip>
+    <a-tooltip
+      v-else
+      placement="top"
+      :title="$t('Pause')"
+    >
+      <LoadingOutlined
+        @click="toggleRuntime(false)"
+        class="font-primary icon"
+      />
+    </a-tooltip>
+  </div>
   <a-tooltip
     v-show="!hideAdd"
     placement="top"
@@ -236,6 +262,7 @@
     <a-row
       v-if="subscribes && subscribes.length > 0 && !loading && did"
       class="row-mg"
+      style="margin-top: -8px;margin-left: -8px;margin-right: -8px;"
     >
       <draggable
         handle=".handle"
@@ -255,7 +282,7 @@
         <template #item="{ element }">
           <a-col
             :key="element.name"
-            class="list-group-item pd-12"
+            class="list-group-item pd-8"
             v-if="element.name != ''"
             :xl="element.config.col"
             :lg="24"
@@ -422,7 +449,7 @@ import {
 } from "@/services/dashboard";
 import Timeline from "@/components/tool/Timeline";
 import EnvSelector from "@/components/menu/EnvSelector";
-import { mapState, mapGetters } from "vuex";
+import { mapState, mapGetters, mapMutations } from "vuex";
 import { isPro, isFreeKey, isK8SKey } from "@/utils/util";
 import subscribeConfig from "@/subscribe/index";
 import draggable from "vuedraggable";
@@ -432,6 +459,8 @@ import {
   CheckOutlined,
   FilterOutlined,
   EditOutlined,
+  CaretRightOutlined,
+  LoadingOutlined,
 } from "@ant-design/icons-vue";
 const isFree = !isPro();
 export default {
@@ -450,6 +479,8 @@ export default {
     Timeline,
     EditOutlined,
     LeftCircleOutlined,
+    CaretRightOutlined,
+    LoadingOutlined,
   },
 
   props: [
@@ -512,8 +543,8 @@ export default {
   },
 
   computed: {
-    ...mapGetters("account", ["user"]),
-    ...mapState("setting", ["lang"]),
+    ...mapGetters("setting", ["runtime"]),
+    ...mapState("setting", ["runtime"]),
     namespaceQL() {
       let rtn = "";
       if (this.namespaceFilter) {
@@ -592,6 +623,11 @@ export default {
   },
 
   methods: {
+    ...mapMutations('setting', ['setRuntime']),
+    toggleRuntime(runtime){
+      this.setRuntime(runtime);
+    },
+
     getPrometheus() {
       this.$gql
         .query(`fleets(filters:{type:{eq:"prometheus"}}){data{id,attributes{name,apply,content}}}`)
@@ -1037,6 +1073,15 @@ export default {
   .header-fullscreen.embed.filter {
     right: 48px;
   }
+	.header-fullscreen.normal.filter {
+	  right: 35px;
+	}
+  .header-fullscreen.embed.runtime {
+    right: 118px;
+  }
+	.header-fullscreen.normal.runtime {
+	  right: 105px;
+	}
   .dashboard-badge {
     position: relative;
     top: -3px;

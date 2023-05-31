@@ -27,6 +27,7 @@ const baseComponents = {
     component: TopologyChart,
     provide: "custom",
     isOpen: false,
+		hasRuntime: true,
     callback: `res => {
     /*TODO*/
     return {
@@ -39,6 +40,7 @@ const baseComponents = {
     component: McsTopologyChart,
     provide: "custom",
     isOpen: false,
+		hasRuntime: true,
     callback: `res => {
     /*TODO*/
     return {
@@ -50,6 +52,7 @@ const baseComponents = {
     icon: "icon-component",
     component: ApiTopologyChart,
     provide: "custom",
+		hasRuntime: true,
     isOpen: false,
     callback: `res => {
     /*TODO*/
@@ -62,6 +65,7 @@ const baseComponents = {
     icon: "icon-component",
     provide: "custom",
     component: AreaChart,
+		hasRuntime: true,
     isOpen: false,
     callback: `res => {
     /*TODO*/
@@ -73,6 +77,7 @@ const baseComponents = {
     icon: "icon-component",
     provide: "custom",
     component: BpsChart,
+		hasRuntime: true,
     isOpen: false,
     callback: `res => {
     /*TODO*/
@@ -83,6 +88,7 @@ const baseComponents = {
   DelayChart: {
     icon: "icon-component",
     component: DelayChart,
+		hasRuntime: true,
     provide: "custom",
     isOpen: false,
     callback: `res => {
@@ -95,6 +101,7 @@ const baseComponents = {
     icon: "icon-component",
     provide: "custom",
     isOpen: false,
+		hasRuntime: true,
     component: QoSSummaryChart,
     callback: `res => {
     /*TODO*/
@@ -140,6 +147,7 @@ const baseComponents = {
   BarChart: {
     icon: "icon-barchart",
     component: BarChart,
+		hasRuntime: true,
     provide: "custom",
     isOpen: false,
     callback: `res => {
@@ -154,6 +162,7 @@ const baseComponents = {
     icon: "icon-barchart",
     component: BarGroupChart,
     provide: "custom",
+		hasRuntime: true,
     isOpen: false,
     callback: `res => {
     /*TODO*/
@@ -166,6 +175,7 @@ const baseComponents = {
     icon: "icon-linechart",
     component: MiniArea,
     provide: "custom",
+		hasRuntime: true,
     isOpen: true,
     callback: `res => {
     /*TODO*/
@@ -190,6 +200,7 @@ const baseComponents = {
     icon: "icon-barchart",
     component: MiniBar,
     provide: "custom",
+		hasRuntime: true,
     isOpen: true,
     callback: `res => {
     /*TODO*/
@@ -222,6 +233,7 @@ const baseComponents = {
     icon: "icon-top1",
     component: RankingGroup,
     provide: "custom",
+		hasRuntime: true,
     isOpen: true,
     callback: `res => {
     /*TODO*/
@@ -259,6 +271,7 @@ const baseComponents = {
     component: Gauge,
     provide: "custom",
     isOpen: true,
+		hasRuntime: true,
     callback: `res => {
     /*TODO*/
     return {
@@ -277,6 +290,7 @@ const baseComponents = {
     component: RingStatus,
     provide: "custom",
     isOpen: true,
+		hasRuntime: true,
     callback: `res => {
     /*TODO*/
     return {

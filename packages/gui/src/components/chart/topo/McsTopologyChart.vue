@@ -296,6 +296,5 @@ export default {
   }
   .topology-main {
     height: calc(100vh - 100px);
-    width: calc(100vw - 50px);
   }
 </style>

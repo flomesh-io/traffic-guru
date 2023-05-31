@@ -3,6 +3,7 @@ import { ADMIN } from "@/config/default";
 import { formatFullPath } from "@/utils/i18n";
 import { filterMenu } from "@/utils/authority-utils";
 import { getLocalSetting } from "@/utils/themeUtil";
+import { getTextColors } from "@/utils/colors";
 
 const localSetting = getLocalSetting(true);
 const customTitlesStr = sessionStorage.getItem(
@@ -23,8 +24,15 @@ export default {
     ...config,
     ...localSetting,
     lang: localStorage.getItem("lang") || process.env.VUE_APP_LANG,
+    runtime: false,
   },
   getters: {
+		themeColors(state) {
+			return { text: getTextColors(null, state.theme.mode) }
+		},
+    runtime(state) {
+      return state.runtime;
+    },
     menuData(state, getters, rootState) {
       if (state.filterMenu) {
         const { permissions, roles } = rootState.account;
@@ -53,6 +61,9 @@ export default {
     },
   },
   mutations: {
+    setRuntime(state, runtime) {
+      state.runtime = runtime;
+    },
     setDevice(state, isMobile) {
       state.isMobile = isMobile;
     },

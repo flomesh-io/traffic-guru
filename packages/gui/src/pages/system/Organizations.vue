@@ -62,6 +62,12 @@
                             v-permission="['organization:update']"
                           ><SettingOutlined /> {{ $t("Administration") }}</a>
                         </a-menu-item>
+                        <a-menu-item key="new">
+                          <a
+                            @click="newChildOrg(null, null, item)"
+                            v-permission="['organization:update']"
+                          ><PlusOutlined /> {{ $t("Add Suborganization") }}</a>
+                        </a-menu-item>
                         <a-menu-item>
                           <a-popconfirm
                             placement="topLeft"
@@ -115,6 +121,12 @@
       >
         <a-descriptions bordered>
           <a-descriptions-item
+            :label="$t('Parent Organization')"
+            v-if="payload.parent"
+          >
+            {{ payload.parent.name }}
+          </a-descriptions-item>
+          <a-descriptions-item
             :label="$t('as')"
             :span="3"
           >
@@ -143,27 +155,6 @@
               :rows="4"
             />
           </a-descriptions-item>
-          <a-descriptions-item :label="$t('Parent Organization')">
-            <a-select
-              :placeholder="$t('unset')"
-              v-model:value="payload.parent"
-              class="width-180"
-              ref="select"
-            >
-              <a-select-option
-                :disabled="
-                  payload.id == org.id ||
-                    (payload.children &&
-                      payload.children.find((item) => item.id == org.id))
-                "
-                :value="org.id"
-                :key="index"
-                v-for="(org, index) in orgs"
-              >
-                {{ org.name }}
-              </a-select-option>
-            </a-select>
-          </a-descriptions-item>
         </a-descriptions>
       </a-form>
     </a-modal>
@@ -177,6 +168,7 @@ import {
   SettingOutlined,
   MoreOutlined,
   CloseOutlined,
+  PlusOutlined,
   EditOutlined,
 } from "@ant-design/icons-vue";
 import PageLayout from "@/layouts/PageLayout";
@@ -194,6 +186,7 @@ export default {
     PageLayout,
     PlusCircleTwoTone,
     PartitionOutlined,
+    PlusOutlined,
     SettingOutlined,
     MoreOutlined,
     CloseOutlined,
@@ -361,7 +354,7 @@ export default {
       const _p = {
         name: savedata.name,
         description: savedata.description,
-        parent: savedata.parent,
+        parent: savedata.parent?.id || savedata.parent,
       };
       if (this.isEdit) {
         const whereID = savedata.id;
@@ -418,10 +411,18 @@ export default {
 
     setting(index, type, item) {
       this.payload = item;
-      if (this.payload.parent) {
-        this.payload.parent = "" + this.payload.parent.id;
-      }
       this.isEdit = true;
+      this.showModal();
+    },
+
+    newChildOrg(index, type, item) {
+      this.isEdit = false;
+      this.payload = {
+        id: "",
+        name: "",
+        parent: item,
+        description: "",
+      };
       this.showModal();
     },
 

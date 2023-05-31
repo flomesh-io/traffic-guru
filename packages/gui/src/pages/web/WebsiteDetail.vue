@@ -25,9 +25,8 @@
           name="port"
           :rules="rules.numberRequired"
         >
-          <a-input
+          <a-input-number
             v-model:value="detail.port"
-            type="number"
             :placeholder="$t('unset')"
             class="width-100"
           />
@@ -47,8 +46,7 @@
           v-if="detail.tlsEnabled"
           :rules="rules.numberRequired"
         >
-          <a-input
-            type="number"
+          <a-input-number
             :placeholder="$t('unset')"
             v-model:value="detail.tlsPort"
             class="width-100"
@@ -273,6 +271,7 @@
                       </a-dropdown>
                     </div>
                   </template>
+                  <!--
                   <div class="list-content">
                     <div class="flex list-content-item">
                       <div class="flex-item pl-10">
@@ -286,7 +285,7 @@
                         </p>
                       </div>
                     </div>
-                  </div>
+                  </div>-->
                 </a-list-item>
               </a-list>
             </a-card>
@@ -353,35 +352,67 @@
                 <TagList
                   v-model:list="payload.hosts"
                   name="hosts"
-                  placeholder="Host"
+                  placeholder="192.168.10.1:8080"
                 />
               </FormItem>
-              <CardSelector
-                :width="500"
-                :search="true"
-                placement="right"
-                :icon="RiseOutlined"
-                :col="2"
-                @select="saveSelector"
-                :get-tag="
-                  (item) => {
-                    return item.content && item.name != item.content.displayName
-                      ? item.content.displayName
-                      : null;
-                  }
-                "
-                :options="upstreams"
+            </div>
+          </a-descriptions-item>
+          <a-descriptions-item
+            :label="$t('Algo')"
+            :span="3"
+          >
+            <div>
+              <FormItem
+                name="hosts"
               >
-                <a v-if="$isPro">
-                  <a-tag
-                    color="#00adef"
-                    key="submit"
-                    type="primary"
+                <a-select
+                  :placeholder="$t('unallocated')"
+                  class="width-220"
+                  v-model:value="payload.algo"
+                >
+                  <a-select-option
+                    v-for="(item, index) in algos"
+                    :key="index"
+                    :value="item.id"
                   >
-                    {{ $t("Select from upstream") }}
-                  </a-tag>
-                </a>
-              </CardSelector>
+                    <span v-if="item.id">{{ item.name }}</span>
+                    <i
+                      v-if="!item.id"
+                      class="gray"
+                    >{{ item.name }} </i>
+                  </a-select-option>
+                </a-select>
+              </FormItem>
+            </div>
+          </a-descriptions-item>
+          <a-descriptions-item
+            :label="$t('Rewrite Path')"
+            :span="1"
+          >
+            <div>
+              <FormItem
+                name="hosts"
+              >
+                <a-switch
+                  v-model:checked="payload.rewritePath"
+                />
+              </FormItem>
+            </div>
+          </a-descriptions-item>
+          <a-descriptions-item
+            :label="$t('New Path')"
+            :span="2"
+          >
+            <div>
+              <FormItem
+                name="hosts"
+              >
+                <a-input
+                  :placeholder="$t('unset')"
+                  v-model:value="payload.newPath"
+                  :disabled="!payload.rewritePath"
+                />
+              </FormItem>
             </div>
           </a-descriptions-item>
         </a-descriptions>
@@ -402,7 +433,6 @@ import {
 import PageLayout from "@/layouts/PageLayout";
 import DetailList from "@/components/tool/DetailList";
 import { mapState } from "vuex";
-import CardSelector from "@/components/card/CardSelector";
 import DetailListItem from "@/components/tool/DetailListItem";
 import JsonEditor from "@/components/editor/JsonEditor";
 import FormItem from "@/components/tool/FormItem";
@@ -418,7 +448,6 @@ export default {
     DetailListItem,
     DetailList,
     PageLayout,
-    CardSelector,
     JsonEditor,
     FormItem,
     TagList,
@@ -446,15 +475,14 @@ export default {
       visibleProvider:false,
       payload: {
         path: "subpath1/",
-        hosts: [],
-        isDefault: false,
+        hosts: []
       },
 
       resource:null,
       detail: {
         domain:'',
         port:80,
-        mimeType:JSON.stringify({default:'',types:[]}),
+        mimeType:JSON.stringify({}),
         tlsEnabled:false,
         tlsPort:443,
         providers:[],
@@ -464,6 +492,11 @@ export default {
 
       downloading:false,
       loading: true,
+      algos: [
+        { name: "RoundRobinLoadBalancer", id: "RoundRobinLoadBalancer" },
+        { name: "LeastWorkLoadBalancer", id: "LeastWorkLoadBalancer" },
+        { name: "HashingLoadBalancer", id: "HashingLoadBalancer" },
+      ],
     };
   },
 
@@ -491,7 +524,7 @@ export default {
         if (res.data && res.data.length > 0) {
           this.defaultMime = res.data[0].content;
           if (!this.pid) {
-            this.detail.mimeType = JSON.stringify({default:'',types:this.defaultMime}) || JSON.stringify({default:'',types:[]});
+            this.detail.mimeType = JSON.stringify(this.defaultMime) || JSON.stringify({});
           }
         }
       });
@@ -509,6 +542,7 @@ export default {
           .query(`website(id: ${this.pid}){data{id,attributes{domain,port,mimeType,tlsEnabled,tlsPort,providers,certificate{data{id}},resource{data{id,attributes{name}}}}}}`)
           .then((d) => {
             let res = d.data;
+            res.mimeType = JSON.stringify(res.mimeType)
             this.detail = res;
             delete this.detail.id;
             if(res.certificate){
@@ -529,11 +563,11 @@ export default {
         this.detail = {
           domain:'',
           port:80,
-          mimeType:JSON.stringify({default:'',types:[]}),
+          mimeType:JSON.stringify({}),
           tlsEnabled:false,
           tlsPort:443,
           providers:[],
-          certificate:null,
+          certificate:null
         };
         this.loading = false;
       }
@@ -589,7 +623,9 @@ export default {
       this.payload = {
         path: "/",
         hosts: [],
-        isDefault: false,
+        rewritePath: false,
+        newPath: "",
+        algo: "RoundRobinLoadBalancer"
       };
       this.visibleProvider = true;
     },
@@ -616,7 +652,7 @@ export default {
 						}}},
 						content
 					}}}`,
-          { filters: {}},
+          { filters: {type: {eq: "api"}}},
           {
             filters: "CertificateFiltersInput",
           }
@@ -624,19 +660,6 @@ export default {
         .then((res) => {
           this.certificates = res.data;
         });
-    },
-
-    changePrdDefault (item, i) {
-      this.detail.providers.forEach((provider, index) => {
-        if (i != index) {
-          provider.isDefault = false;
-        }
-      });
-      if (item.isDefault) {
-        this.detail.providers.unshift(
-          this.detail.providers.splice(i, 1)[0],
-        );
-      }
     },
 
     saveSelector (target) {
@@ -665,6 +688,7 @@ export default {
         return;
       }
       let savedata = this.detail;
+      savedata.mimeType = JSON.parse(savedata.mimeType) 
       if (this.pid != "") {
         this.$gql
           .mutation(

@@ -25,7 +25,7 @@
     :ref="name"
     type="text"
     size="small"
-    class="mr-10 width-100"
+    class="mr-10 width-160"
     :placeholder="placeholder"
     v-model:value="value"
     @blur="inputConfirm"

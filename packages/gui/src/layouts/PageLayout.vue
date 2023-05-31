@@ -203,7 +203,7 @@ export default {
 
 <style lang="less">
   .page-header {
-    margin: 0 -24px 0;
+    margin: 0 -18px 0 -18px;
   }
   .link {
     /*margin-top: 16px;*/

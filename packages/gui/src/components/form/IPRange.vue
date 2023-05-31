@@ -14,7 +14,6 @@
     <span>.</span>
     <a-input-number
       key="b"
-      type="number"
       :min="0"
       :max="999"
       v-if="editable"
@@ -89,7 +88,6 @@
     <span v-if="editable">/</span>
     <a-input-number
       key="suffix"
-      type="number"
       :min="0"
       :max="999"
       v-if="editable"
@@ -103,7 +101,6 @@
   <span v-if="type == 4">
     <a-input-number
       key="d"
-      type="number"
       :min="0"
       :max="999"
       v-if="editable"

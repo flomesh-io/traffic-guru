@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 export default {
   name: "Gauge",
   props: ["vals", "id", "height", "format", "ver", "offset"],
@@ -24,10 +24,17 @@ export default {
   },
 
   computed: {
+    ...mapGetters("setting", ["themeColors"]),
     ...mapState("setting", ["lang"]),
   },
 
   watch: {
+    themeColors() {
+      setTimeout(() => {
+        this.renderChart();
+      }, 500);
+    },
+
     lang(newVal) {
       this.$i18n.locale = newVal;
     },
@@ -101,6 +108,7 @@ export default {
           itemStyle: { color: _val.color },
           title: {
             offsetCenter: offsetCenter[index].title,
+            color:this.themeColors.text[0]
           },
           detail: {
             offsetCenter: offsetCenter[index].detail,
@@ -135,7 +143,7 @@ export default {
 
             axisLabel: {
               distance: 20,
-              color: "#999",
+              color: this.themeColors.text[0],
               fontSize: 10,
             },
 
@@ -146,7 +154,7 @@ export default {
               length: 8,
               lineStyle: {
                 width: 3,
-                color: "#999",
+                color: this.themeColors.text[0],
               },
             },
 

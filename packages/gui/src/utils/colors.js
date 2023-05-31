@@ -27,6 +27,15 @@ function getFunctionalColors(mode) {
   };
 }
 
+function getTextColors(color, mode) {
+  if (mode == themeMode.NIGHT) {
+    return ANTD.primary.night.textColors;
+  } else if (color == ANTD.primary.color) {
+    return ANTD.primary.dark.textColors;
+  } else {
+    return ANTD.primary.light.textColors;
+  }
+}
 function getMenuColors(color, mode) {
   if (mode == themeMode.NIGHT) {
     return ANTD.primary.night.menuColors;
@@ -105,5 +114,6 @@ module.exports = {
   getAntdColors,
   getMenuColors,
   getThemeToggleColors,
+	getTextColors,
   getFunctionalColors,
 };

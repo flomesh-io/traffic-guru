@@ -7,14 +7,6 @@
       'beauty-scroll',
     ]"
   >
-    <WindowsMenu
-      :class="[{ 'fixed-tabs': fixedTabs }]"
-      @toggleCollapse="toggleCollapse"
-      :theme="theme.mode"
-      :menu-data="menuData"
-      :collapsed="collapsed"
-      :collapsible="true"
-    />
     <a-layout class="admin-layout-main ant-layout beauty-scroll">
       <AdminHeader
         :class="[
@@ -41,10 +33,18 @@
         v-show="fixedHeader"
       />
       <a-layout-content
-        class="admin-layout-content"
+        class="admin-layout-content flex"
         :style="`min-height: ${minHeight}px;`"
       >
-        <div class="layout-content">
+        <WindowsMenu
+          :class="[{ 'fixed-tabs': fixedTabs }]"
+          @toggleCollapse="toggleCollapse"
+          :theme="theme.mode"
+          :menu-data="menuData"
+          :collapsed="collapsed"
+          :collapsible="true"
+        />
+        <div class="flex-item layout-content">
           <slot />
         </div>
       </a-layout-content>
@@ -274,14 +274,16 @@ export default {
       }
     }
     .admin-layout-content {
-      padding: 24px 24px 0;
+      // padding: 24px 24px 0;
       /*overflow-x: hidden;*/
       /*min-height: calc(100vh - 64px - 122px);*/
     }
   }
   .layout-content {
+		background-color: @layout-body-background;
     position: relative;
-    padding-top: 15px;
+		z-index: 2;
+    padding: 34px 18px 0 18px;
   }
   .header-fullscreen {
     z-index: 10;

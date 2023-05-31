@@ -205,7 +205,7 @@
           >
             <a-select
               v-model:value="payload.type"
-              class="width-180"
+              class="width-220"
               :disabled="isEdit"
               @change="changeType"
             >
@@ -333,9 +333,9 @@ export default {
   props: ["isBind", "col", "bindCertificates", "certificateSize", "mode"],
   data() {
     return {
-      tlsMap: { api: "API/LB Secret", tunnel: "Tunnel Secret", client: "Client Secret", rfc8998: "RFC8998 Secret", k8s: "K8S Secret" },
+      tlsMap: { api: "API/LB/Website TLS Secret", tunnel: "Tunnel Secret", client: "Client Secret", rfc8998: "RFC8998 Secret", k8s: "K8S Secret" },
       tlsTypes: [
-        { value: "api", label: "API/LB TLS Secret" },
+        { value: "api", label: "API/LB/Website TLS Secret" },
         { value: "tunnel", label: "Tunnel TLS Secret" },
         { value: "client", label: "Client Secret" },
         { value: "rfc8998", label: "RFC8998 Secret" },

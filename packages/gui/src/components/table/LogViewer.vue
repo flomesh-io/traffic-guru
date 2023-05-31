@@ -191,7 +191,7 @@
                   </a-list-item-meta>
                   <template #actions>
                     <span v-if="record['resStatus'] > 0">Status {{ record["resStatus"] }}</span>
-                    <span><FieldTimeOutlined /> {{ record.timestamp }}</span>
+                    <span><FieldTimeOutlined /> {{ record.timestamp || new Date(record.reqTime * 1)?.toLocaleString() }}</span>
                     <span
                       v-if="record.remoteAddr"
                     >Remote {{ record.remoteAddr }} : {{ record.remotePort }}
