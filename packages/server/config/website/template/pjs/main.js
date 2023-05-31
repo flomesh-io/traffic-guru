@@ -25,9 +25,10 @@
   .listen(config.listenTLS || 0 )
   .onStart(() => void (__isTLS = true))
   .acceptTLS({
-    certificate: (sni, cert) => (
-      sni && Object.entries(_certificates).find(([k, v]) => new RegExp(k).test(sni))?.[1]
-    )
+    certificate: {
+      cert: new crypto.CertificateChain(os.readFile("../scerets/tls.crt")),
+      key: new crypto.PrivateKey(os.readFile("../scerets/tls.key"))
+    }
   }).to('inbound-http')
 
   .pipeline('inbound-http')

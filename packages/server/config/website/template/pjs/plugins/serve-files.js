@@ -3,7 +3,7 @@
 
   sites = config['serve-files'],
 
-  mimeTypes = config['mime'].types,
+  mimeTypes = config['mime'],
 
 ) => pipy({
   _file: null,
@@ -22,9 +22,9 @@
       ) => (
         _reqPathName = new URL(msg.head.path).pathname,
         root && (
-          _file = http.File.from(root + _reqPathName)
+          _file = http.File.from(root + _reqPathName),
+         !_file && (_file = http.File.from(root.replace("..", "") + _reqPathName))
         )
-
       ))()
     )
   )

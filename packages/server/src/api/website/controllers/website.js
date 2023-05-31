@@ -38,13 +38,7 @@ module.exports = createCoreController('api::website.website', {
     console.log(['-rfp', process.cwd() + '/config/website/pipybin/' + os + "/pipy", tempBase + "/bin/"])
     strapi.log.info(process.cwd() + '/config/website/pipybin/' + os + "/pipy ; " + tempBase + "/bin/")
    
-
-    const certs = {};
     if (website.tlsEnabled) {
-      certs[`^(${website.domain})`] = {
-        cert: `../scerets/tls.crt`,
-        key: '../scerets/tls.key',
-      };
       fs.writeFileSync(
         tempBase + '/scerets/tls.key',
         website.certificate.content.key
@@ -78,7 +72,6 @@ module.exports = createCoreController('api::website.website', {
     const config = {
       listen: website.port,
       listenTLS: website.tlsEnabled ? website.tlsPort : undefined,
-      certificates: certs,
       plugins: [
         'plugins/router.js',
         'plugins/balancer.js',
