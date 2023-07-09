@@ -14,6 +14,7 @@ spec:
 {{ if eq .Values.service.type "NodePort"}}
       nodePort: {{ .Values.service.nodePort | default 30000 }}
 {{ end }}
+{{- if not .Values.pipyRepo.standalone }}
     - port: {{ .Values.pipyRepo.service.port }}
       targetPort: {{ .Values.pipyRepo.service.port }}
       protocol: TCP
@@ -21,5 +22,6 @@ spec:
 {{ if eq .Values.service.type "NodePort"}}
       nodePort: {{ .Values.pipyRepo.service.nodePort | default 30060 }}
 {{ end }}
+{{- end}}
   selector:
     {{- include "traffic-guru.selectorLabels" . | nindent 4 }}

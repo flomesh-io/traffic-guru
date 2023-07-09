@@ -149,6 +149,16 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
+{{- define "traffic-guru.pipyRepo.labels"}}
+helm.sh/chart: {{ include "traffic-guru.chart" . }}
+app.kubernetes.io/name: pipy-repo
+app.kubernetes.io/component: pipy-repo
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
 {{- define "traffic-guru.repository" -}}
 {{- if contains "ubi" .Chart.Version -}}
 quay.io/{{ .Values.image.repository }}

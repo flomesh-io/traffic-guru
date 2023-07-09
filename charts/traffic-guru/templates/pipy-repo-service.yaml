@@ -1,0 +1,21 @@
+---
+{{- if .Values.pipyRepo.standalone }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: pipy-repo
+  labels:
+    {{- include "traffic-guru.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.pipyRepo.service.port }}
+      targetPort: {{ .Values.pipyRepo.service.port }}
+      protocol: TCP
+      name: repo
+{{- if eq .Values.service.type "NodePort"}}
+      nodePort: {{ .Values.pipyRepo.service.nodePort | default 30060 }}
+{{- end }}
+  selector:
+    {{- include "traffic-guru.pipyRepo.labels" . | nindent 4 }}
+{{- end}}
