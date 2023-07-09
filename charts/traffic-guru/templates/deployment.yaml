@@ -58,7 +58,11 @@ spec:
           - name: HOST
             value: '::'
           - name: PIPY_REPO_HOST
+            {{- if .Values.pipyRepo.standalone }}
+            value: pipy-repo.{{.Release.Namespace}}.svc
+            {{- else}}
             value: localhost
+            {{- end}}
           - name: PIPY_REPO_PORT
             value: "6060"
           - name: PORT
@@ -94,6 +98,7 @@ spec:
             httpGet:
               path: /
               port: http
+        {{- if not .Values.pipyRepo.standalone }}
         - name: pipy-repo
           image: "{{- include "pipyRepo.imageName" .}}:{{ .Values.pipyRepo.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -113,6 +118,7 @@ spec:
               port: http
           resources:
             {{- toYaml .Values.pipyRepo.resources | nindent 12 }}
+        {{- end}}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

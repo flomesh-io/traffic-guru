@@ -18,6 +18,7 @@ gui:
   uploadVolumeEnabled: true
 
 pipyRepo:
+  standalone: false
   imageName: pipy-repo
   tag: 0.90.1-87
   resources: {}

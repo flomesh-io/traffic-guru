@@ -1,0 +1,60 @@
+---
+{{- if .Values.pipyRepo.standalone }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pipy-repo
+  labels:
+    {{- include "traffic-guru.pipyRepo.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "traffic-guru.pipyRepo.labels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "traffic-guru.pipyRepo.labels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      containers:
+        - name: pipy-repo
+          image: "{{- include "pipyRepo.imageName" .}}:{{ .Values.pipyRepo.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+          - pipy
+          ports:
+            - name: http
+              containerPort: 6060
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /api/v1/repo
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /api/v1/repo
+              port: http
+          resources:
+            {{- toYaml .Values.pipyRepo.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end}}
