@@ -15,6 +15,7 @@ gui:
   tag: ""
   resources: {}
   env: {}
+  uploadVolumeEnabled: true
 
 pipyRepo:
   imageName: pipy-repo
